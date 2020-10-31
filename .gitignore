@@ -1,10 +1,9 @@
   # workplace
-# compiled output
-/dist
+/.idea
+*.xml
+*.DS_Store
 /tmp
-/out-tsc
-# Only exists if Bazel was run
-/bazel-out
-
-# dependencies
-/node_modules
+/dist
+node_modules/
+/.tscache
+!.gitignore
