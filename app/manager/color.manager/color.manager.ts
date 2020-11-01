@@ -12,11 +12,12 @@ export class ColorManager implements IColorManager {
   readonly #hex!: string;
   #alpha!: number;
 
-  private constructor(params: { hex?: string, rgba?: Rgba }) {
+  private constructor(params: { hex?: string, rgba?: Rgba, alpha?: number }) {
     if (params.hex) {
       this.#hex = params.hex;
       this.#rgba = this.hexToRgba()!;
-      this.#alpha = 1;
+      this.#rgba.alpha = params.alpha || 1;
+      this.#alpha = params.alpha ?? 1;
     } else if (params.rgba) {
       this.#rgba = params.rgba;
       this.#hex = this.rgbToHex(params.rgba);
@@ -26,7 +27,6 @@ export class ColorManager implements IColorManager {
 
   get rgba(): string {
     const data = Object.values(this.#rgba);
-    data.push(this.#alpha);
     return `rgba(${data.join(',')})`;
   }
 
@@ -41,8 +41,8 @@ export class ColorManager implements IColorManager {
     return new ColorManager({ rgba });
   }
 
-  static fromHex(hex: string) {
-    return new ColorManager({ hex });
+  static fromHex(hex: string, alpha = 1) {
+    return new ColorManager({ hex, alpha });
   }
 
   private rgbToHex(rgba: Rgba) {
