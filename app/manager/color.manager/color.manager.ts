@@ -16,7 +16,7 @@ export class ColorManager implements IColorManager {
     if (params.hex) {
       this.#hex = params.hex;
       this.#rgba = this.hexToRgba()!;
-      this.#rgba.alpha = params.alpha || 1;
+      this.#rgba.alpha = params.alpha ?? 1;
       this.#alpha = params.alpha ?? 1;
     } else if (params.rgba) {
       this.#rgba = params.rgba;
