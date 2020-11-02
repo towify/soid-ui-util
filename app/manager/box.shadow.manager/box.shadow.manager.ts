@@ -2,25 +2,71 @@
  *  @Author KaySaith
  *  @Date 10/29/20
  */
-import {BoxShadowManagerInterface} from "./box.shadow.manager.interface";
+import {BoxShadowManagerInterface} from './box.shadow.manager.interface';
 
 export class BoxShadowManager implements BoxShadowManagerInterface {
-  #rect?: DOMRect;
-  #spinButtonPosition?: { x: number, y: number }
+    #rect?: DOMRect;
+    #spinButtonPosition?: { x: number; y: number };
+    #distance?: number;
 
-  set spinButtonPosition(position: { x: number, y: number }) {
-    this.#spinButtonPosition = position
-  }
-
-  getShadowAngle(hold: (angle: number) => void): BoxShadowManager {
-    if (this.#spinButtonPosition && this.#rect) {
-      // do something
+    set spinButtonPosition(position: { x: number; y: number }) {
+        this.#spinButtonPosition = position;
     }
-    return this;
-  }
 
-  setSpinButtonRect(rect: DOMRect): BoxShadowManager {
-    this.#rect = rect;
-    return this;
-  }
+    set distance(distance: number) {
+        this.#distance = distance;
+    }
+
+    setSpinButtonRect(rect: DOMRect): BoxShadowManager {
+        this.#rect = rect;
+        return this;
+    }
+
+    getShadowAngle(
+        hold: (result: {
+            angle: number;
+            horizontalOffset: number;
+            verticalOffset: number;
+        }) => void
+    ): BoxShadowManager {
+        if (this.#spinButtonPosition && this.#rect) {
+            // 拖拽判断边界：传入的X、Y大于半径，则不做响应
+            if (
+                Math.abs(this.#spinButtonPosition.x) > this.#rect.width / 2 ||
+                Math.abs(this.#spinButtonPosition.y) > this.#rect.width / 2
+            ) {
+                console.log('X、Y超出了Rect');
+                return this;
+            }
+            const distance = this.#distance ? this.#distance : this.#rect.width / 2;
+            // 比例值: 根据传入的distance，要等比例控制 horizontalOffset 和 verticalOffset 的缩放
+            const scale = distance / (this.#rect.width / 2);
+            const horizontalOffset = this.#spinButtonPosition.x * scale;
+            const verticalOffset = this.#spinButtonPosition.y * scale;
+            // 原始角度
+            const currentAngle = (Math.atan(this.#spinButtonPosition.y / this.#spinButtonPosition.x) * 180) / Math.PI;
+            let resultAngle = 0;
+            // 处理角度返回值：分别处理第一到第四象限的角度（假设已圆心为圆点）
+            if (horizontalOffset >= 0 && verticalOffset < 0) {
+                resultAngle = -currentAngle;
+            } else if (horizontalOffset < 0 && verticalOffset <= 0) {
+                resultAngle = 180 - currentAngle;
+            } else if (horizontalOffset < 0 && verticalOffset > 0) {
+                resultAngle = 180 - currentAngle;
+            } else if (horizontalOffset >= 0 && verticalOffset > 0) {
+                resultAngle = 360 - currentAngle;
+            } else {
+                resultAngle = 0;
+            }
+            const parameter = {
+                angle: resultAngle,
+                horizontalOffset,
+                verticalOffset
+            };
+            hold(parameter);
+        }
+        return this;
+    }
+
+
 }
