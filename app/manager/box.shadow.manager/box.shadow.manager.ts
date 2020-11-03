@@ -29,7 +29,7 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
       verticalOffset: number;
     }) => void
   ): BoxShadowManager {
-    if (!(this.#spinButtonPosition && this.#rect)) return this;
+    if (!this.#spinButtonPosition || !this.#rect) return this;
 
     const radius = this.#rect.width / 2;
     // 拖拽判断边界：传入的X、Y大于半径，则不做响应
