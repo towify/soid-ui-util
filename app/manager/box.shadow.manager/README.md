@@ -46,3 +46,17 @@ manager.getShadowAngle(
   }
 );
 ```
+
+## 反向初始化工具
+
+在 box.shadow.manager.ts 中提供了一个方法：传入当前控件的阴影在水平方向（horizontal）和垂直方向（vertical）的设置，
+返回当前角度（0-360）
+
+```
+示例：
+const h = 10;
+const v = 10;
+const res = manager.getAngleByParameter({horizontal:h, vertical:v});
+const final = `输入的控件(h：v) => (${h}:${v}) =>角度 ${res}`;
+window.alert(final);
+```
