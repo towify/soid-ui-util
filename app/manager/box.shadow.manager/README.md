@@ -26,9 +26,10 @@ const manager = new BoxShadowManager();
 
 ```
 示例：
+// 注意，要先设置rect，再设置spinButtonPosition
+manager.setSpinButtonRect(new DOMRect(10, 10, 20, 20));
 manager.distance = 30;
 manager.spinButtonPosition = { x: 10, y: 10 };
-manager.setSpinButtonRect(new DOMRect(10, 10, 20, 20));
 ```
 
 - 调用 getShadowAngle，传入回调函数，监听角度变化
