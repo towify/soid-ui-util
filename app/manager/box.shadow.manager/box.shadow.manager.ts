@@ -13,8 +13,7 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
   set spinButtonPosition(position: { x: number; y: number }) {
     const positionX = position.x - this.#radius!;
     const positionY = position.y - this.#radius!;
-    this.#spinButtonPosition = { x:positionX, y: positionY};
-    this.#spinButtonPosition = position;
+    this.#spinButtonPosition = { x: positionX, y: positionY };
   }
 
   set distance(distance: number) {
@@ -46,7 +45,7 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     const scale = distance / this.#radius!;
     const horizontalOffset = this.#spinButtonPosition.x * scale;
     const verticalOffset = this.#spinButtonPosition.y * scale;
-    const resultAngle = this.getAngleByHorizontalAndVertical(
+    const resultAngle = this.getAngle(
       this.#spinButtonPosition.x,
       this.#spinButtonPosition.y
     );
@@ -63,6 +62,12 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     horizontal: number,
     vertical: number
   ): number {
+    const positionX = horizontal - this.#radius!;
+    const positionY = vertical - this.#radius!;
+    return this.getAngle(positionX, positionY);
+  }
+
+  private getAngle(horizontal: number, vertical: number): number {
     // 原始角度
     const currentAngle = (Math.atan(vertical / horizontal) * 180) / Math.PI;
     let resultAngle: number;
@@ -80,5 +85,4 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     }
     return Math.floor(resultAngle);
   }
-
 }
