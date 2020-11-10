@@ -62,12 +62,34 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
       resultAngle = 0;
     }
     const parameter = {
-      angle: resultAngle,
-      horizontalOffset,
-      verticalOffset
+      angle: Math.floor(resultAngle),
+      horizontalOffset: Math.floor(horizontalOffset),
+      verticalOffset: Math.floor(verticalOffset)
     };
     hold(parameter);
 
     return this;
+  }
+
+  static getAngleByHorizontalAndVertical(
+    horizontal: number,
+    vertical: number
+  ): number {
+    // 原始角度
+    const currentAngle = (Math.atan(vertical / horizontal) * 180) / Math.PI;
+    let resultAngle = 0;
+    // 处理角度返回值：分别处理第一到第四象限的角度（假设已圆心为圆点）
+    if (horizontal >= 0 && vertical < 0) {
+      resultAngle = -currentAngle;
+    } else if (horizontal < 0 && vertical <= 0) {
+      resultAngle = 180 - currentAngle;
+    } else if (horizontal < 0 && vertical > 0) {
+      resultAngle = 180 - currentAngle;
+    } else if (horizontal >= 0 && vertical > 0) {
+      resultAngle = 360 - currentAngle;
+    } else {
+      resultAngle = 0;
+    }
+    return Math.floor(resultAngle);
   }
 }
