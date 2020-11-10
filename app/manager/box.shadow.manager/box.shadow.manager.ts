@@ -8,8 +8,12 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
   #rect?: DOMRect;
   #spinButtonPosition?: { x: number; y: number };
   #distance?: number;
+  #radius?: number;
 
   set spinButtonPosition(position: { x: number; y: number }) {
+    const positionX = position.x - this.#radius!;
+    const positionY = position.y - this.#radius!;
+    this.#spinButtonPosition = { x:positionX, y: positionY};
     this.#spinButtonPosition = position;
   }
 
@@ -19,6 +23,7 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
 
   setSpinButtonRect(rect: DOMRect): BoxShadowManager {
     this.#rect = rect;
+    this.#radius = rect.width / 2;
     return this;
   }
 
@@ -30,54 +35,37 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     }) => void
   ): BoxShadowManager {
     if (!this.#spinButtonPosition || !this.#rect) return this;
-
-    const radius = this.#rect.width / 2;
     // 拖拽判断边界：传入的X、Y大于半径，则不做响应
     if (
-      Math.abs(this.#spinButtonPosition.x) > radius ||
-      Math.abs(this.#spinButtonPosition.y) > radius
+      Math.abs(this.#spinButtonPosition.x) > this.#radius! ||
+      Math.abs(this.#spinButtonPosition.y) > this.#radius!
     )
       return this;
-    const distance = this.#distance ?? radius;
+    const distance = this.#distance ?? this.#radius!;
     // 比例值: 根据传入的distance，要等比例控制 horizontalOffset 和 verticalOffset 的缩放
-    const scale = distance / radius;
+    const scale = distance / this.#radius!;
     const horizontalOffset = this.#spinButtonPosition.x * scale;
     const verticalOffset = this.#spinButtonPosition.y * scale;
-    // 原始角度
-    const currentAngle =
-      (Math.atan(this.#spinButtonPosition.y / this.#spinButtonPosition.x) *
-        180) /
-      Math.PI;
-    let resultAngle = 0;
-    // 处理角度返回值：分别处理第一到第四象限的角度（假设已圆心为圆点）
-    if (horizontalOffset >= 0 && verticalOffset < 0) {
-      resultAngle = -currentAngle;
-    } else if (horizontalOffset < 0 && verticalOffset <= 0) {
-      resultAngle = 180 - currentAngle;
-    } else if (horizontalOffset < 0 && verticalOffset > 0) {
-      resultAngle = 180 - currentAngle;
-    } else if (horizontalOffset >= 0 && verticalOffset > 0) {
-      resultAngle = 360 - currentAngle;
-    } else {
-      resultAngle = 0;
-    }
+    const resultAngle = this.getAngleByHorizontalAndVertical(
+      this.#spinButtonPosition.x,
+      this.#spinButtonPosition.y
+    );
     const parameter = {
-      angle: Math.floor(resultAngle),
+      angle: resultAngle,
       horizontalOffset: Math.floor(horizontalOffset),
       verticalOffset: Math.floor(verticalOffset)
     };
     hold(parameter);
-
     return this;
   }
 
-  static getAngleByHorizontalAndVertical(
+  getAngleByHorizontalAndVertical(
     horizontal: number,
     vertical: number
   ): number {
     // 原始角度
     const currentAngle = (Math.atan(vertical / horizontal) * 180) / Math.PI;
-    let resultAngle = 0;
+    let resultAngle: number;
     // 处理角度返回值：分别处理第一到第四象限的角度（假设已圆心为圆点）
     if (horizontal >= 0 && vertical < 0) {
       resultAngle = -currentAngle;
@@ -92,4 +80,5 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     }
     return Math.floor(resultAngle);
   }
+
 }
