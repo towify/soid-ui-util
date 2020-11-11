@@ -23,6 +23,13 @@ export interface BoxShadowManagerInterface {
   setSpinButtonRect(rect: DOMRect): BoxShadowManagerInterface;
 
   /**
+   * @Author Zhangqi
+   * @param rect
+   * 设置旋钮的自身大小
+   */
+  setSpinPointRect(rect: DOMRect): BoxShadowManagerInterface;
+
+  /**
    * @param hold
    * 获取旋转按钮在当前 Position 下的对应的 ShadowAngle 角度
    */
