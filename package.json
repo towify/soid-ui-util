@@ -11,6 +11,21 @@
     "watch:build": "webpack --watch",
     "watch:server": "nodemon \"./dist/main.js\" --watch \"./build\" "
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.html": "prettier --write --parser angular",
+    "*.component.html": "prettier --write --parser angular",
+    "*.{js,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.js": "eslint --cache --fix",
+    "*.{js,css,md,json,scss}": "prettier --write"
+  },
   "bundleDependencies": false,
   "dependencies": {
     "@babel/runtime-corejs3": "^7.11.2",
