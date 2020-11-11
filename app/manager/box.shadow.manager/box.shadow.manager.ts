@@ -9,15 +9,23 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
   #spinButtonPosition?: { x: number; y: number };
   #distance?: number;
   #radius?: number;
+  #pointRect?: DOMRect;
+  #pointRadius?: number;
 
   set spinButtonPosition(position: { x: number; y: number }) {
-    const positionX = position.x - this.#radius!;
-    const positionY = position.y - this.#radius!;
+    const positionX = position.x - this.#radius! + this.#pointRadius!;
+    const positionY = position.y - this.#radius! + this.#pointRadius!;
     this.#spinButtonPosition = { x: positionX, y: positionY };
   }
 
   set distance(distance: number) {
     this.#distance = distance;
+  }
+
+  setSpinPointRect(rect: DOMRect): BoxShadowManager {
+    this.#pointRect = rect;
+    this.#pointRadius = rect.width / 2;
+    return this;
   }
 
   setSpinButtonRect(rect: DOMRect): BoxShadowManager {
@@ -62,8 +70,8 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     horizontal: number,
     vertical: number
   ): number {
-    const positionX = horizontal - this.#radius!;
-    const positionY = vertical - this.#radius!;
+    const positionX = horizontal;
+    const positionY = vertical;
     return this.getAngle(positionX, positionY);
   }
 
@@ -84,5 +92,48 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
       resultAngle = 0;
     }
     return Math.floor(resultAngle);
+  }
+
+  getHorizontalAndVerticalAndPositionByAngle(
+    angle: number,
+    distance: number
+  ): {
+      horizontal: number;
+      vertical: number;
+      positionX: number;
+      positionY: number;
+    } {
+    // 弧度转角度 1弧度=180/π度，1度=π/180弧度
+    const newAngel = (angle * Math.PI) / 180;
+    const sin = Math.sin(newAngel);
+    const cos = Math.cos(newAngel);
+    let positionX = this.#radius! * cos;
+    let positionY = this.#radius! * sin;
+    if (angle === 0) {
+      positionX = this.#radius!;
+      positionY = 0;
+    } else if (angle === 90) {
+      positionX = 0;
+      positionY = -this.#radius!;
+    } else if (angle === 180) {
+      positionX = -this.#radius!;
+      positionY = 0;
+    } else if (angle === 270) {
+      positionX = 0;
+      positionY = this.#radius!;
+    } else if (angle === 360) {
+      positionX = this.#radius!;
+      positionY = 0;
+    }
+    const horizontal = (positionX * distance) / this.#radius!;
+    const vertical = (positionY * distance) / this.#radius!;
+    positionX = positionX + this.#radius! - this.#pointRadius!;
+    positionY = positionY + this.#radius! - this.#pointRadius!;
+    return {
+      horizontal,
+      vertical,
+      positionX,
+      positionY
+    };
   }
 }
