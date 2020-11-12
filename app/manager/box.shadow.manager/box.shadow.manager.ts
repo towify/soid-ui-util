@@ -11,6 +11,7 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
   #radius?: number;
   #pointRect?: DOMRect;
   #pointRadius?: number;
+  #offsetFix?: number;
 
   set spinButtonPosition(position: { x: number; y: number }) {
     const positionX = position.x - this.#radius! + this.#pointRadius!;
@@ -20,6 +21,10 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
 
   set distance(distance: number) {
     this.#distance = distance;
+  }
+
+  set offsetFix(offsetFix: number) {
+    this.#offsetFix = offsetFix;
   }
 
   setSpinPointRect(rect: DOMRect): BoxShadowManager {
@@ -103,50 +108,49 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     positionX: number;
     positionY: number;
   } {
+    if (!this.#offsetFix) this.#offsetFix = 3;
+    if (!this.#pointRadius) this.#pointRadius = 3;
+    if (!this.#radius) this.#radius = 16;
+
     // 弧度转角度 1弧度=180/π度，1度=π/180弧度
     const newAngel = (angle * Math.PI) / 180;
     const sin = Math.sin(newAngel);
     const cos = Math.cos(newAngel);
-    let positionX = this.#radius! * cos;
-    let positionY = this.#radius! * sin;
+    let positionX = this.#radius * cos;
+    let positionY = -this.#radius * sin;
     if (angle === 0) {
-      positionX = this.#radius!;
+      positionX = this.#radius;
       positionY = 0;
     } else if (angle === 90) {
       positionX = 0;
-      positionY = -this.#radius!;
+      positionY = -this.#radius;
     } else if (angle === 180) {
-      positionX = -this.#radius!;
+      positionX = -this.#radius;
       positionY = 0;
     } else if (angle === 270) {
       positionX = 0;
-      positionY = this.#radius!;
+      positionY = this.#radius;
     } else if (angle === 360) {
-      positionX = this.#radius!;
+      positionX = this.#radius;
       positionY = 0;
     }
-    positionY = -positionY;
-    const horizontal = (positionX * distance) / this.#radius!;
-    const vertical = (positionY * distance) / this.#radius!;
-    // 先转移整体坐标系
-    positionX += this.#radius!;
-    positionY += this.#radius!;
-    // 针对小红点，做坐标调整
+    const horizontal = (positionX * distance) / this.#radius;
+    const vertical = (positionY * distance) / this.#radius;
     // 小红点圆心坐标
     const pointCenterX =
-      (this.#pointRadius! / this.#radius!) * (positionX - this.#radius!) +
-      this.#radius!;
+      ((this.#radius - this.#pointRadius - this.#offsetFix) / this.#radius) *
+      positionX;
     const pointCenterY =
-      (this.#pointRadius! / this.#radius!) * (positionY - this.#radius!) +
-      this.#radius!;
-    // 求助小红点所在正方形的左上角坐标
-    positionX = pointCenterX - this.#pointRadius!;
-    positionY = pointCenterY - this.#pointRadius!;
+      ((this.#radius - this.#pointRadius - this.#offsetFix) / this.#radius) *
+      positionY;
+    // 求出小红点所在正方形的左上角坐标
+    const finalPositionX = pointCenterX - this.#pointRadius + this.#radius;
+    const finalPositionY = pointCenterY - this.#pointRadius + this.#radius;
     return {
       horizontal,
       vertical,
-      positionX,
-      positionY
+      positionX: finalPositionX,
+      positionY: finalPositionY
     };
   }
 }
