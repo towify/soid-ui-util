@@ -98,11 +98,11 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     angle: number,
     distance: number
   ): {
-      horizontal: number;
-      vertical: number;
-      positionX: number;
-      positionY: number;
-    } {
+    horizontal: number;
+    vertical: number;
+    positionX: number;
+    positionY: number;
+  } {
     // 弧度转角度 1弧度=180/π度，1度=π/180弧度
     const newAngel = (angle * Math.PI) / 180;
     const sin = Math.sin(newAngel);
@@ -125,10 +125,23 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
       positionX = this.#radius!;
       positionY = 0;
     }
+    positionY = -positionY;
     const horizontal = (positionX * distance) / this.#radius!;
     const vertical = (positionY * distance) / this.#radius!;
-    positionX = positionX + this.#radius! - this.#pointRadius!;
-    positionY = positionY + this.#radius! - this.#pointRadius!;
+    // 先转移整体坐标系
+    positionX += this.#radius!;
+    positionY += this.#radius!;
+    // 针对小红点，做坐标调整
+    // 小红点圆心坐标
+    const pointCenterX =
+      (this.#pointRadius! / this.#radius!) * (positionX - this.#radius!) +
+      this.#radius!;
+    const pointCenterY =
+      (this.#pointRadius! / this.#radius!) * (positionY - this.#radius!) +
+      this.#radius!;
+    // 求助小红点所在正方形的左上角坐标
+    positionX = pointCenterX - this.#pointRadius!;
+    positionY = pointCenterY - this.#pointRadius!;
     return {
       horizontal,
       vertical,
