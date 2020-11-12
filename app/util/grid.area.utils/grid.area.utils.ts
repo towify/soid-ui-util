@@ -99,6 +99,7 @@ export class GridAreaUtils implements GridAreaUtilsInterface {
         gridTemplateRows: this.#gridRowInfo ?? [],
         gridPadding
       });
+      console.log('gridItemRectList', gridItemRectList);
       const dropLeftTop = {
         x: this.#droppedRect.x - this.#gridRect.x,
         y: this.#droppedRect.y - this.#gridRect.y
