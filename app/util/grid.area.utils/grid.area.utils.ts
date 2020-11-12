@@ -99,7 +99,6 @@ export class GridAreaUtils implements GridAreaUtilsInterface {
         gridTemplateRows: this.#gridRowInfo ?? [],
         gridPadding
       });
-      console.log('gridItemRectList', gridItemRectList);
       const dropLeftTop = {
         x: this.#droppedRect.x - this.#gridRect.x,
         y: this.#droppedRect.y - this.#gridRect.y
@@ -115,9 +114,9 @@ export class GridAreaUtils implements GridAreaUtilsInterface {
       let marginLeft = 0;
       let marginTop = 0;
       let rowStart = 1;
-      let rowEnd = 1;
+      let rowEnd = gridItemRectList.length;
       let columnStart = 1;
-      let columnEnd = 1;
+      let columnEnd = gridItemRectList[0]?.length || rowEnd;
       gridItemRectList.forEach((rowItem, rowIndex) => [
         rowItem.forEach((rect, columnIndex) => {
           if (this.checkPointIsInRect(dropLeftTop, rect)) {
