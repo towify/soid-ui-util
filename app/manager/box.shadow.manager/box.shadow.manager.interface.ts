@@ -30,6 +30,12 @@ export interface BoxShadowManagerInterface {
   setSpinPointRect(rect: DOMRect): BoxShadowManagerInterface;
 
   /**
+   * @Author Zhangqi
+   * 修正的偏移量
+   */
+  offsetFix: number;
+
+  /**
    * @param hold
    * 获取旋转按钮在当前 Position 下的对应的 ShadowAngle 角度
    */

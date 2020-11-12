@@ -18,8 +18,7 @@ BoxShadowManager
 - 实现 BoxShadowManagerInterface 接口
 - getShadowAngle ：实时获取阴影偏移量
 - getAngleByHorizontalAndVertical（工具方法） ：根据阴影的偏移量，返回角度
-- getHorizontalAndVerticalAndPositionByAngle（工具方法） ： 根据角度和distance，返回阴影偏移量和拖拽圆点的坐标
-
+- getHorizontalAndVerticalAndPositionByAngle（工具方法） ： 根据角度和 distance，返回阴影偏移量和拖拽圆点的坐标
 
 ## getShadowAngle 的使用
 
@@ -57,9 +56,9 @@ manager.getShadowAngle(
 );
 ```
 
-## 工具方法：反向初始化angle
+## 工具方法：反向初始化 angle
 
-box.shadow.manager.ts 中的方法getAngleByHorizontalAndVertical：传入当前控件的阴影在水平方向（horizontal）和垂直方向（vertical）的设置，
+box.shadow.manager.ts 中的方法 getAngleByHorizontalAndVertical：传入当前控件的阴影在水平方向（horizontal）和垂直方向（vertical）的设置，
 返回当前角度（0-360），角度返回值做了向下取整处理。
 
 ```
@@ -72,7 +71,7 @@ const final = `输入的控件(h：v) => (${h}:${v}) =>角度 ${res}`;
 
 ```
 
-## 根据角度和distance获取实际阴影的偏移量和小圆点的坐标
+## 根据角度和 distance 获取实际阴影的偏移量和小圆点的坐标
 
 box.shadow.manager.ts 提供的方法 getHorizontalAndVerticalAndPositionByAngle，可以获取阴影偏移量和拖拽圆点的坐标
 
@@ -82,7 +81,8 @@ box.shadow.manager.ts 提供的方法 getHorizontalAndVerticalAndPositionByAngle
 manager.setSpinButtonRect(new DOMRect(10, 10, 20, 20));
 manager.setSpinPointRect(new DOMRect(0, 0, 6, 6));
 manager.distance = 30;
-// 注意，一定要先传入 拖拽父控件的rect 和 圆点的rect
+manager.offsetFix = 3;
+// 注意，一定要先传入 拖拽父控件的rect 、 圆点的rect 、偏移量offsetFix
 const res = manager.getHorizontalAndVerticalAndPositionByAngle(30, 10);
 //处理其他业务逻辑
 
