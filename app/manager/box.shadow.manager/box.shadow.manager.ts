@@ -47,12 +47,6 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     }) => void
   ): BoxShadowManager {
     if (!this.#spinButtonPosition || !this.#rect) return this;
-    // 拖拽判断边界：传入的X、Y大于半径，则不做响应
-    if (
-      Math.abs(this.#spinButtonPosition.x) > this.#radius! ||
-      Math.abs(this.#spinButtonPosition.y) > this.#radius!
-    )
-      return this;
     const distance = this.#distance ?? this.#radius!;
     // 比例值: 根据传入的distance，要等比例控制 horizontalOffset 和 verticalOffset 的缩放
     const scale = distance / this.#radius!;
@@ -109,7 +103,6 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     if (!this.#offsetFix) this.#offsetFix = 3;
     if (!this.#pointRadius) this.#pointRadius = 3;
     if (!this.#radius) this.#radius = 16;
-
     // 弧度转角度 1弧度=180/π度，1度=π/180弧度
     const newAngel = (angle * Math.PI) / 180;
     const sin = Math.sin(newAngel);
@@ -132,8 +125,16 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
       positionX = this.#radius;
       positionY = 0;
     }
-    const horizontal = (positionX * distance) / this.#radius;
-    const vertical = (positionY * distance) / this.#radius;
+    // 偏移量
+    const scale = distance / this.#radius;
+    const horizontal =
+      ((positionX * (this.#radius - this.#pointRadius - this.#offsetFix)) /
+        this.#radius) *
+      scale;
+    const vertical =
+      ((positionY * (this.#radius - this.#pointRadius - this.#offsetFix)) /
+        this.#radius) *
+      scale;
     // 小红点圆心坐标
     const pointCenterX =
       ((this.#radius - this.#pointRadius - this.#offsetFix) / this.#radius) *
@@ -145,8 +146,8 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     const finalPositionX = pointCenterX - this.#pointRadius + this.#radius;
     const finalPositionY = pointCenterY - this.#pointRadius + this.#radius;
     return {
-      horizontal,
-      vertical,
+      horizontal: Math.floor(horizontal),
+      vertical: Math.floor(vertical),
       positionX: finalPositionX,
       positionY: finalPositionY
     };
