@@ -47,12 +47,6 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     }) => void
   ): BoxShadowManager {
     if (!this.#spinButtonPosition || !this.#rect) return this;
-    // 拖拽判断边界：传入的X、Y大于半径，则不做响应
-    if (
-      Math.abs(this.#spinButtonPosition.x) > this.#radius! ||
-      Math.abs(this.#spinButtonPosition.y) > this.#radius!
-    )
-      return this;
     const distance = this.#distance ?? this.#radius!;
     // 比例值: 根据传入的distance，要等比例控制 horizontalOffset 和 verticalOffset 的缩放
     const scale = distance / this.#radius!;
@@ -64,37 +58,50 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     );
     const parameter = {
       angle: resultAngle,
-      horizontalOffset: Math.floor(horizontalOffset),
-      verticalOffset: Math.floor(verticalOffset)
+      horizontalOffset: parseFloat(horizontalOffset.toFixed(2)),
+      verticalOffset: parseFloat(verticalOffset.toFixed(2))
     };
     hold(parameter);
     return this;
   }
 
-  getAngleByHorizontalAndVertical(
+  getAngleAndPositionByHorizontalAndVertical(
     horizontal: number,
     vertical: number
-  ): number {
-    return BoxShadowManager.getAngle(horizontal, vertical);
+  ): {
+    angle: number;
+    positionX: number;
+    positionY: number;
+    distance: number;
+  } {
+    if (!this.#offsetFix) this.#offsetFix = 3;
+    if (!this.#pointRadius) this.#pointRadius = 3;
+    if (!this.#radius) this.#radius = 16;
+    const radiusMin = this.#radius - this.#pointRadius - this.#offsetFix;
+    const angle = BoxShadowManager.getAngle(horizontal, vertical);
+    const distance =
+      (Math.sqrt(horizontal ** 2 + vertical ** 2) * this.#radius) / radiusMin;
+    const circleX = (horizontal * this.#radius ** 2) / (distance * radiusMin);
+    const circleY = (vertical * this.#radius ** 2) / (distance * radiusMin);
+    const pointCenterX = (radiusMin / this.#radius) * circleX;
+    const pointCenterY = (radiusMin / this.#radius) * circleY;
+    const positionX = pointCenterX - this.#pointRadius + this.#radius;
+    const positionY = pointCenterY - this.#pointRadius + this.#radius;
+    return {
+      angle,
+      positionX,
+      positionY,
+      distance: parseFloat(distance.toFixed(2))
+    };
   }
 
   private static getAngle(horizontal: number, vertical: number): number {
-    // 原始角度
-    const currentAngle = (Math.atan(vertical / horizontal) * 180) / Math.PI;
-    let resultAngle: number;
-    // 处理角度返回值：分别处理第一到第四象限的角度（假设已圆心为圆点）
-    if (horizontal >= 0 && vertical < 0) {
-      resultAngle = -currentAngle;
-    } else if (horizontal < 0 && vertical <= 0) {
-      resultAngle = 180 - currentAngle;
-    } else if (horizontal < 0 && vertical > 0) {
-      resultAngle = 180 - currentAngle;
-    } else if (horizontal >= 0 && vertical > 0) {
-      resultAngle = 360 - currentAngle;
-    } else {
-      resultAngle = 0;
+    const cosValue = horizontal / Math.sqrt(horizontal ** 2 + vertical ** 2);
+    let currentAngle = (Math.acos(cosValue) * 180) / Math.PI;
+    if (vertical > 0) {
+      currentAngle = 360 - currentAngle;
     }
-    return Math.floor(resultAngle);
+    return parseFloat(currentAngle.toFixed(2));
   }
 
   getHorizontalAndVerticalAndPositionByAngle(
@@ -109,7 +116,6 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     if (!this.#offsetFix) this.#offsetFix = 3;
     if (!this.#pointRadius) this.#pointRadius = 3;
     if (!this.#radius) this.#radius = 16;
-
     // 弧度转角度 1弧度=180/π度，1度=π/180弧度
     const newAngel = (angle * Math.PI) / 180;
     const sin = Math.sin(newAngel);
@@ -132,8 +138,6 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
       positionX = this.#radius;
       positionY = 0;
     }
-    const horizontal = (positionX * distance) / this.#radius;
-    const vertical = (positionY * distance) / this.#radius;
     // 小红点圆心坐标
     const pointCenterX =
       ((this.#radius - this.#pointRadius - this.#offsetFix) / this.#radius) *
@@ -141,12 +145,16 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     const pointCenterY =
       ((this.#radius - this.#pointRadius - this.#offsetFix) / this.#radius) *
       positionY;
+    // 偏移量
+    const scale = distance / this.#radius;
+    const horizontal = pointCenterX * scale;
+    const vertical = pointCenterY * scale;
     // 求出小红点所在正方形的左上角坐标
     const finalPositionX = pointCenterX - this.#pointRadius + this.#radius;
     const finalPositionY = pointCenterY - this.#pointRadius + this.#radius;
     return {
-      horizontal,
-      vertical,
+      horizontal: parseFloat(horizontal.toFixed(2)),
+      vertical: parseFloat(vertical.toFixed(2)),
       positionX: finalPositionX,
       positionY: finalPositionY
     };
