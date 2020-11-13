@@ -19,7 +19,7 @@ BoxShadowManagerInterface
 方法：
 
 - getShadowAngle ： 旋钮旋转之后的回调函数，用于拖拽时实时返回阴影偏移量
-- getAngleAndPositionByHorizontalAndVertical： 通过水平和垂直偏移量，获取角度和鼠标坐标
+- getAngleAndPositionByHorizontalAndVerticalAndDistance： 通过偏移距离和偏移量，获取角度和鼠标坐标
 - getHorizontalAndVerticalAndPositionByAngle：通过角度和 distance，返回阴影偏移量和拖拽圆点的坐标
 
 ## getShadowAngle 的使用
@@ -54,19 +54,27 @@ manager.getShadowAngle(
   }) => {
     //拿到回调结果： angle 、horizontalOffset、verticalOffset
     //处理其他业务逻辑
+    console.log('1、获取角度，偏移量 :', result);
+
   }
 );
 ```
 
 ## 工具方法：反向初始化 angle 和鼠标位置
 
-box.shadow.manager.ts 中的方法 getAngleAndPositionByHorizontalAndVertical：传入当前控件的阴影在水平方向（horizontal）和垂直方向（vertical）的设置，
+box.shadow.manager.ts 中的方法 getAngleAndPositionByHorizontalAndVerticalAndDistance：
+传入当前控件的阴影在水平方向（horizontal）和垂直方向（vertical）的设置，以及 distance，
 返回鼠标坐标和当前角度（0-360）
 
 ```
 示例：
-const res2 = manager.getAngleAndPositionByHorizontalAndVertical(9, 2);
-console.log('获取angle , position :', res2);
+const res2 = manager.getAngleAndPositionByHorizontalAndVerticalAndDistance(
+  {
+    horizontal: -10,
+    vertical: 0,
+    distance
+  } );
+console.log('3、获取angle,position :', res2);
 
 ```
 
@@ -84,6 +92,7 @@ manager.offsetFix = 3;
 // 注意，一定要先传入 拖拽父控件的rect 、 圆点的rect 、偏移量offsetFix
 const res = manager.getHorizontalAndVerticalAndPositionByAngle(30, 10);
 //处理其他业务逻辑
+console.log('2、获取偏移量，position :', res);
 
 
 ```

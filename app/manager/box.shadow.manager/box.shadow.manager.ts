@@ -65,22 +65,34 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     return this;
   }
 
-  getAngleAndPositionByHorizontalAndVertical(
-    horizontal: number,
-    vertical: number
-  ): {
+  getAngleAndPositionByHorizontalAndVerticalAndDistance(shadowOffset: {
+    horizontal: number;
+    vertical: number;
+    distance: number;
+  }): {
     angle: number;
     positionX: number;
     positionY: number;
   } {
-    const scale = this.#distance! / this.#radius!;
-    const angle = BoxShadowManager.getAngle(horizontal, vertical);
-    const positionX = horizontal / scale - this.#pointRadius! + this.#radius!;
-    const positionY = vertical / scale - this.#pointRadius! + this.#radius!;
+    const angle = BoxShadowManager.getAngle(
+      shadowOffset.horizontal,
+      shadowOffset.vertical
+    );
+    const scale = shadowOffset.distance / this.#radius!;
+    const positionX =
+      ((shadowOffset.horizontal / scale) *
+        (this.#radius! - this.#pointRadius! + this.#offsetFix!)) /
+      this.#radius!;
+    const positionY =
+      ((shadowOffset.vertical / scale) *
+        (this.#radius! - this.#pointRadius! + this.#offsetFix!)) /
+      this.#radius!;
+    const finalPositionX = positionX + this.#radius! - this.#pointRadius!;
+    const finalPositionY = positionY + this.#radius! - this.#pointRadius!;
     return {
       angle,
-      positionX,
-      positionY
+      positionX: Math.floor(finalPositionX),
+      positionY: Math.floor(finalPositionY)
     };
   }
 
@@ -160,8 +172,8 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     return {
       horizontal: Math.floor(horizontal),
       vertical: Math.floor(vertical),
-      positionX: finalPositionX,
-      positionY: finalPositionY
+      positionX: Math.floor(finalPositionX),
+      positionY: Math.floor(finalPositionY)
     };
   }
 }
