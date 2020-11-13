@@ -2,11 +2,11 @@
  * @author allen
  * @data 2020/11/12 15:56
  */
-import { GridAreaUtilsInterface } from './grid.area.utils.interface';
+import { GridAreaServiceInterface } from './grid.area.service.interface';
 import { PaddingInfo } from '../../type/common.type';
 
-export class GridAreaUtils implements GridAreaUtilsInterface {
-  private static instance?: GridAreaUtils;
+export class GridAreaService implements GridAreaServiceInterface {
+  private static instance?: GridAreaService;
 
   #windowWidth = 0;
 
@@ -22,38 +22,38 @@ export class GridAreaUtils implements GridAreaUtilsInterface {
 
   #droppedRect?: DOMRect;
 
-  static getInstance(): GridAreaUtils {
-    GridAreaUtils.instance ??= new GridAreaUtils();
-    return GridAreaUtils.instance;
+  static getInstance(): GridAreaService {
+    GridAreaService.instance ??= new GridAreaService();
+    return GridAreaService.instance;
   }
 
-  setWindowSize(width: number, height: number): GridAreaUtilsInterface {
+  setWindowSize(width: number, height: number): GridAreaServiceInterface {
     this.#windowWidth = width;
     this.#windowHeight = height;
     return this;
   }
 
-  setGridRect(rect: DOMRect): GridAreaUtilsInterface {
+  setGridRect(rect: DOMRect): GridAreaServiceInterface {
     this.#gridRect = rect;
     return this;
   }
 
-  setGridColumnInfo(info: string[]): GridAreaUtilsInterface {
+  setGridColumnInfo(info: string[]): GridAreaServiceInterface {
     this.#gridColumnInfo = info;
     return this;
   }
 
-  setGridRowInfo(info: string[]): GridAreaUtilsInterface {
+  setGridRowInfo(info: string[]): GridAreaServiceInterface {
     this.#gridRowInfo = info;
     return this;
   }
 
-  setGridPaddingInfo(padding: PaddingInfo): GridAreaUtilsInterface {
+  setGridPaddingInfo(padding: PaddingInfo): GridAreaServiceInterface {
     this.#gridPaddingInfo = padding;
     return this;
   }
 
-  setDroppedRect(rect: DOMRect): GridAreaUtilsInterface {
+  setDroppedRect(rect: DOMRect): GridAreaServiceInterface {
     this.#droppedRect = rect;
     return this;
   }

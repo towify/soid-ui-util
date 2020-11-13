@@ -2,8 +2,8 @@
  * @author kaysaith
  * @date 2020/4/4 01:43
  */
-export * from './util/grid.area.utils/grid.area.utils';
-export * from './util/grid.area.utils/grid.area.utils.interface';
+export * from './service/grid.area.service/grid.area.service';
+export * from './service/grid.area.service/grid.area.service.interface';
 export * from './manager/box.shadow.manager/box.shadow.manager';
 export * from './manager/box.shadow.manager/box.shadow.manager.interface';
 export * from './manager/color.manager/color.manager.interface';
