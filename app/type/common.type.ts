@@ -4,12 +4,17 @@
  */
 
 type Rgba = {
-  red: number,
-  green: number,
-  blue: number,
-  alpha: number
+  red: number;
+  green: number;
+  blue: number;
+  alpha: number;
 };
 
-export {
-  Rgba
+type PaddingInfo = {
+  left: string;
+  top: string;
+  right: string;
+  bottom: string;
 };
+
+export { Rgba, PaddingInfo };
