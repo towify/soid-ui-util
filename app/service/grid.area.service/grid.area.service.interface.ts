@@ -54,4 +54,24 @@ export interface GridAreaServiceInterface {
     marginLeft: number;
     marginTop: number;
   };
+
+  setChildrenRectInfo(
+    childrenInfo: {
+      id: string;
+      gridArea: number[];
+      marginLeft: number;
+      marginTop: number;
+      width: number;
+      height: number;
+    }[]
+  ): GridAreaServiceInterface;
+
+  adjustChildrenRectInfo(): {
+    id: string;
+    gridArea: number[];
+    marginLeft: number;
+    marginTop: number;
+    width: number;
+    height: number;
+  }[];
 }
