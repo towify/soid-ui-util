@@ -37,7 +37,7 @@
     "eslint-plugin-import": "^2.22.1",
     "husky": "^4.3.0",
     "install": "^0.13.0",
-    "lint-staged": "^10.5.0",
+    "lint-staged": "^10.5.1",
     "npm": "^6.14.8",
     "prettier": "^2.1.2",
     "soid-data": "^0.0.26"
@@ -56,7 +56,7 @@
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-import": "^2.22.1",
     "husky": "^4.3.0",
-    "lint-staged": "^10.4.2",
+    "lint-staged": "^10.5.1",
     "prettier": "^2.1.2",
     "ts-loader": "^6.2.2",
     "tslint": "^6.1.3",
