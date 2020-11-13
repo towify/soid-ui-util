@@ -23,6 +23,31 @@ export class GridAreaService implements GridAreaServiceInterface {
 
   #droppedRect?: DOMRect;
 
+  #checkPointIsInRect = (point: { x: number; y: number }, rect: DOMRect) => {
+    const checkXIn = point.x >= rect.x && point.x <= rect.x + rect.width;
+    const checkYIn = point.y >= rect.y && point.y <= rect.y + rect.height;
+    return checkXIn && checkYIn;
+  };
+
+  #changeStringValueToNumber = (params: {
+    value: string;
+    maxValue?: number;
+    windowWidth?: number;
+    windowHeight?: number;
+  }) => {
+    let valueNumber = CommonUtil.pickNumber(params.value) ?? 0;
+    if (params.value.indexOf('vw') !== -1) {
+      valueNumber = ((params.windowWidth ?? 0) * valueNumber) / 100;
+    }
+    if (params.value.indexOf('vh') !== -1) {
+      valueNumber = ((params.windowHeight ?? 0) * valueNumber) / 100;
+    }
+    if (params.value.indexOf('%') !== -1) {
+      valueNumber = ((params.maxValue ?? 0) * valueNumber) / 100;
+    }
+    return valueNumber;
+  };
+
   static getInstance(): GridAreaService {
     GridAreaService.instance ??= new GridAreaService();
     return GridAreaService.instance;
@@ -59,6 +84,21 @@ export class GridAreaService implements GridAreaServiceInterface {
     return this;
   }
 
+  setChildrenRectInfo(): GridAreaServiceInterface {
+    return this;
+  }
+
+  adjustChildrenRectInfo(): {
+    id: string;
+    gridArea: number[];
+    marginLeft: number;
+    marginTop: number;
+    width: number;
+    height: number;
+  }[] {
+    return [];
+  }
+
   getDroppedGridInfo(): {
     gridArea: number[];
     marginLeft: number;
@@ -77,19 +117,19 @@ export class GridAreaService implements GridAreaServiceInterface {
         bottom: 0
       };
       if (this.#gridPaddingInfo) {
-        gridPadding.left = this.changeStringValueToNumber({
+        gridPadding.left = this.#changeStringValueToNumber({
           value: this.#gridPaddingInfo.left,
           maxValue: this.#gridRect.width
         });
-        gridPadding.left = this.changeStringValueToNumber({
+        gridPadding.left = this.#changeStringValueToNumber({
           value: this.#gridPaddingInfo.right,
           maxValue: this.#gridRect.width
         });
-        gridPadding.left = this.changeStringValueToNumber({
+        gridPadding.left = this.#changeStringValueToNumber({
           value: this.#gridPaddingInfo.top,
           maxValue: this.#gridRect.height
         });
-        gridPadding.left = this.changeStringValueToNumber({
+        gridPadding.left = this.#changeStringValueToNumber({
           value: this.#gridPaddingInfo.bottom,
           maxValue: this.#gridRect.height
         });
@@ -120,16 +160,16 @@ export class GridAreaService implements GridAreaServiceInterface {
       let columnEnd = gridItemRectList[0]?.length || rowEnd;
       gridItemRectList.forEach((rowItem, rowIndex) => [
         rowItem.forEach((rect, columnIndex) => {
-          if (this.checkPointIsInRect(dropLeftTop, rect)) {
+          if (this.#checkPointIsInRect(dropLeftTop, rect)) {
             rowStart = rowIndex + 1;
             columnStart = columnIndex + 1;
             marginLeft = dropLeftTop.x - rect.x;
             marginTop = dropLeftTop.y - rect.y;
           }
-          if (this.checkPointIsInRect(dropRightTop, rect)) {
+          if (this.#checkPointIsInRect(dropRightTop, rect)) {
             columnEnd = columnIndex + 1;
           }
-          if (this.checkPointIsInRect(dropLeftBottom, rect)) {
+          if (this.#checkPointIsInRect(dropLeftBottom, rect)) {
             rowEnd = rowIndex + 1;
           }
         })
@@ -218,7 +258,7 @@ export class GridAreaService implements GridAreaServiceInterface {
       isFr = value.indexOf('fr') !== -1;
       isAuto = value.indexOf('auto') !== -1;
       if (!isFr && !isAuto) {
-        valueList[index] = this.changeStringValueToNumber({
+        valueList[index] = this.#changeStringValueToNumber({
           value,
           maxValue: params.maxValue,
           windowWidth: params.windowWidth,
@@ -253,33 +293,5 @@ export class GridAreaService implements GridAreaServiceInterface {
       });
     }
     return valueList;
-  }
-
-  private checkPointIsInRect(
-    point: { x: number; y: number },
-    rect: DOMRect
-  ): boolean {
-    const checkXIn = point.x >= rect.x && point.x <= rect.x + rect.width;
-    const checkYIn = point.y >= rect.y && point.y <= rect.y + rect.height;
-    return checkXIn && checkYIn;
-  }
-
-  private changeStringValueToNumber(params: {
-    value: string;
-    maxValue?: number;
-    windowWidth?: number;
-    windowHeight?: number;
-  }): number {
-    let valueNumber = CommonUtil.pickNumber(params.value) ?? 0;
-    if (params.value.indexOf('vw') !== -1) {
-      valueNumber = ((params.windowWidth ?? 0) * valueNumber) / 100;
-    }
-    if (params.value.indexOf('vh') !== -1) {
-      valueNumber = ((params.windowHeight ?? 0) * valueNumber) / 100;
-    }
-    if (params.value.indexOf('%') !== -1) {
-      valueNumber = ((params.maxValue ?? 0) * valueNumber) / 100;
-    }
-    return valueNumber;
   }
 }
