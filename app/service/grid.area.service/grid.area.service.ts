@@ -2,6 +2,7 @@
  * @author allen
  * @data 2020/11/12 15:56
  */
+import { CommonUtil } from 'soid-data';
 import { GridAreaServiceInterface } from './grid.area.service.interface';
 import { PaddingInfo } from '../../type/common.type';
 
@@ -76,22 +77,22 @@ export class GridAreaService implements GridAreaServiceInterface {
         bottom: 0
       };
       if (this.#gridPaddingInfo) {
-        gridPadding.left = this.getValueNumber(
-          this.#gridPaddingInfo.left,
-          this.#gridRect.width
-        );
-        gridPadding.right = this.getValueNumber(
-          this.#gridPaddingInfo.right,
-          this.#gridRect.width
-        );
-        gridPadding.top = this.getValueNumber(
-          this.#gridPaddingInfo.top,
-          this.#gridRect.height
-        );
-        gridPadding.bottom = this.getValueNumber(
-          this.#gridPaddingInfo.bottom,
-          this.#gridRect.height
-        );
+        gridPadding.left = this.changeStringValueToNumber({
+          value: this.#gridPaddingInfo.left,
+          maxValue: this.#gridRect.width
+        });
+        gridPadding.left = this.changeStringValueToNumber({
+          value: this.#gridPaddingInfo.right,
+          maxValue: this.#gridRect.width
+        });
+        gridPadding.left = this.changeStringValueToNumber({
+          value: this.#gridPaddingInfo.top,
+          maxValue: this.#gridRect.height
+        });
+        gridPadding.left = this.changeStringValueToNumber({
+          value: this.#gridPaddingInfo.bottom,
+          maxValue: this.#gridRect.height
+        });
       }
       const gridItemRectList = this.getGridItemRectList({
         rect: this.#gridRect,
@@ -146,15 +147,6 @@ export class GridAreaService implements GridAreaServiceInterface {
     };
   }
 
-  private checkPointIsInRect(
-    point: { x: number; y: number },
-    rect: DOMRect
-  ): boolean {
-    const checkXIn = point.x >= rect.x && point.x <= rect.x + rect.width;
-    const checkYIn = point.y >= rect.y && point.y <= rect.y + rect.height;
-    return checkXIn && checkYIn;
-  }
-
   private getGridItemRectList(params: {
     rect: DOMRect;
     gridTemplateColumns: string[];
@@ -165,14 +157,18 @@ export class GridAreaService implements GridAreaServiceInterface {
       params.rect.width - params.gridPadding.left - params.gridPadding.right;
     const gridHeight =
       params.rect.height - params.gridPadding.top - params.gridPadding.bottom;
-    const columnsNumberArray = this.getGridTemplateNumberValues(
-      params.gridTemplateColumns,
-      gridWidth
-    );
-    const rowsNumberArray = this.getGridTemplateNumberValues(
-      params.gridTemplateRows,
-      gridHeight
-    );
+    const columnsNumberArray = this.changeStringValueListToNumberList({
+      list: params.gridTemplateColumns,
+      maxValue: gridWidth,
+      windowWidth: this.#windowWidth,
+      windowHeight: this.#windowHeight
+    });
+    const rowsNumberArray = this.changeStringValueListToNumberList({
+      list: params.gridTemplateRows,
+      maxValue: gridHeight,
+      windowWidth: this.#windowWidth,
+      windowHeight: this.#windowHeight
+    });
     let rowIndex = 0;
     let rowLength = rowsNumberArray.length;
     if (rowLength === 0) {
@@ -206,21 +202,28 @@ export class GridAreaService implements GridAreaServiceInterface {
     return itemRectList;
   }
 
-  private getGridTemplateNumberValues(
-    gridTemplateList: string[],
-    maxValue: number
-  ): number[] {
-    let spareValue = maxValue;
+  private changeStringValueListToNumberList(params: {
+    list: string[];
+    maxValue: number;
+    windowWidth: number;
+    windowHeight: number;
+  }): number[] {
+    let spareValue = params.maxValue;
     let frNumber = 0;
     let autoNumber = 0;
     let isFr = false;
     let isAuto = false;
-    const valueList: number[] = new Array(gridTemplateList.length);
-    gridTemplateList.forEach((value, index) => {
+    const valueList: number[] = new Array(params.list.length);
+    params.list.forEach((value, index) => {
       isFr = value.indexOf('fr') !== -1;
       isAuto = value.indexOf('auto') !== -1;
       if (!isFr && !isAuto) {
-        valueList[index] = this.getValueNumber(value, maxValue);
+        valueList[index] = this.changeStringValueToNumber({
+          value,
+          maxValue: params.maxValue,
+          windowWidth: params.windowWidth,
+          windowHeight: params.windowHeight
+        });
       }
       if (isFr) {
         const realValue = value.slice(0, value.length - 2);
@@ -235,7 +238,7 @@ export class GridAreaService implements GridAreaServiceInterface {
       spareValue -= value;
     });
     const singleFrValue = spareValue / frNumber;
-    gridTemplateList.forEach((value, index) => {
+    params.list.forEach((value, index) => {
       isFr = value.indexOf('fr') !== -1;
       if (isFr) {
         const realValue = value.slice(0, value.length - 2);
@@ -243,32 +246,39 @@ export class GridAreaService implements GridAreaServiceInterface {
         spareValue -= valueList[index];
       }
     });
-    if (spareValue === maxValue && autoNumber !== 0) {
+    if (spareValue === params.maxValue && autoNumber !== 0) {
       const autoValue = spareValue / autoNumber;
-      gridTemplateList.forEach((value, index) => {
+      params.list.forEach((value, index) => {
         valueList[index] = autoValue;
       });
     }
     return valueList;
   }
 
-  private getValueNumber(value: string, maxValue: number): number {
-    let valueNumber = 0;
-    if (value.indexOf('px') !== -1) {
-      const realValue = value.slice(0, value.length - 2);
-      valueNumber = parseFloat(realValue);
+  private checkPointIsInRect(
+    point: { x: number; y: number },
+    rect: DOMRect
+  ): boolean {
+    const checkXIn = point.x >= rect.x && point.x <= rect.x + rect.width;
+    const checkYIn = point.y >= rect.y && point.y <= rect.y + rect.height;
+    return checkXIn && checkYIn;
+  }
+
+  private changeStringValueToNumber(params: {
+    value: string;
+    maxValue?: number;
+    windowWidth?: number;
+    windowHeight?: number;
+  }): number {
+    let valueNumber = CommonUtil.pickNumber(params.value) ?? 0;
+    if (params.value.indexOf('vw') !== -1) {
+      valueNumber = ((params.windowWidth ?? 0) * valueNumber) / 100;
     }
-    if (value.indexOf('vw') !== -1) {
-      const realValue = value.slice(0, value.length - 2);
-      valueNumber = (this.#windowWidth * parseFloat(realValue)) / 100;
+    if (params.value.indexOf('vh') !== -1) {
+      valueNumber = ((params.windowHeight ?? 0) * valueNumber) / 100;
     }
-    if (value.indexOf('vh') !== -1) {
-      const realValue = value.slice(0, value.length - 2);
-      valueNumber = (this.#windowHeight * parseFloat(realValue)) / 100;
-    }
-    if (value.indexOf('%') !== -1) {
-      const realValue = value.slice(0, value.length - 1);
-      valueNumber = (maxValue * parseFloat(realValue)) / 100;
+    if (params.value.indexOf('%') !== -1) {
+      valueNumber = ((params.maxValue ?? 0) * valueNumber) / 100;
     }
     return valueNumber;
   }

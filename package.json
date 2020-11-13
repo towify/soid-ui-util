@@ -31,15 +31,16 @@
     "@babel/runtime-corejs3": "^7.11.2",
     "core-js": "^2.6.11",
     "crypto-js": "^4.0.0",
-    "install": "^0.13.0",
-    "npm": "^6.14.8",
     "eslint": "^7.12.1",
     "eslint-config-airbnb-typescript": "^8.0.2",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-import": "^2.22.1",
     "husky": "^4.3.0",
+    "install": "^0.13.0",
     "lint-staged": "^10.5.0",
-    "prettier": "^2.1.2"
+    "npm": "^6.14.8",
+    "prettier": "^2.1.2",
+    "soid-data": "^0.0.26"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
