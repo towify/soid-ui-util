@@ -1,5 +1,5 @@
 /**
- *  @Author KaySaith
+ *  @Author Zhangqi
  *  @Date 10/29/20
  */
 
@@ -11,7 +11,6 @@ export interface BoxShadowManagerInterface {
   spinButtonPosition: { x: number; y: number };
 
   /**
-   * @Author Zhangqi
    * 设置阴影的实际偏移距离值
    */
   distance: number;
@@ -23,14 +22,13 @@ export interface BoxShadowManagerInterface {
   setSpinButtonRect(rect: DOMRect): BoxShadowManagerInterface;
 
   /**
-   * @Author Zhangqi
    * @param rect
    * 设置旋钮的自身大小
    */
   setSpinPointRect(rect: DOMRect): BoxShadowManagerInterface;
 
   /**
-   * @Author Zhangqi
+   * @Author
    * 修正的偏移量
    */
   offsetFix: number;
@@ -46,4 +44,33 @@ export interface BoxShadowManagerInterface {
       verticalOffset: number;
     }) => void
   ): BoxShadowManagerInterface;
+
+  /**
+   * @param horizontal 阴影水平偏移
+   * @param vertical 阴影垂直偏移
+   * 根据阴影的偏移获取角度和鼠标位置信息
+   */
+  getAngleAndPositionByHorizontalAndVertical(
+    horizontal: number,
+    vertical: number
+  ): {
+    angle: number;
+    positionX: number;
+    positionY: number;
+  };
+
+  /**
+   * @param angle 角度
+   * @param distance 偏移量，表示阴影的偏移程度
+   * 获取当前阴影的水平和垂直偏移，以及鼠标坐标信息
+   */
+  getHorizontalAndVerticalAndPositionByAngle(
+    angle: number,
+    distance: number
+  ): {
+    horizontal: number;
+    vertical: number;
+    positionX: number;
+    positionY: number;
+  };
 }

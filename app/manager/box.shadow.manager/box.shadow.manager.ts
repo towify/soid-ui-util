@@ -65,11 +65,23 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     return this;
   }
 
-  getAngleByHorizontalAndVertical(
+  getAngleAndPositionByHorizontalAndVertical(
     horizontal: number,
     vertical: number
-  ): number {
-    return BoxShadowManager.getAngle(horizontal, vertical);
+  ): {
+    angle: number;
+    positionX: number;
+    positionY: number;
+  } {
+    const scale = this.#distance! / this.#radius!;
+    const angle = BoxShadowManager.getAngle(horizontal, vertical);
+    const positionX = horizontal / scale - this.#pointRadius! + this.#radius!;
+    const positionY = vertical / scale - this.#pointRadius! + this.#radius!;
+    return {
+      angle,
+      positionX,
+      positionY
+    };
   }
 
   private static getAngle(horizontal: number, vertical: number): number {

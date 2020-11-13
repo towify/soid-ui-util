@@ -2,23 +2,25 @@
 
 ## Description
 
-设置控件元素阴影的管理器
+设置控件元素阴影的管理器，并提供了两个工具方法
 
-## 核心功能 / 接口
+## 核心功能（接口）
 
 BoxShadowManagerInterface
+
+属性值：
 
 - spinButtonPosition ：旋转按钮移动的点
 - distance ： 用户设置的阴影偏移量
 - setSpinButtonRect ：旋转按钮所在父控件（圆盘）的位置信息
-- getShadowAngle ： 旋钮旋转之后的回调函数
+- setSpinPointRect：旋转按钮自身的位置信息
+- offsetFix: 修正小圆点坐标的偏移量
 
-BoxShadowManager
+方法：
 
-- 实现 BoxShadowManagerInterface 接口
-- getShadowAngle ：实时获取阴影偏移量
-- getAngleByHorizontalAndVertical（工具方法） ：根据阴影的偏移量，返回角度
-- getHorizontalAndVerticalAndPositionByAngle（工具方法） ： 根据角度和 distance，返回阴影偏移量和拖拽圆点的坐标
+- getShadowAngle ： 旋钮旋转之后的回调函数，用于拖拽时实时返回阴影偏移量
+- getAngleAndPositionByHorizontalAndVertical： 通过水平和垂直偏移量，获取角度和鼠标坐标
+- getHorizontalAndVerticalAndPositionByAngle：通过角度和 distance，返回阴影偏移量和拖拽圆点的坐标
 
 ## getShadowAngle 的使用
 
@@ -56,22 +58,19 @@ manager.getShadowAngle(
 );
 ```
 
-## 工具方法：反向初始化 angle
+## 工具方法：反向初始化 angle 和鼠标位置
 
-box.shadow.manager.ts 中的方法 getAngleByHorizontalAndVertical：传入当前控件的阴影在水平方向（horizontal）和垂直方向（vertical）的设置，
-返回当前角度（0-360），角度返回值做了向下取整处理。
+box.shadow.manager.ts 中的方法 getAngleAndPositionByHorizontalAndVertical：传入当前控件的阴影在水平方向（horizontal）和垂直方向（vertical）的设置，
+返回鼠标坐标和当前角度（0-360）
 
 ```
 示例：
-const h = 10;
-const v = 10;
-const res = manager.getAngleByParameter({horizontal:h, vertical:v});
-const final = `输入的控件(h：v) => (${h}:${v}) =>角度 ${res}`;
-//处理其他业务逻辑
+const res2 = manager.getAngleAndPositionByHorizontalAndVertical(9, 2);
+console.log('获取angle , position :', res2);
 
 ```
 
-## 根据角度和 distance 获取实际阴影的偏移量和小圆点的坐标
+## 工具方法：根据角度和 distance 获取实际阴影的偏移量和小圆点的坐标
 
 box.shadow.manager.ts 提供的方法 getHorizontalAndVerticalAndPositionByAngle，可以获取阴影偏移量和拖拽圆点的坐标
 
