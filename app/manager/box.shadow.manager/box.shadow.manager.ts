@@ -69,11 +69,11 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     horizontal: number,
     vertical: number
   ): {
-    angle: number;
-    positionX: number;
-    positionY: number;
-    distance: number;
-  } {
+      angle: number;
+      positionX: number;
+      positionY: number;
+      distance: number;
+    } {
     if (!this.#offsetFix) this.#offsetFix = 3;
     if (!this.#pointRadius) this.#pointRadius = 3;
     if (!this.#radius) this.#radius = 16;
@@ -108,11 +108,11 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     angle: number,
     distance: number
   ): {
-    horizontal: number;
-    vertical: number;
-    positionX: number;
-    positionY: number;
-  } {
+      horizontal: number;
+      vertical: number;
+      positionX: number;
+      positionY: number;
+    } {
     if (!this.#offsetFix) this.#offsetFix = 3;
     if (!this.#pointRadius) this.#pointRadius = 3;
     if (!this.#radius) this.#radius = 16;
