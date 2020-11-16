@@ -46,14 +46,14 @@ export interface BoxShadowManagerInterface {
   ): BoxShadowManagerInterface;
 
   /**
-   * @param shadowOffset 阴影水平偏移
+   * @param horizontal 阴影水平偏移
+   * @param vertical 阴影垂直偏移
    * 根据阴影的偏移获取角度和鼠标位置信息
    */
-  getAngleAndPositionByHorizontalAndVerticalAndDistance(shadowOffset: {
-    horizontal: number;
-    vertical: number;
-    distance: number;
-  }): {
+  getAngleAndPositionByHorizontalAndVertical(
+    horizontal: number,
+    vertical: number
+  ): {
     angle: number;
     positionX: number;
     positionY: number;
@@ -74,3 +74,4 @@ export interface BoxShadowManagerInterface {
     positionY: number;
   };
 }
+
