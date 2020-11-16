@@ -11,10 +11,10 @@ type Rgba = {
 };
 
 type PaddingInfo = {
-  left: string;
-  top: string;
-  right: string;
-  bottom: string;
+  left: { value: number, unit: string };
+  top: { value: number, unit: string };
+  right: { value: number, unit: string };
+  bottom: { value: number, unit: string };
 };
 
 export { Rgba, PaddingInfo };
