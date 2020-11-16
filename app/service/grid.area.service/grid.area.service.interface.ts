@@ -22,13 +22,17 @@ export interface GridAreaServiceInterface {
    * @param info grid row info， eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
    * 设置 grid row info
    */
-  setGridRowInfo(info: { value: number, unit: string }[]): GridAreaServiceInterface;
+  setGridRowInfo(
+    info: { value: number; unit: string }[]
+  ): GridAreaServiceInterface;
 
   /**
    * @param info grid column info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
    * 设置 grid column info
    */
-  setGridColumnInfo(info: { value: number, unit: string }[]): GridAreaServiceInterface;
+  setGridColumnInfo(
+    info: { value: number; unit: string }[]
+  ): GridAreaServiceInterface;
 
   /**
    * @param 设置 grid row \ column count
@@ -39,7 +43,7 @@ export interface GridAreaServiceInterface {
    * @param padding grid padding info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
    * 设置 grid padding
    */
-  setGridPaddingInfo(padding: PaddingInfo): GridAreaServiceInterface
+  setGridPaddingInfo(padding: PaddingInfo): GridAreaServiceInterface;
 
   /**
    * @param rect dropped rect
@@ -88,6 +92,6 @@ export interface GridAreaServiceInterface {
     id: string;
     gridArea: number[];
     marginLeft: number;
-    marginTop: number
+    marginTop: number;
   }[];
 }
