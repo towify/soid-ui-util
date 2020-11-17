@@ -10,7 +10,10 @@ export interface GridAreaServiceInterface {
    * @param height Window height
    * 设置窗口 高宽
    */
-  setWindowSize(width: number, height: number): GridAreaServiceInterface;
+  setWindowSize(size: {
+    width: number;
+    height: number;
+  }): GridAreaServiceInterface;
 
   /**
    * @param rect grid rect

@@ -7,8 +7,7 @@ import { PaddingInfo } from '../../type/common.type';
 
 export class GridAreaService implements GridAreaServiceInterface {
   private static instance?: GridAreaService;
-  #windowWidth = 0;
-  #windowHeight = 0;
+  #windowSize?: { width: number; height: number };
   #gridRect?: DOMRect;
   #gridColumnInfo?: { value: number; unit: string }[];
   #gridRowInfo?: { value: number; unit: string }[];
@@ -22,25 +21,26 @@ export class GridAreaService implements GridAreaServiceInterface {
     return checkXIn && checkYIn;
   };
 
-  #changeUnitObjectToNumber = (params: {
-    unitObject: { value: number; unit: string };
+  #changeSizeInfoToNumber = (params: {
+    sizeInfo: { value: number; unit: string };
+    windowSize?: { width: number; height: number };
     maxValue?: number;
-    windowWidth?: number;
-    windowHeight?: number;
   }) => {
-    let valueNumber = params.unitObject.value;
+    let valueNumber = params.sizeInfo.value;
     if (valueNumber === -1) {
       return 0;
     }
-    if (params.unitObject.unit === 'vw') {
-      valueNumber = ((params.windowWidth ?? 0) * valueNumber) / 100;
-      if (!params.windowWidth || params.windowWidth === 0) {
+    if (params.sizeInfo.unit === 'vw') {
+      valueNumber = ((params.windowSize?.width ?? 0) * valueNumber) / 100;
+      // todo: window width 为空和等于0 分开处理
+      if (!params.windowSize?.width || params.windowSize?.width === 0) {
         console.error('SOID-UI-UTIL', 'GridAreaService', 'windowWidth is zero');
       }
     }
-    if (params.unitObject.unit === 'vh') {
-      valueNumber = ((params.windowHeight ?? 0) * valueNumber) / 100;
-      if (!params.windowHeight || params.windowHeight === 0) {
+    if (params.sizeInfo.unit === 'vh') {
+      valueNumber = ((params.windowSize?.height ?? 0) * valueNumber) / 100;
+      // todo: window width 为空和等于0 分开处理
+      if (!params.windowSize?.height || params.windowSize?.height === 0) {
         console.error(
           'SOID-UI-UTIL',
           'GridAreaService',
@@ -48,7 +48,7 @@ export class GridAreaService implements GridAreaServiceInterface {
         );
       }
     }
-    if (params.unitObject.unit === '%') {
+    if (params.sizeInfo.unit === '%') {
       valueNumber = ((params.maxValue ?? 0) * valueNumber) / 100;
     }
     return valueNumber;
@@ -59,9 +59,11 @@ export class GridAreaService implements GridAreaServiceInterface {
     return GridAreaService.instance;
   }
 
-  setWindowSize(width: number, height: number): GridAreaServiceInterface {
-    this.#windowWidth = width;
-    this.#windowHeight = height;
+  setWindowSize(size: {
+    width: number;
+    height: number;
+  }): GridAreaServiceInterface {
+    this.#windowSize = size;
     return this;
   }
 
@@ -85,26 +87,18 @@ export class GridAreaService implements GridAreaServiceInterface {
   }
 
   setGridCount(row: number, column: number): GridAreaServiceInterface {
-    if (this.#gridRowInfo) {
-      this.#gridRowInfo.splice(0, this.#gridRowInfo.length);
-    } else {
-      this.#gridRowInfo = [];
-    }
-    if (this.#gridColumnInfo) {
-      this.#gridColumnInfo.splice(0, this.#gridColumnInfo.length);
-    } else {
-      this.#gridColumnInfo = [];
-    }
+    this.#gridRowInfo = [];
+    this.#gridColumnInfo = [];
     let rowIndex = 0;
     for (rowIndex; rowIndex < row; rowIndex += 1) {
-      this.#gridRowInfo!.push({
+      this.#gridRowInfo.push({
         value: parseFloat((100 / row).toFixed(2)),
         unit: '%'
       });
     }
     let columnIndex = 0;
     for (columnIndex; columnIndex < column; columnIndex += 1) {
-      this.#gridRowInfo!.push({
+      this.#gridRowInfo.push({
         value: parseFloat((100 / column).toFixed(2)),
         unit: '%'
       });
@@ -286,46 +280,40 @@ export class GridAreaService implements GridAreaServiceInterface {
       bottom: 0
     };
     if (this.#gridPaddingInfo) {
-      gridPadding.left = this.#changeUnitObjectToNumber({
-        unitObject: this.#gridPaddingInfo.left,
+      gridPadding.left = this.#changeSizeInfoToNumber({
+        sizeInfo: this.#gridPaddingInfo.left,
         maxValue: this.#gridRect.width,
-        windowWidth: this.#windowWidth,
-        windowHeight: this.#windowHeight
+        windowSize: this.#windowSize
       });
-      gridPadding.right = this.#changeUnitObjectToNumber({
-        unitObject: this.#gridPaddingInfo.right,
+      gridPadding.right = this.#changeSizeInfoToNumber({
+        sizeInfo: this.#gridPaddingInfo.right,
         maxValue: this.#gridRect.width,
-        windowWidth: this.#windowWidth,
-        windowHeight: this.#windowHeight
+        windowSize: this.#windowSize
       });
-      gridPadding.top = this.#changeUnitObjectToNumber({
-        unitObject: this.#gridPaddingInfo.top,
+      gridPadding.top = this.#changeSizeInfoToNumber({
+        sizeInfo: this.#gridPaddingInfo.top,
         maxValue: this.#gridRect.height,
-        windowWidth: this.#windowWidth,
-        windowHeight: this.#windowHeight
+        windowSize: this.#windowSize
       });
-      gridPadding.bottom = this.#changeUnitObjectToNumber({
-        unitObject: this.#gridPaddingInfo.bottom,
+      gridPadding.bottom = this.#changeSizeInfoToNumber({
+        sizeInfo: this.#gridPaddingInfo.bottom,
         maxValue: this.#gridRect.height,
-        windowWidth: this.#windowWidth,
-        windowHeight: this.#windowHeight
+        windowSize: this.#windowSize
       });
     }
     const gridWidth =
       this.#gridRect.width - gridPadding.left - gridPadding.right;
     const gridHeight =
       this.#gridRect.height - gridPadding.top - gridPadding.bottom;
-    const columnsNumberArray = this.changeUnitObjectListToNumberList({
-      unitList: this.#gridColumnInfo ?? [],
+    const columnsNumberArray = this.changeSizeInfoListToNumberList({
+      sizeInfoList: this.#gridColumnInfo ?? [],
       maxValue: gridWidth,
-      windowWidth: this.#windowWidth,
-      windowHeight: this.#windowHeight
+      windowSize: this.#windowSize
     });
-    const rowsNumberArray = this.changeUnitObjectListToNumberList({
-      unitList: this.#gridRowInfo ?? [],
+    const rowsNumberArray = this.changeSizeInfoListToNumberList({
+      sizeInfoList: this.#gridRowInfo ?? [],
       maxValue: gridHeight,
-      windowWidth: this.#windowWidth,
-      windowHeight: this.#windowHeight
+      windowSize: this.#windowSize
     });
     let rowIndex = 0;
     let rowLength = rowsNumberArray.length;
@@ -360,24 +348,22 @@ export class GridAreaService implements GridAreaServiceInterface {
     return itemRectList;
   }
 
-  private changeUnitObjectListToNumberList(params: {
-    unitList: { value: number; unit: string }[];
-    maxValue: number;
-    windowWidth: number;
-    windowHeight: number;
+  private changeSizeInfoListToNumberList(params: {
+    sizeInfoList: { value: number; unit: string }[];
+    windowSize?: { width: number; height: number };
+    maxValue?: number;
   }): number[] {
-    let spareValue = params.maxValue;
+    let spareValue = params.maxValue ?? 0;
     let autoNumber = 0;
     let isAuto = false;
-    const valueList: number[] = new Array(params.unitList.length);
-    params.unitList.forEach((value, index) => {
+    const valueList: number[] = new Array(params.sizeInfoList.length);
+    params.sizeInfoList.forEach((value, index) => {
       isAuto = value.value === -1;
       if (!isAuto) {
-        valueList[index] = this.#changeUnitObjectToNumber({
-          unitObject: value,
+        valueList[index] = this.#changeSizeInfoToNumber({
+          sizeInfo: value,
           maxValue: params.maxValue,
-          windowWidth: params.windowWidth,
-          windowHeight: params.windowHeight
+          windowSize: params.windowSize
         });
       } else {
         valueList[index] = 0;
@@ -389,7 +375,7 @@ export class GridAreaService implements GridAreaServiceInterface {
     });
     if (spareValue !== 0 && autoNumber !== 0) {
       const autoValue = spareValue / autoNumber;
-      params.unitList.forEach((value, index) => {
+      params.sizeInfoList.forEach((value, index) => {
         valueList[index] = autoValue;
       });
     }
