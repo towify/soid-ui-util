@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/11/12 15:42
  */
-import { PaddingInfo } from '../../type/common.type';
+import { PaddingInfo, RectInfo } from '../../type/common.type';
 
 export interface GridAreaServiceInterface {
   /**
@@ -19,13 +19,16 @@ export interface GridAreaServiceInterface {
    * @param rect grid rect
    * 设置 parent grid rect
    */
-  setGridRect(rect: DOMRect): GridAreaServiceInterface;
+  setParentGridSize(size: {
+    width: number;
+    height: number;
+  }): GridAreaServiceInterface;
 
   /**
    * @param info grid row info， eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
    * 设置 grid row info
    */
-  setGridRowInfo(
+  setParentGridRowInfo(
     info: { value: number; unit: string }[]
   ): GridAreaServiceInterface;
 
@@ -33,26 +36,26 @@ export interface GridAreaServiceInterface {
    * @param info grid column info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
    * 设置 grid column info
    */
-  setGridColumnInfo(
+  setParentGridColumnInfo(
     info: { value: number; unit: string }[]
   ): GridAreaServiceInterface;
 
   /**
    * @param 设置 grid row \ column count
    */
-  setGridCount(row: number, column: number): GridAreaServiceInterface;
+  setParentGridCount(row: number, column: number): GridAreaServiceInterface;
 
   /**
    * @param padding grid padding info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
    * 设置 grid padding
    */
-  setGridPaddingInfo(padding: PaddingInfo): GridAreaServiceInterface;
+  setParentGridPaddingInfo(padding: PaddingInfo): GridAreaServiceInterface;
 
   /**
    * @param rect dropped rect
    * 设置 dropped rect
    */
-  setDroppedRect(rect: DOMRect): GridAreaServiceInterface;
+  setDroppedRect(rect: RectInfo): GridAreaServiceInterface;
 
   /**
    * @description 根据 dropped rect 返回 drop 在 grid 中的 info
