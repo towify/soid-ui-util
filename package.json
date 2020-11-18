@@ -40,7 +40,7 @@
     "lint-staged": "^10.5.1",
     "npm": "^6.14.8",
     "prettier": "^2.1.2",
-    "soid-data": "^0.0.26"
+    "soid-data": "^0.0.28"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
