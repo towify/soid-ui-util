@@ -123,6 +123,6 @@ export interface GridAreaServiceInterface {
    * 返回grid
    */
   getGridLineList(
-    showBorder: boolean
+    isShowBorder: boolean
   ): { fromX: number; fromY: number; toX: number; toY: number }[];
 }

@@ -53,17 +53,18 @@ export class GridAreaUtils {
     return valueNumber;
   }
 
-  static getGridLineList(
+  static getGridLineList(params: {
     gridItemRectList: RectInfo[][],
-    gridSize: { width: number; height: number }
-  ): { fromX: number; fromY: number; toX: number; toY: number }[] {
+    gridSize: { width: number; height: number },
+    isShowBorder: boolean
+  }): { fromX: number; fromY: number; toX: number; toY: number }[] {
     const result: {
       fromX: number;
       fromY: number;
       toX: number;
       toY: number;
     }[] = [];
-    gridItemRectList.forEach(rowItem => {
+    params.gridItemRectList.forEach(rowItem => {
       rowItem.forEach(rect => {
         result.push({
           fromX: rect.x,
@@ -135,15 +136,13 @@ export class GridAreaUtils {
       toY: number;
     };
     return result.filter(item => {
-      if (
-        item.fromX === item.toX &&
-        (item.fromX === 0 || item.fromX === gridSize.width)
+      if (!params.isShowBorder && item.fromX === item.toX &&
+        (item.fromX === 0 || item.fromX === params.gridSize.width)
       ) {
         return false;
       }
-      if (
-        item.fromY === item.toY &&
-        (item.fromY === 0 || item.fromY === gridSize.height)
+      if (!params.isShowBorder && item.fromY === item.toY &&
+        (item.fromY === 0 || item.fromY === params.gridSize.height)
       ) {
         return false;
       }
@@ -227,10 +226,10 @@ export class GridAreaUtils {
     rowGap: number;
     columnGap: number;
   }): {
-    gridArea: GridAreaInfo;
-    marginLeft: number;
-    marginTop: number;
-  } {
+      gridArea: GridAreaInfo;
+      marginLeft: number;
+      marginTop: number;
+    } {
     const maxWidth = params.rect.x + params.rect.width;
     const maxHeight = params.rect.y + params.rect.height;
     const rowLength = params.gridItemRectList.length;
@@ -359,8 +358,8 @@ export class GridAreaUtils {
     });
     return {
       gridArea: { rowStart, columnStart, rowEnd, columnEnd },
-      marginLeft,
-      marginTop
+      marginLeft: parseFloat(marginLeft.toFixed(1)),
+      marginTop: parseFloat(marginTop.toFixed(1))
     };
   }
 }
