@@ -278,12 +278,14 @@ export class GridAreaService implements GridAreaServiceInterface {
     });
   }
 
-  getGridLineList(): {
-    fromX: number;
-    fromY: number;
-    toX: number;
-    toY: number;
-  }[] {
+  getGridLineList(
+    isShowBorder: boolean
+  ): {
+      fromX: number;
+      fromY: number;
+      toX: number;
+      toY: number;
+    }[] {
     if (!this.#gridSize) {
       console.error('SOID-UI-UTIL', 'GridAreaService', 'gridRect is undefined');
       return [];
@@ -292,7 +294,11 @@ export class GridAreaService implements GridAreaServiceInterface {
       this.#gridRowGap,
       this.#gridColumnGap
     );
-    return GridAreaUtils.getGridLineList(gridItemRectList, this.#gridSize);
+    return GridAreaUtils.getGridLineList({
+      gridItemRectList,
+      gridSize: this.#gridSize,
+      isShowBorder
+    });
   }
 
   private getGridItemRectList(rowGap: number, columnGap: number): RectInfo[][] {
