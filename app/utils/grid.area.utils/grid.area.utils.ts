@@ -267,7 +267,7 @@ export class GridAreaUtils {
         columnEnd = 1;
       }
       if (maxWidth > params.gridRect.x + params.gridRect.width) {
-        columnEnd = columnLength + 1;
+        columnEnd = columnLength + 2;
       }
     }
     if (
@@ -296,7 +296,7 @@ export class GridAreaUtils {
         rowEnd = 1;
       }
       if (maxHeight > params.gridRect.y + params.gridRect.height) {
-        rowEnd = rowLength + 1;
+        rowEnd = rowLength + 2;
       }
     }
     params.gridItemRectList.forEach((rowItem, rowIndex) => {
