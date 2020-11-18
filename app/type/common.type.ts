@@ -17,6 +17,13 @@ type PaddingInfo = {
   bottom: { value: number; unit: string };
 };
 
+type GridAreaInfo = {
+  rowStart: number;
+  columnStart: number;
+  rowEnd: number;
+  columnEnd: number;
+};
+
 type RectInfo = {
   x: number;
   y: number;
@@ -24,4 +31,4 @@ type RectInfo = {
   height: number;
 };
 
-export { Rgba, PaddingInfo, RectInfo };
+export { Rgba, PaddingInfo, RectInfo, GridAreaInfo };

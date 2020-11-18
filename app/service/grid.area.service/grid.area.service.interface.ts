@@ -2,12 +2,11 @@
  * @author allen
  * @data 2020/11/12 15:42
  */
-import { PaddingInfo, RectInfo } from '../../type/common.type';
+import { GridAreaInfo, PaddingInfo, RectInfo } from '../../type/common.type';
 
 export interface GridAreaServiceInterface {
   /**
-   * @param width Window width
-   * @param height Window height
+   * @param size Window size
    * 设置窗口 高宽
    */
   setWindowSize(size: {
@@ -16,8 +15,8 @@ export interface GridAreaServiceInterface {
   }): GridAreaServiceInterface;
 
   /**
-   * @param rect grid rect
-   * 设置 parent grid rect
+   * @param size grid size
+   * 设置 parent grid size
    */
   setParentGridSize(size: {
     width: number;
@@ -25,7 +24,7 @@ export interface GridAreaServiceInterface {
   }): GridAreaServiceInterface;
 
   /**
-   * @param info grid row info， eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
+   * @param info:  grid row info， eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
    * 设置 grid row info
    */
   setParentGridRowInfo(
@@ -33,7 +32,7 @@ export interface GridAreaServiceInterface {
   ): GridAreaServiceInterface;
 
   /**
-   * @param info grid column info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
+   * @param info:  grid column info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
    * 设置 grid column info
    */
   setParentGridColumnInfo(
@@ -41,7 +40,19 @@ export interface GridAreaServiceInterface {
   ): GridAreaServiceInterface;
 
   /**
-   * @param 设置 grid row \ column count
+   * @param rowInfo: grid row info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
+   * @param columnInfo: grid column info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
+   * 设置 grid column info
+   */
+  setParentGridInfo(
+    rowInfo: { value: number; unit: string }[],
+    columnInfo: { value: number; unit: string }[]
+  ): GridAreaServiceInterface;
+
+  /**
+   * @param row: grid row count
+   * @param column: grid column count
+   * 设置 grid row \ column count
    */
   setParentGridCount(row: number, column: number): GridAreaServiceInterface;
 
@@ -50,6 +61,16 @@ export interface GridAreaServiceInterface {
    * 设置 grid padding
    */
   setParentGridPaddingInfo(padding: PaddingInfo): GridAreaServiceInterface;
+
+  /**
+   * @param rowGap: grid row gap
+   * @param columnGap: grid column gap
+   * 设置 grid row \ column gap
+   */
+  setParentGridGap(
+    rowGap: { value: number; unit: string },
+    columnGap: { value: number; unit: string }
+  ): GridAreaServiceInterface;
 
   /**
    * @param rect dropped rect
@@ -65,7 +86,7 @@ export interface GridAreaServiceInterface {
    * marginTop: dropped marginTop
    */
   getDroppedGridInfo(): {
-    gridArea: number[];
+    gridArea: GridAreaInfo;
     marginLeft: number;
     marginTop: number;
   };
@@ -80,10 +101,10 @@ export interface GridAreaServiceInterface {
    * width: child width
    * height: child height
    */
-  setChildrenRectInfo(
+  setChildrenGridInfo(
     childrenInfo: {
       id: string;
-      gridArea: number[];
+      gridArea: GridAreaInfo;
       marginLeft: number;
       marginTop: number;
       width: number;
@@ -96,8 +117,16 @@ export interface GridAreaServiceInterface {
    */
   adjustChildrenGridInfo(): {
     id: string;
-    gridArea: number[];
+    gridArea: GridAreaInfo;
     marginLeft: number;
     marginTop: number;
   }[];
+
+  /**
+   * @param showBord: 是否显示 border, 默认为false
+   * 返回grid
+   */
+  getGridLineList(
+    showBorder: boolean
+  ): { fromX: number; fromY: number; toX: number; toY: number }[];
 }
