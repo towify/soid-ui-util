@@ -28,19 +28,19 @@ export class GridAreaService implements GridAreaServiceInterface {
     return GridAreaService.instance;
   }
 
-  setWindowSize(size: {
-    width: number;
-    height: number;
-  }): GridAreaServiceInterface {
-    this.#windowSize = size;
+  setWindowSize(width: number, height: number): GridAreaServiceInterface {
+    this.#windowSize = {
+      width,
+      height
+    };
     return this;
   }
 
-  setParentGridSize(size: {
-    width: number;
-    height: number;
-  }): GridAreaServiceInterface {
-    this.#gridSize = size;
+  setParentGridSize(width: number, height: number): GridAreaServiceInterface {
+    this.#gridSize = {
+      width,
+      height
+    };
     return this;
   }
 
@@ -59,11 +59,11 @@ export class GridAreaService implements GridAreaServiceInterface {
   }
 
   setParentGridInfo(
-    rowInfo: { value: number; unit: string }[],
-    columnInfo: { value: number; unit: string }[]
+    row: { value: number; unit: string }[],
+    column: { value: number; unit: string }[]
   ): GridAreaServiceInterface {
-    this.#gridRowInfo = rowInfo;
-    this.#gridColumnInfo = columnInfo;
+    this.#gridRowInfo = row;
+    this.#gridColumnInfo = column;
     return this;
   }
 
@@ -88,16 +88,16 @@ export class GridAreaService implements GridAreaServiceInterface {
   }
 
   setParentGridGap(
-    rowGap: { value: number; unit: string },
-    columnGap: { value: number; unit: string }
+    row: { value: number; unit: string },
+    column: { value: number; unit: string }
   ): GridAreaServiceInterface {
     this.#gridRowGap = GridAreaUtils.changeSizeInfoToNumber({
-      sizeInfo: rowGap,
+      sizeInfo: row,
       maxValue: this.#gridSize?.width,
       windowSize: this.#windowSize
     });
     this.#gridColumnGap = GridAreaUtils.changeSizeInfoToNumber({
-      sizeInfo: columnGap,
+      sizeInfo: column,
       maxValue: this.#gridSize?.width,
       windowSize: this.#windowSize
     });

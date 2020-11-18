@@ -6,22 +6,18 @@ import { GridAreaInfo, PaddingInfo, RectInfo } from '../../type/common.type';
 
 export interface GridAreaServiceInterface {
   /**
-   * @param size Window size
+   * @param width Window width
+   * @param height Window height
    * 设置窗口 高宽
    */
-  setWindowSize(size: {
-    width: number;
-    height: number;
-  }): GridAreaServiceInterface;
+  setWindowSize(width: number, height: number): GridAreaServiceInterface;
 
   /**
-   * @param size grid size
+   * @param width Window width
+   * @param height Window height
    * 设置 parent grid size
    */
-  setParentGridSize(size: {
-    width: number;
-    height: number;
-  }): GridAreaServiceInterface;
+  setParentGridSize(width: number, height: number): GridAreaServiceInterface;
 
   /**
    * @param info:  grid row info， eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
@@ -40,13 +36,13 @@ export interface GridAreaServiceInterface {
   ): GridAreaServiceInterface;
 
   /**
-   * @param rowInfo: grid row info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
-   * @param columnInfo: grid column info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
+   * @param row: grid row info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
+   * @param column: grid column info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
    * 设置 grid column info
    */
   setParentGridInfo(
-    rowInfo: { value: number; unit: string }[],
-    columnInfo: { value: number; unit: string }[]
+    row: { value: number; unit: string }[],
+    column: { value: number; unit: string }[]
   ): GridAreaServiceInterface;
 
   /**
@@ -57,19 +53,19 @@ export interface GridAreaServiceInterface {
   setParentGridCount(row: number, column: number): GridAreaServiceInterface;
 
   /**
-   * @param padding grid padding info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
+   * @param info grid padding info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
    * 设置 grid padding
    */
-  setParentGridPaddingInfo(padding: PaddingInfo): GridAreaServiceInterface;
+  setParentGridPaddingInfo(info: PaddingInfo): GridAreaServiceInterface;
 
   /**
-   * @param rowGap: grid row gap
-   * @param columnGap: grid column gap
+   * @param row: grid row gap
+   * @param column: grid column gap
    * 设置 grid row \ column gap
    */
   setParentGridGap(
-    rowGap: { value: number; unit: string },
-    columnGap: { value: number; unit: string }
+    row: { value: number; unit: string },
+    column: { value: number; unit: string }
   ): GridAreaServiceInterface;
 
   /**
