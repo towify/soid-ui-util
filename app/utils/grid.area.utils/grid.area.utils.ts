@@ -20,6 +20,40 @@ export class GridAreaUtils {
     return checkXIn && checkYIn;
   }
 
+  static changeNumberToSizeInfo(params: {
+    valueNumber: number,
+    unit: string,
+    windowSize?: { width: number; height: number };
+    maxValue?: number;
+  }): { value: number, unit: string } {
+    let value = params.valueNumber;
+    if (params.unit === 'vw') {
+      value = (params.valueNumber / (params.windowSize?.width ?? 1)) * 100;
+      // todo: window width 为空和等于 0 分开处理
+      if (!params.windowSize?.width || params.windowSize?.width === 0) {
+        console.error('SOID-UI-UTIL', 'GridAreaService', 'windowWidth is zero');
+      }
+    }
+    if (params.unit === 'vh') {
+      value = (params.valueNumber / (params.windowSize?.height ?? 1)) * 100;
+      // todo: window width 为空和等于 0 分开处理
+      if (!params.windowSize?.height || params.windowSize?.height === 0) {
+        console.error(
+          'SOID-UI-UTIL',
+          'GridAreaService',
+          'windowHeight is zero'
+        );
+      }
+    }
+    if (params.unit === '%') {
+      value = (params.valueNumber / (params.maxValue ?? 1)) * 100;
+    }
+    return {
+      value,
+      unit: params.unit
+    };
+  }
+
   static changeSizeInfoToNumber(params: {
     sizeInfo: { value: number; unit: string };
     windowSize?: { width: number; height: number };
@@ -51,6 +85,54 @@ export class GridAreaUtils {
       valueNumber = ((params.maxValue ?? 0) * valueNumber) / 100;
     }
     return valueNumber;
+  }
+
+  static changeChildSizeInfoToNumber(params: {
+    gridArea: GridAreaInfo,
+    gridItemRectList: RectInfo[][]
+  }): {
+      x: number,
+      y: number,
+      width: number,
+      height: number
+    } {
+    let rowStart = params.gridArea.rowStart - 1;
+    let columnStart = params.gridArea.columnStart - 1;
+    let rowEnd = params.gridArea.rowEnd - 1;
+    let columnEnd = params.gridArea.columnEnd - 1;
+    const childGridRect = {
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0
+    };
+    if (rowStart < 0) {
+      rowStart = 0;
+    }
+    if (rowStart >= params.gridItemRectList.length) {
+      rowStart = params.gridItemRectList.length - 1;
+    }
+    if (columnStart < 0) {
+      columnStart = 0;
+    }
+    if (columnStart >= params.gridItemRectList[0].length) {
+      columnStart = params.gridItemRectList[0].length - 1;
+    }
+    childGridRect.x = params.gridItemRectList[0][columnStart].x;
+    childGridRect.y = params.gridItemRectList[rowStart][0].y;
+    if (rowEnd >= params.gridItemRectList.length) {
+      rowEnd = params.gridItemRectList.length - 1;
+      childGridRect.height = params.gridItemRectList[rowEnd][0].y + params.gridItemRectList[rowEnd][0].height - childGridRect.y;
+    } else {
+      childGridRect.height = params.gridItemRectList[rowEnd][0].y - childGridRect.y;
+    }
+    if (columnEnd >= params.gridItemRectList[0].length) {
+      columnEnd = params.gridItemRectList[0].length - 1;
+      childGridRect.width = params.gridItemRectList[0][columnEnd].x + params.gridItemRectList[0][columnEnd].width - childGridRect.x;
+    } else {
+      childGridRect.width = params.gridItemRectList[0][columnEnd].x - childGridRect.x;
+    }
+    return childGridRect;
   }
 
   static getGridLineList(params: {
@@ -202,11 +284,16 @@ export class GridAreaUtils {
         });
       }
     });
-    valueList.forEach(value => {
+    if (valueList.length > 0) {
+      spareValue += params.gap;
+    }
+    valueList.forEach((value) => {
       spareValue -= value;
       spareValue -= params.gap;
     });
-    spareValue += params.gap;
+    if (spareValue < 0) {
+      spareValue = 0;
+    }
     if (spareValue !== 0 && autoNumber !== 0) {
       const autoValue = spareValue / autoNumber;
       params.sizeInfoList.forEach((value, index) => {
@@ -222,7 +309,6 @@ export class GridAreaUtils {
   static getGridAreaInfoByRect(params: {
     rect: RectInfo;
     gridItemRectList: RectInfo[][];
-    gridRect: RectInfo;
     rowGap: number;
     columnGap: number;
   }): {
@@ -240,17 +326,23 @@ export class GridAreaUtils {
     let rowEnd = rowLength + 1;
     let columnStart = 1;
     let columnEnd = columnLength + 1;
+    const gridAreaRect = {
+      x: params.gridItemRectList[0][0].x,
+      y: params.gridItemRectList[0][0].y,
+      width: (params.gridItemRectList[0][columnLength - 1].x + params.gridItemRectList[0][columnLength - 1].width),
+      height: (params.gridItemRectList[rowLength - 1][0].y + params.gridItemRectList[rowLength - 1][0].height)
+    };
     if (
       !GridAreaUtils.checkPointIsInRect(
-        { x: params.rect.x, y: params.gridRect.y },
-        params.gridRect
+        { x: params.rect.x, y: gridAreaRect.y },
+        gridAreaRect
       )
     ) {
-      if (params.rect.x < params.gridRect.x) {
+      if (params.rect.x < gridAreaRect.x) {
         columnStart = 1;
-        marginLeft = params.rect.x - params.gridRect.x;
+        marginLeft = params.rect.x - gridAreaRect.x;
       }
-      if (params.rect.x > params.gridRect.x + params.gridRect.width) {
+      if (params.rect.x > gridAreaRect.x + gridAreaRect.width) {
         columnStart = columnLength;
         marginLeft =
           params.rect.x - params.gridItemRectList[0][columnLength - 1].x;
@@ -258,28 +350,28 @@ export class GridAreaUtils {
     }
     if (
       !GridAreaUtils.checkPointIsInRect(
-        { x: maxWidth, y: params.gridRect.y },
-        params.gridRect
+        { x: maxWidth, y: gridAreaRect.y },
+        gridAreaRect
       )
     ) {
-      if (maxWidth < params.gridRect.x) {
+      if (maxWidth < gridAreaRect.x) {
         columnEnd = 2;
       }
-      if (maxWidth > params.gridRect.x + params.gridRect.width) {
-        columnEnd = columnLength + 1;
+      if (maxWidth > gridAreaRect.x + gridAreaRect.width) {
+        columnEnd = columnLength + 2;
       }
     }
     if (
       !GridAreaUtils.checkPointIsInRect(
-        { x: params.gridRect.x, y: params.rect.y },
-        params.gridRect
+        { x: gridAreaRect.x, y: params.rect.y },
+        gridAreaRect
       )
     ) {
-      if (params.rect.y < params.gridRect.y) {
+      if (params.rect.y < gridAreaRect.y) {
         rowStart = 1;
-        marginTop = params.rect.y - params.gridRect.y;
+        marginTop = params.rect.y - gridAreaRect.y;
       }
-      if (params.rect.y > params.gridRect.y + params.gridRect.height) {
+      if (params.rect.y > gridAreaRect.y + gridAreaRect.height) {
         rowStart = rowLength;
         marginTop =
           params.rect.y -  params.gridItemRectList[rowLength-1][0].y;
@@ -287,15 +379,15 @@ export class GridAreaUtils {
     }
     if (
       !GridAreaUtils.checkPointIsInRect(
-        { x: params.gridRect.x, y: maxHeight },
-        params.gridRect
+        { x: gridAreaRect.x, y: maxHeight },
+        gridAreaRect
       )
     ) {
-      if (maxHeight < params.gridRect.y) {
+      if (maxHeight < gridAreaRect.y) {
         rowEnd = 2;
       }
-      if (maxHeight > params.gridRect.y + params.gridRect.height) {
-        rowEnd = rowLength + 1;
+      if (maxHeight > gridAreaRect.y + gridAreaRect.height) {
+        rowEnd = rowLength + 2;
       }
     }
     params.gridItemRectList.forEach((rowItem, rowIndex) => {
