@@ -251,9 +251,9 @@ export class GridAreaUtils {
         marginLeft = params.rect.x - params.gridRect.x;
       }
       if (params.rect.x > params.gridRect.x + params.gridRect.width) {
-        columnStart = columnLength + 1;
+        columnStart = columnLength;
         marginLeft =
-          params.rect.x - (params.gridRect.x + params.gridRect.width);
+          params.rect.x - params.gridItemRectList[0][columnLength - 1].x;
       }
     }
     if (
@@ -263,10 +263,10 @@ export class GridAreaUtils {
       )
     ) {
       if (maxWidth < params.gridRect.x) {
-        columnEnd = 1;
+        columnEnd = 2;
       }
       if (maxWidth > params.gridRect.x + params.gridRect.width) {
-        columnEnd = columnLength + 2;
+        columnEnd = columnLength + 1;
       }
     }
     if (
@@ -280,9 +280,9 @@ export class GridAreaUtils {
         marginTop = params.rect.y - params.gridRect.y;
       }
       if (params.rect.y > params.gridRect.y + params.gridRect.height) {
-        rowStart = rowLength + 1;
+        rowStart = rowLength;
         marginTop =
-          params.rect.y - (params.gridRect.y + params.gridRect.height);
+          params.rect.y -  params.gridItemRectList[rowLength-1][0].y;
       }
     }
     if (
@@ -292,10 +292,10 @@ export class GridAreaUtils {
       )
     ) {
       if (maxHeight < params.gridRect.y) {
-        rowEnd = 1;
+        rowEnd = 2;
       }
       if (maxHeight > params.gridRect.y + params.gridRect.height) {
-        rowEnd = rowLength + 2;
+        rowEnd = rowLength + 1;
       }
     }
     params.gridItemRectList.forEach((rowItem, rowIndex) => {
@@ -345,14 +345,6 @@ export class GridAreaUtils {
           )
         ) {
           columnEnd = columnIndex + 2;
-        }
-        if (
-          GridAreaUtils.checkPointIsInRect(
-            { x: activeRect.x, y: maxHeight },
-            activeRect
-          )
-        ) {
-          rowEnd = rowIndex + 2;
         }
       });
     });
