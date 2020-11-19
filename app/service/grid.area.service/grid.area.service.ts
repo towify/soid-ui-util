@@ -12,8 +12,6 @@ export class GridAreaService implements GridAreaServiceInterface {
   #gridSize?: { width: number; height: number };
   #gridColumnInfo?: { value: number; unit: string }[];
   #gridRowInfo?: { value: number; unit: string }[];
-  #droppedRect?: RectInfo;
-  #childRectInfoList: { id: string; rect: RectInfo }[] = [];
   #gridRowGap = 0;
   #gridColumnGap = 0;
   #gridPadding = {
@@ -22,6 +20,16 @@ export class GridAreaService implements GridAreaServiceInterface {
     right: 0,
     bottom: 0
   };
+
+  #droppedInfo?: {
+    x: number;
+    y: number;
+    width: { value: number; unit: string };
+    height: { value: number; unit: string };
+    gridArea?: GridAreaInfo
+  };
+
+  #childRectInfoList: { id: string; rect: RectInfo; leftUint: string; topUnit: string, widthUint: string, heightUint: string }[] = [];
 
   static getInstance(): GridAreaService {
     GridAreaService.instance ??= new GridAreaService();
@@ -128,116 +136,25 @@ export class GridAreaService implements GridAreaServiceInterface {
     return this;
   }
 
-  setDroppedRect(rect: RectInfo): GridAreaServiceInterface {
-    this.#droppedRect = rect;
+  setDroppedInfo(dropped: {
+    x: number;
+    y: number;
+    width: { value: number; unit: string };
+    height: { value: number; unit: string };
+    gridArea?: GridAreaInfo
+  }): GridAreaServiceInterface {
+    this.#droppedInfo = dropped;
     return this;
-  }
-
-  setChildrenGridInfo(
-    childrenInfo: {
-      id: string;
-      gridArea: GridAreaInfo;
-      marginLeft: number;
-      marginTop: number;
-      width: number;
-      height: number;
-    }[]
-  ): GridAreaServiceInterface {
-    if (!this.#gridSize) {
-      console.error('SOID-UI-UTIL', 'GridAreaService', 'gridRect is undefined');
-      return this;
-    }
-    const gridItemRectList = this.getGridItemRectList(
-      this.#gridRowGap,
-      this.#gridColumnGap
-    );
-    let childX = 0;
-    let childY = 0;
-    let columnIndex = 0;
-    let rowIndex = 0;
-    this.#childRectInfoList = childrenInfo.map(childInfo => {
-      columnIndex = childInfo.gridArea.columnStart - 1;
-      if (columnIndex >= gridItemRectList[0].length) {
-        columnIndex = gridItemRectList[0].length - 1;
-      }
-      if (columnIndex < 0) {
-        columnIndex = 0;
-      }
-      rowIndex = childInfo.gridArea.rowStart - 1;
-      if (rowIndex >= gridItemRectList.length) {
-        rowIndex = gridItemRectList.length - 1;
-      }
-      if (rowIndex < 0) {
-        rowIndex = 0;
-      }
-      childX = gridItemRectList[0][columnIndex].x + childInfo.marginLeft;
-      childY = gridItemRectList[rowIndex][0].y + +childInfo.marginTop;
-      return {
-        id: childInfo.id,
-        rect: {
-          x: childX,
-          y: childY,
-          width: childInfo.width,
-          height: childInfo.height
-        }
-      };
-    });
-    return this;
-  }
-
-  adjustChildrenGridInfo(): {
-    id: string;
-    gridArea: GridAreaInfo;
-    marginLeft: number;
-    marginTop: number;
-  }[] {
-    if (!this.#gridSize || !this.#childRectInfoList.length) {
-      console.error(
-        'SOID-UI-UTIL',
-        'GridAreaService',
-        'gridRect / childrenGrid is undefined'
-      );
-      return [];
-    }
-    const gridItemRectList = this.getGridItemRectList(
-      this.#gridRowGap,
-      this.#gridColumnGap
-    );
-    const gridRect = {
-      x: this.#gridPadding.left,
-      y: this.#gridPadding.top,
-      width:
-        this.#gridSize!.width -
-        this.#gridPadding.left -
-        this.#gridPadding.right,
-      height:
-        this.#gridSize!.height -
-        this.#gridPadding.top -
-        this.#gridPadding.bottom
-    };
-    return this.#childRectInfoList.map(childInfo => {
-      const areaInfo = GridAreaUtils.getGridAreaInfoByRect({
-        rect: childInfo.rect,
-        rowGap: this.#gridRowGap,
-        columnGap: this.#gridColumnGap,
-        gridRect,
-        gridItemRectList
-      });
-      return {
-        id: childInfo.id,
-        gridArea: areaInfo.gridArea,
-        marginLeft: areaInfo.marginLeft,
-        marginTop: areaInfo.marginTop
-      };
-    });
   }
 
   getDroppedGridInfo(): {
     gridArea: GridAreaInfo;
     marginLeft: number;
     marginTop: number;
+    width: { value: number; unit: string };
+    height: { value: number; unit: string };
   } {
-    if (!this.#gridSize || !this.#droppedRect) {
+    if (!this.#gridSize || !this.#droppedInfo) {
       console.error(
         'SOID-UI-UTIL',
         'GridAreaService',
@@ -251,30 +168,223 @@ export class GridAreaService implements GridAreaServiceInterface {
           columnEnd: 2
         },
         marginLeft: 0,
-        marginTop: 0
+        marginTop: 0,
+        width: { value: 0, unit: 'px'},
+        height: { value: 0, unit: 'px'}
       };
     }
     const gridItemRectList = this.getGridItemRectList(
       this.#gridRowGap,
       this.#gridColumnGap
     );
-    return GridAreaUtils.getGridAreaInfoByRect({
-      rect: this.#droppedRect,
+    const droppedRect = {
+      x: this.#droppedInfo.x,
+      y: this.#droppedInfo.y,
+      width: 0,
+      height: 0
+    };
+    if (this.#droppedInfo.gridArea) {
+      const droppedParentRect = GridAreaUtils.changeChildSizeInfoToNumber({
+        gridArea: this.#droppedInfo.gridArea,
+        gridItemRectList
+      });
+      droppedRect.width = GridAreaUtils.changeSizeInfoToNumber({
+        sizeInfo: this.#droppedInfo.width,
+        maxValue: droppedParentRect.width,
+        windowSize: this.#windowSize
+      });
+      droppedRect.height = GridAreaUtils.changeSizeInfoToNumber({
+        sizeInfo: this.#droppedInfo.height,
+        maxValue: droppedParentRect.height,
+        windowSize: this.#windowSize
+      });
+    } else {
+      droppedRect.width = GridAreaUtils.changeSizeInfoToNumber({
+        sizeInfo: this.#droppedInfo.width
+      });
+      droppedRect.height = GridAreaUtils.changeSizeInfoToNumber({
+        sizeInfo: this.#droppedInfo.height
+      });
+    }
+    const gridInfo = GridAreaUtils.getGridAreaInfoByRect({
+      rect: droppedRect,
       rowGap: this.#gridRowGap,
       columnGap: this.#gridColumnGap,
-      gridRect: {
-        x: this.#gridPadding.left,
-        y: this.#gridPadding.top,
-        width:
-          this.#gridSize.width -
-          this.#gridPadding.left -
-          this.#gridPadding.right,
-        height:
-          this.#gridSize.height -
-          this.#gridPadding.top -
-          this.#gridPadding.bottom
-      },
       gridItemRectList
+    });
+    const finishParentRect = GridAreaUtils.changeChildSizeInfoToNumber({
+      gridArea: gridInfo.gridArea,
+      gridItemRectList
+    });
+    const width = GridAreaUtils.changeNumberToSizeInfo({
+      valueNumber: droppedRect.width,
+      unit: this.#droppedInfo.width.unit,
+      maxValue: finishParentRect.width,
+      windowSize: this.#windowSize
+    });
+    const height = GridAreaUtils.changeNumberToSizeInfo({
+      valueNumber: droppedRect.height,
+      unit: this.#droppedInfo.height.unit,
+      maxValue: finishParentRect.height,
+      windowSize: this.#windowSize
+    });
+    return {
+      gridArea: gridInfo.gridArea,
+      marginTop: gridInfo.marginTop,
+      marginLeft: gridInfo.marginLeft,
+      width,
+      height
+    };
+  }
+
+  setChildrenGridInfo(
+    childrenInfo: {
+      id: string;
+      gridArea: GridAreaInfo;
+      marginLeft: { value: number; unit: string };
+      marginTop: { value: number; unit: string };
+      width: { value: number; unit: string };
+      height: { value: number; unit: string }
+    }[]
+  ): GridAreaServiceInterface {
+    if (!this.#gridSize) {
+      console.error('SOID-UI-UTIL', 'GridAreaService', 'gridRect is undefined');
+      return this;
+    }
+    const gridItemRectList = this.getGridItemRectList(
+      this.#gridRowGap,
+      this.#gridColumnGap
+    );
+    let childX = 0;
+    let childY = 0;
+    let childWidth = 0;
+    let childHeight = 0;
+    let childGridRect: {
+      x: number,
+      y: number,
+      width: number,
+      height: number
+    };
+    this.#childRectInfoList = childrenInfo.map((childInfo) => {
+      childGridRect = GridAreaUtils.changeChildSizeInfoToNumber({
+        gridArea: childInfo.gridArea,
+        gridItemRectList
+      });
+      childX = childGridRect.x + GridAreaUtils.changeSizeInfoToNumber({
+        sizeInfo: childInfo.marginLeft,
+        maxValue: childGridRect.width,
+        windowSize: this.#windowSize
+      });
+      childY = childGridRect.y + GridAreaUtils.changeSizeInfoToNumber({
+        sizeInfo: childInfo.marginTop,
+        maxValue: childGridRect.height,
+        windowSize: this.#windowSize
+      });
+      childWidth = GridAreaUtils.changeSizeInfoToNumber({
+        sizeInfo: childInfo.width,
+        maxValue: childGridRect.width,
+        windowSize: this.#windowSize
+      });
+      childHeight = GridAreaUtils.changeSizeInfoToNumber({
+        sizeInfo: childInfo.height,
+        maxValue: childGridRect.height,
+        windowSize: this.#windowSize
+      });
+      return {
+        id: childInfo.id,
+        rect: {
+          x: childX,
+          y: childY,
+          width: childWidth,
+          height: childHeight
+        },
+        leftUint: childInfo.marginLeft.unit,
+        topUnit: childInfo.marginTop.unit,
+        widthUint: childInfo.width.unit,
+        heightUint: childInfo.height.unit
+      };
+    });
+    return this;
+  }
+
+  adjustChildrenGridInfo(): {
+    id: string;
+    gridArea: GridAreaInfo;
+    marginLeft: { value: number; unit: string };
+    marginTop: { value: number; unit: string };
+    width: { value: number; unit: string },
+    height: { value: number; unit: string }
+  }[] {
+    if (!this.#gridSize || !this.#childRectInfoList.length) {
+      console.error(
+        'SOID-UI-UTIL',
+        'GridAreaService',
+        'gridRect / childrenGrid is undefined'
+      );
+      return [];
+    }
+    const gridItemRectList = this.getGridItemRectList(
+      this.#gridRowGap,
+      this.#gridColumnGap
+    );
+    let areaInfo: {
+      gridArea: GridAreaInfo;
+      marginLeft: number;
+      marginTop: number;
+    };
+    let childGridRect: {
+      x: number,
+      y: number,
+      width: number,
+      height: number
+    };
+    let marginLeft: { value: number, unit: string};
+    let marginTop: { value: number, unit: string};
+    let width: { value: number, unit: string};
+    let height: { value: number, unit: string};
+    return this.#childRectInfoList.map((childInfo) => {
+      areaInfo = GridAreaUtils.getGridAreaInfoByRect({
+        rect: childInfo.rect,
+        rowGap: this.#gridRowGap,
+        columnGap: this.#gridColumnGap,
+        gridItemRectList
+      });
+      childGridRect = GridAreaUtils.changeChildSizeInfoToNumber({
+        gridArea: areaInfo.gridArea,
+        gridItemRectList
+      });
+      marginLeft = GridAreaUtils.changeNumberToSizeInfo({
+        valueNumber: areaInfo.marginLeft,
+        unit: childInfo.leftUint,
+        maxValue: childGridRect.width,
+        windowSize: this.#windowSize
+      });
+      marginTop = GridAreaUtils.changeNumberToSizeInfo({
+        valueNumber: areaInfo.marginTop,
+        unit: childInfo.topUnit,
+        maxValue: childGridRect.height,
+        windowSize: this.#windowSize
+      });
+      width = GridAreaUtils.changeNumberToSizeInfo({
+        valueNumber: childInfo.rect.width,
+        unit: childInfo.widthUint,
+        maxValue: childGridRect.width,
+        windowSize: this.#windowSize
+      });
+      height = GridAreaUtils.changeNumberToSizeInfo({
+        valueNumber: childInfo.rect.height,
+        unit: childInfo.heightUint,
+        maxValue: childGridRect.height,
+        windowSize: this.#windowSize
+      });
+      return {
+        id: childInfo.id,
+        gridArea: areaInfo.gridArea,
+        marginLeft,
+        marginTop,
+        width,
+        height
+      };
     });
   }
 

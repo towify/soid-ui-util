@@ -69,10 +69,16 @@ export interface GridAreaServiceInterface {
   ): GridAreaServiceInterface;
 
   /**
-   * @param rect dropped rect
+   * @param dropped dropped rect
    * 设置 dropped rect
    */
-  setDroppedRect(rect: RectInfo): GridAreaServiceInterface;
+  setDroppedInfo(dropped: {
+    x: number;
+    y: number;
+    width: { value: number; unit: string };
+    height: { value: number; unit: string };
+    gridArea?: GridAreaInfo
+  }): GridAreaServiceInterface;
 
   /**
    * @description 根据 dropped rect 返回 drop 在 grid 中的 info
@@ -85,6 +91,8 @@ export interface GridAreaServiceInterface {
     gridArea: GridAreaInfo;
     marginLeft: number;
     marginTop: number;
+    width: { value: number; unit: string };
+    height: { value: number; unit: string };
   };
 
   /**
@@ -101,10 +109,10 @@ export interface GridAreaServiceInterface {
     childrenInfo: {
       id: string;
       gridArea: GridAreaInfo;
-      marginLeft: number;
-      marginTop: number;
-      width: number;
-      height: number;
+      marginLeft: { value: number; unit: string };
+      marginTop: { value: number; unit: string };
+      width: { value: number; unit: string };
+      height: { value: number; unit: string };
     }[]
   ): GridAreaServiceInterface;
 
@@ -114,8 +122,10 @@ export interface GridAreaServiceInterface {
   adjustChildrenGridInfo(): {
     id: string;
     gridArea: GridAreaInfo;
-    marginLeft: number;
-    marginTop: number;
+    marginLeft: { value: number; unit: string };
+    marginTop: { value: number; unit: string };
+    width: { value: number; unit: string },
+    height: { value: number, unit: string}
   }[];
 
   /**
