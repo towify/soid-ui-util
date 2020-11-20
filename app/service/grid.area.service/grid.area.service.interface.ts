@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/11/12 15:42
  */
-import { GridAreaInfo, PaddingInfo, RectInfo } from '../../type/common.type';
+import { GridAreaInfo, PaddingInfo } from '../../type/common.type';
 
 export interface GridAreaServiceInterface {
   /**
@@ -46,11 +46,15 @@ export interface GridAreaServiceInterface {
   ): GridAreaServiceInterface;
 
   /**
-   * @param row: grid row count
-   * @param column: grid column count
+   * @param params: grid row count
    * 设置 grid row \ column count
    */
-  setParentGridCount(row: number, column: number): GridAreaServiceInterface;
+  setParentGridCount(params: {
+    row: number;
+    column: number;
+    rowGap?: { value: number; unit: string };
+    columnGap?: { value: number; unit: string };
+  }): GridAreaServiceInterface;
 
   /**
    * @param info grid padding info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
@@ -77,7 +81,7 @@ export interface GridAreaServiceInterface {
     y: number;
     width: { value: number; unit: string };
     height: { value: number; unit: string };
-    gridArea?: GridAreaInfo
+    gridArea?: GridAreaInfo;
   }): GridAreaServiceInterface;
 
   /**
@@ -124,8 +128,8 @@ export interface GridAreaServiceInterface {
     gridArea: GridAreaInfo;
     marginLeft: { value: number; unit: string };
     marginTop: { value: number; unit: string };
-    width: { value: number; unit: string },
-    height: { value: number, unit: string}
+    width: { value: number; unit: string };
+    height: { value: number; unit: string };
   }[];
 
   /**
