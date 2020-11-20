@@ -6,8 +6,8 @@
 import { GridAreaInfo, RectInfo } from '../../type/common.type';
 
 enum GridAreaLineType {
-  Hor = 1,
-  Ver = 2
+  Hor = 'hor',
+  Ver = 'ver'
 }
 
 export class GridAreaUtils {
@@ -21,11 +21,11 @@ export class GridAreaUtils {
   }
 
   static changeNumberToSizeInfo(params: {
-    valueNumber: number,
-    unit: string,
+    valueNumber: number;
+    unit: string;
     windowSize?: { width: number; height: number };
     maxValue?: number;
-  }): { value: number, unit: string } {
+  }): { value: number; unit: string } {
     let value = params.valueNumber;
     if (params.unit === 'vw') {
       value = (params.valueNumber / (params.windowSize?.width ?? 1)) * 100;
@@ -49,7 +49,7 @@ export class GridAreaUtils {
       value = (params.valueNumber / (params.maxValue ?? 1)) * 100;
     }
     return {
-      value,
+      value: parseFloat(value.toFixed(1)),
       unit: params.unit
     };
   }
@@ -60,7 +60,7 @@ export class GridAreaUtils {
     maxValue?: number;
   }): number {
     let valueNumber = params.sizeInfo.value;
-    if (valueNumber === -1) {
+    if (valueNumber === -10000) {
       return 0;
     }
     if (params.sizeInfo.unit === 'vw') {
@@ -88,18 +88,19 @@ export class GridAreaUtils {
   }
 
   static changeChildSizeInfoToNumber(params: {
-    gridArea: GridAreaInfo,
-    gridItemRectList: RectInfo[][]
+    gridArea: GridAreaInfo;
+    gridItemRectList: RectInfo[][];
+    gridRect: RectInfo;
   }): {
-      x: number,
-      y: number,
-      width: number,
-      height: number
-    } {
-    let rowStart = params.gridArea.rowStart - 1;
-    let columnStart = params.gridArea.columnStart - 1;
-    let rowEnd = params.gridArea.rowEnd - 1;
-    let columnEnd = params.gridArea.columnEnd - 1;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } {
+    const rowStart = params.gridArea.rowStart - 1;
+    const columnStart = params.gridArea.columnStart - 1;
+    const rowEnd = params.gridArea.rowEnd - 1;
+    const columnEnd = params.gridArea.columnEnd - 1;
     const childGridRect = {
       x: 0,
       y: 0,
@@ -107,38 +108,60 @@ export class GridAreaUtils {
       height: 0
     };
     if (rowStart < 0) {
-      rowStart = 0;
-    }
-    if (rowStart >= params.gridItemRectList.length) {
-      rowStart = params.gridItemRectList.length - 1;
+      childGridRect.y = params.gridItemRectList[0][0].y;
+    } else if (rowStart >= params.gridItemRectList.length) {
+      const maxRowItem =
+        params.gridItemRectList[params.gridItemRectList.length - 1];
+      childGridRect.y = maxRowItem[0].y + maxRowItem[0].height;
+    } else {
+      childGridRect.y = params.gridItemRectList[rowStart][0].y;
     }
     if (columnStart < 0) {
-      columnStart = 0;
-    }
-    if (columnStart >= params.gridItemRectList[0].length) {
-      columnStart = params.gridItemRectList[0].length - 1;
-    }
-    childGridRect.x = params.gridItemRectList[0][columnStart].x;
-    childGridRect.y = params.gridItemRectList[rowStart][0].y;
-    if (rowEnd >= params.gridItemRectList.length) {
-      rowEnd = params.gridItemRectList.length - 1;
-      childGridRect.height = params.gridItemRectList[rowEnd][0].y + params.gridItemRectList[rowEnd][0].height - childGridRect.y;
+      childGridRect.x = params.gridItemRectList[0][0].x;
+    } else if (columnStart >= params.gridItemRectList[0].length) {
+      const maxColumnItem =
+        params.gridItemRectList[0][params.gridItemRectList[0].length - 1];
+      childGridRect.x = maxColumnItem.x + maxColumnItem.width;
     } else {
-      childGridRect.height = params.gridItemRectList[rowEnd][0].y - childGridRect.y;
+      childGridRect.x = params.gridItemRectList[0][columnStart].x;
     }
-    if (columnEnd >= params.gridItemRectList[0].length) {
-      columnEnd = params.gridItemRectList[0].length - 1;
-      childGridRect.width = params.gridItemRectList[0][columnEnd].x + params.gridItemRectList[0][columnEnd].width - childGridRect.x;
+    if (rowEnd === params.gridItemRectList.length) {
+      const maxRowItem =
+        params.gridItemRectList[params.gridItemRectList.length - 1];
+      childGridRect.height =
+        maxRowItem[0].y + maxRowItem[0].height - childGridRect.y;
+    } else if (rowEnd < params.gridItemRectList.length) {
+      childGridRect.height =
+        params.gridItemRectList[rowEnd][0].y - childGridRect.y;
     } else {
-      childGridRect.width = params.gridItemRectList[0][columnEnd].x - childGridRect.x;
+      childGridRect.height =
+        params.gridRect.y + params.gridRect.height - childGridRect.y;
+    }
+    if (columnEnd === params.gridItemRectList[0].length) {
+      const maxColumnItem =
+        params.gridItemRectList[0][params.gridItemRectList[0].length - 1];
+      childGridRect.width =
+        maxColumnItem.x + maxColumnItem.width - childGridRect.x;
+    } else if (columnEnd < params.gridItemRectList[0].length) {
+      childGridRect.width =
+        params.gridItemRectList[0][columnEnd].x - childGridRect.x;
+    } else {
+      childGridRect.width =
+        params.gridRect.x + params.gridRect.width - childGridRect.x;
+    }
+    if (childGridRect.height < 0) {
+      childGridRect.height = 0;
+    }
+    if (childGridRect.width < 0) {
+      childGridRect.width = 0;
     }
     return childGridRect;
   }
 
   static getGridLineList(params: {
-    gridItemRectList: RectInfo[][],
-    gridSize: { width: number; height: number },
-    isShowBorder: boolean
+    gridItemRectList: RectInfo[][];
+    gridSize: { width: number; height: number };
+    isShowBorder: boolean;
   }): { fromX: number; fromY: number; toX: number; toY: number }[] {
     const result: {
       fromX: number;
@@ -218,12 +241,16 @@ export class GridAreaUtils {
       toY: number;
     };
     return result.filter(item => {
-      if (!params.isShowBorder && item.fromX === item.toX &&
+      if (
+        !params.isShowBorder &&
+        item.fromX === item.toX &&
         (item.fromX === 0 || item.fromX === params.gridSize.width)
       ) {
         return false;
       }
-      if (!params.isShowBorder && item.fromY === item.toY &&
+      if (
+        !params.isShowBorder &&
+        item.fromY === item.toY &&
         (item.fromY === 0 || item.fromY === params.gridSize.height)
       ) {
         return false;
@@ -287,7 +314,7 @@ export class GridAreaUtils {
     if (valueList.length > 0) {
       spareValue += params.gap;
     }
-    valueList.forEach((value) => {
+    valueList.forEach(value => {
       spareValue -= value;
       spareValue -= params.gap;
     });
@@ -312,10 +339,10 @@ export class GridAreaUtils {
     rowGap: number;
     columnGap: number;
   }): {
-      gridArea: GridAreaInfo;
-      marginLeft: number;
-      marginTop: number;
-    } {
+    gridArea: GridAreaInfo;
+    marginLeft: number;
+    marginTop: number;
+  } {
     const maxWidth = params.rect.x + params.rect.width;
     const maxHeight = params.rect.y + params.rect.height;
     const rowLength = params.gridItemRectList.length;
@@ -329,8 +356,12 @@ export class GridAreaUtils {
     const gridAreaRect = {
       x: params.gridItemRectList[0][0].x,
       y: params.gridItemRectList[0][0].y,
-      width: (params.gridItemRectList[0][columnLength - 1].x + params.gridItemRectList[0][columnLength - 1].width),
-      height: (params.gridItemRectList[rowLength - 1][0].y + params.gridItemRectList[rowLength - 1][0].height)
+      width:
+        params.gridItemRectList[0][columnLength - 1].x +
+        params.gridItemRectList[0][columnLength - 1].width,
+      height:
+        params.gridItemRectList[rowLength - 1][0].y +
+        params.gridItemRectList[rowLength - 1][0].height
     };
     if (
       !GridAreaUtils.checkPointIsInRect(
@@ -358,7 +389,7 @@ export class GridAreaUtils {
         columnEnd = 2;
       }
       if (maxWidth > gridAreaRect.x + gridAreaRect.width) {
-        columnEnd = columnLength + 2;
+        columnEnd = columnLength + 1;
       }
     }
     if (
@@ -373,8 +404,7 @@ export class GridAreaUtils {
       }
       if (params.rect.y > gridAreaRect.y + gridAreaRect.height) {
         rowStart = rowLength;
-        marginTop =
-          params.rect.y -  params.gridItemRectList[rowLength-1][0].y;
+        marginTop = params.rect.y - params.gridItemRectList[rowLength - 1][0].y;
       }
     }
     if (
@@ -387,7 +417,7 @@ export class GridAreaUtils {
         rowEnd = 2;
       }
       if (maxHeight > gridAreaRect.y + gridAreaRect.height) {
-        rowEnd = rowLength + 2;
+        rowEnd = rowLength + 1;
       }
     }
     params.gridItemRectList.forEach((rowItem, rowIndex) => {
