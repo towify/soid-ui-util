@@ -11,6 +11,8 @@ enum GridAreaLineType {
 }
 
 export class GridAreaUtils {
+  static autoNumber = -10000;
+
   static checkPointIsInRect(
     point: { x: number; y: number },
     rect: RectInfo
@@ -60,7 +62,7 @@ export class GridAreaUtils {
     maxValue?: number;
   }): number {
     let valueNumber = params.sizeInfo.value;
-    if (valueNumber === -10000) {
+    if (valueNumber === GridAreaUtils.autoNumber) {
       return 0;
     }
     if (params.sizeInfo.unit === 'vw') {
@@ -299,7 +301,7 @@ export class GridAreaUtils {
     let isAuto = false;
     const valueList: number[] = new Array(params.sizeInfoList.length);
     params.sizeInfoList.forEach((value, index) => {
-      isAuto = value.value === -1;
+      isAuto = value.value === GridAreaUtils.autoNumber;
       if (isAuto) {
         valueList[index] = 0;
         autoNumber += 1;
@@ -324,7 +326,7 @@ export class GridAreaUtils {
     if (spareValue !== 0 && autoNumber !== 0) {
       const autoValue = spareValue / autoNumber;
       params.sizeInfoList.forEach((value, index) => {
-        isAuto = value.value === -1;
+        isAuto = value.value === GridAreaUtils.autoNumber;
         if (isAuto) {
           valueList[index] = autoValue;
         }

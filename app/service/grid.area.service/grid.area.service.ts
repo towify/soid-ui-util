@@ -240,17 +240,15 @@ export class GridAreaService implements GridAreaServiceInterface {
       gridItemRectList,
       gridRect: this.#gridRect
     });
-    const width = GridAreaUtils.changeNumberToSizeInfo({
+    const width = this.changeNumberToSizeInfo({
       valueNumber: droppedRect.width,
       unit: this.#droppedInfo.width.unit,
-      maxValue: finishParentRect.width,
-      windowSize: this.#windowSize
+      maxValue: finishParentRect.width
     });
-    const height = GridAreaUtils.changeNumberToSizeInfo({
+    const height = this.changeNumberToSizeInfo({
       valueNumber: droppedRect.height,
       unit: this.#droppedInfo.height.unit,
-      maxValue: finishParentRect.height,
-      windowSize: this.#windowSize
+      maxValue: finishParentRect.height
     });
     return {
       gridArea: gridInfo.gridArea,
@@ -369,29 +367,25 @@ export class GridAreaService implements GridAreaServiceInterface {
         gridItemRectList,
         gridRect: this.#gridRect!
       });
-      marginLeft = GridAreaUtils.changeNumberToSizeInfo({
+      marginLeft = this.changeNumberToSizeInfo({
         valueNumber: areaInfo.marginLeft,
         unit: childInfo.leftUint,
-        maxValue: childGridRect.width,
-        windowSize: this.#windowSize
+        maxValue: childGridRect.width
       });
-      marginTop = GridAreaUtils.changeNumberToSizeInfo({
+      marginTop = this.changeNumberToSizeInfo({
         valueNumber: areaInfo.marginTop,
         unit: childInfo.topUnit,
-        maxValue: childGridRect.height,
-        windowSize: this.#windowSize
+        maxValue: childGridRect.height
       });
-      width = GridAreaUtils.changeNumberToSizeInfo({
+      width = this.changeNumberToSizeInfo({
         valueNumber: childInfo.rect.width,
         unit: childInfo.widthUint,
-        maxValue: childGridRect.width,
-        windowSize: this.#windowSize
+        maxValue: childGridRect.width
       });
-      height = GridAreaUtils.changeNumberToSizeInfo({
+      height = this.changeNumberToSizeInfo({
         valueNumber: childInfo.rect.height,
         unit: childInfo.heightUint,
-        maxValue: childGridRect.height,
-        windowSize: this.#windowSize
+        maxValue: childGridRect.height
       });
       return {
         id: childInfo.id,
@@ -509,6 +503,19 @@ export class GridAreaService implements GridAreaServiceInterface {
     return GridAreaUtils.changeSizeInfoToNumber({
       sizeInfo,
       maxValue,
+      windowSize: this.#windowSize
+    });
+  }
+
+  private changeNumberToSizeInfo(params: {
+    valueNumber: number;
+    unit: string;
+    maxValue?: number;
+  }): { value: number; unit: string } {
+    return GridAreaUtils.changeNumberToSizeInfo({
+      valueNumber: params.valueNumber,
+      unit: params.unit,
+      maxValue: params.maxValue,
       windowSize: this.#windowSize
     });
   }
