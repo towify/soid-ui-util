@@ -89,13 +89,13 @@ gridService
       }
     }
   ])
-  .setGridRowInfo([
+  .setParentGridRowInfo([
     {
       value: 20,
       unit: '%'
     }
   ])
-  .setGridColumnInfo([
+  .setParentGridColumnInfo([
     {
       value: 20,
       unit: '%'
@@ -113,7 +113,7 @@ const gridService: GridAreaService = GridAreaService.getInstance();
 gridService
   .setWindowSize(1024, 768)
   .setParentGridSize(500, 400)
-  .setGridRowInfo([
+  .setParentGridRowInfo([
     {
       value: 20,
       unit: '%'
@@ -123,7 +123,7 @@ gridService
       unit: 'px'
     }
   ])
-  .setGridColumnInfo([
+  .setParentGridColumnInfo([
     {
       value: 20,
       unit: '%'
@@ -133,7 +133,7 @@ gridService
       unit: 'px'
     }
   ])
-  .getGridLineList();
+  .getGridLineList(true);
 ```
 
 ````HTML
