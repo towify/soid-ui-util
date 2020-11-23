@@ -500,7 +500,7 @@ export class GridAreaService implements GridAreaServiceInterface {
     sizeInfo: { value: number; unit: string },
     maxValue?: number
   ): number {
-    return GridAreaUtils.changeSizeInfoToNumber({
+    return GridAreaUtils.convertSizeInfoToNumber({
       sizeInfo,
       maxValue,
       windowSize: this.#windowSize

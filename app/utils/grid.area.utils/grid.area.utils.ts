@@ -56,7 +56,7 @@ export class GridAreaUtils {
     };
   }
 
-  static changeSizeInfoToNumber(params: {
+  static convertSizeInfoToNumber(params: {
     sizeInfo: { value: number; unit: string };
     windowSize?: { width: number; height: number };
     maxValue?: number;
@@ -290,7 +290,7 @@ export class GridAreaUtils {
     });
   }
 
-  static changeSizeInfoListToNumberList(params: {
+  static changeSizeInfoListToNumberList(params: {git
     sizeInfoList: { value: number; unit: string }[];
     gap: number;
     windowSize?: { width: number; height: number };
@@ -306,7 +306,7 @@ export class GridAreaUtils {
         valueList[index] = 0;
         autoNumber += 1;
       } else {
-        valueList[index] = GridAreaUtils.changeSizeInfoToNumber({
+        valueList[index] = GridAreaUtils.convertSizeInfoToNumber({
           sizeInfo: value,
           maxValue: params.maxValue,
           windowSize: params.windowSize
