@@ -99,7 +99,7 @@ export class GridAreaService implements GridAreaServiceInterface {
     if (params.rowGap) {
       this.#gridRowGap = this.changeSizeInfoToNumber(
         params.rowGap,
-        this.#gridRect.width
+        this.#gridRect.height
       );
     }
     if (params.columnGap) {
@@ -425,16 +425,20 @@ export class GridAreaService implements GridAreaServiceInterface {
     if (!this.#gridRect) {
       return [];
     }
-    const gridWidth = this.#gridRect.width;
-    const gridHeight = this.#gridRect.height;
+    const gridColumnInfo = this.#gridColumnInfo ?? [];
+    const gridRowInfo = this.#gridRowInfo ?? [];
+    const gridWidth =
+      this.#gridRect.width - (gridColumnInfo.length - 1) * columnGap;
+    const gridHeight =
+      this.#gridRect.height - (gridRowInfo.length - 1) * rowGap;
     const columnsNumberArray = GridAreaUtils.changeSizeInfoListToNumberList({
-      sizeInfoList: this.#gridColumnInfo ?? [],
+      sizeInfoList: gridColumnInfo,
       maxValue: gridWidth,
       windowSize: this.#windowSize,
       gap: columnGap
     });
     const rowsNumberArray = GridAreaUtils.changeSizeInfoListToNumberList({
-      sizeInfoList: this.#gridRowInfo ?? [],
+      sizeInfoList: gridRowInfo,
       maxValue: gridHeight,
       windowSize: this.#windowSize,
       gap: rowGap
