@@ -6,8 +6,8 @@
 import { GridAreaInfo, RectInfo } from '../../type/common.type';
 
 enum GridAreaLineType {
-  Hor = 'hor',
-  Ver = 'ver'
+  Horizontal = 'horizontal',
+  Vertical = 'vertical'
 }
 
 export class GridAreaUtils {
@@ -201,17 +201,27 @@ export class GridAreaUtils {
     });
     result.sort((a, b) => {
       const aType =
-        a.fromY === a.toY ? GridAreaLineType.Hor : GridAreaLineType.Ver;
+        a.fromY === a.toY
+          ? GridAreaLineType.Horizontal
+          : GridAreaLineType.Vertical;
       const bType =
-        b.fromY === b.toY ? GridAreaLineType.Hor : GridAreaLineType.Ver;
-      if (aType === GridAreaLineType.Hor && bType === GridAreaLineType.Ver) {
+        b.fromY === b.toY
+          ? GridAreaLineType.Horizontal
+          : GridAreaLineType.Vertical;
+      if (
+        aType === GridAreaLineType.Horizontal &&
+        bType === GridAreaLineType.Vertical
+      ) {
         return -1;
       }
-      if (aType === GridAreaLineType.Ver && bType === GridAreaLineType.Hor) {
+      if (
+        aType === GridAreaLineType.Vertical &&
+        bType === GridAreaLineType.Horizontal
+      ) {
         return 1;
       }
       if (aType === bType) {
-        if (aType === GridAreaLineType.Hor) {
+        if (aType === GridAreaLineType.Horizontal) {
           if (a.fromY < b.fromY) {
             return -1;
           }
@@ -222,7 +232,7 @@ export class GridAreaUtils {
             return a.fromX < b.fromX ? -1 : 1;
           }
         }
-        if (aType === GridAreaLineType.Ver) {
+        if (aType === GridAreaLineType.Vertical) {
           if (a.fromX < b.fromX) {
             return -1;
           }
