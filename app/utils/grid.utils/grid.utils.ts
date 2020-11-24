@@ -2,7 +2,6 @@
  * @author allen
  * @data 2020/11/18 12:12
  */
-
 import { GridAreaInfo, RectInfo } from '../../type/common.type';
 
 export class GridUtils {
@@ -19,7 +18,7 @@ export class GridUtils {
     return checkXIn && checkYIn;
   }
 
-  static changeNumberToSizeInfo(params: {
+  static convertNumberToSizeInfo(params: {
     valueNumber: number;
     unit: string;
     windowSize?: { width: number; height: number };
@@ -53,7 +52,7 @@ export class GridUtils {
     };
   }
 
-  static changeSizeInfoToNumber(params: {
+  static convertSizeInfoToNumber(params: {
     sizeInfo: { value: number; unit: string };
     windowSize?: { width: number; height: number };
     maxValue?: number;
@@ -105,7 +104,7 @@ export class GridUtils {
         valueList[index] = 0;
         autoNumber += 1;
       } else {
-        valueList[index] = GridUtils.changeSizeInfoToNumber({
+        valueList[index] = GridUtils.convertSizeInfoToNumber({
           sizeInfo: value,
           maxValue: params.maxValue,
           windowSize: params.windowSize

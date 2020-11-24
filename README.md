@@ -124,7 +124,7 @@ gridService
       unit: 'px'
     }
   ])
-  .setGridColumnInfo([
+  .setParentGridColumnInfo([
     {
       value: 20,
       unit: '%'
@@ -234,7 +234,25 @@ gridService
       value: 150,
       unit: 'px'
     }
-  ]);
+  ])
+  .setGridPaddingInfo({
+    left: {
+      value: 20,
+      unit: '%'
+    },
+    right: {
+      value: 20,
+      unit: '%'
+    },
+    top: {
+      value: 20,
+      unit: '%'
+    },
+    bottom: {
+      value: 20,
+      unit: '%'
+    }
+  });
 const gridPaddingLines = gridService.getGridPaddingAreaAndLines(5).lines;
 const gridPaddingArea = gridService.getGridPaddingAreaAndLines(5).area;
 ```
