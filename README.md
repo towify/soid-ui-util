@@ -188,7 +188,7 @@ const gridGapArea = gridService.getGridGapAreaAndLines(5).area;
 
 ```HTML
 // draw area and line in angular eg:
-<line *ngFor="let line of gridGapLineList"
+<line *ngFor="let line of gridGapLines"
           [attr.x1]="line.fromX"
           [attr.x2]="line.toX"
           [attr.y1]="line.fromY"
@@ -241,7 +241,7 @@ const gridPaddingArea = gridService.getGridPaddingAreaAndLines(5).area;
 
 ```HTML
 // draw area and line in angular eg:
-<line *ngFor="let line of gridPaddingLineList"
+<line *ngFor="let line of gridPaddingLines"
           [attr.x1]="line.fromX"
           [attr.x2]="line.toX"
           [attr.y1]="line.fromY"
