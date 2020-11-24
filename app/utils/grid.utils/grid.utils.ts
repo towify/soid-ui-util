@@ -111,12 +111,8 @@ export class GridUtils {
         });
       }
     });
-    if (valueList.length > 0) {
-      spareValue += params.gap;
-    }
     valueList.forEach(value => {
       spareValue -= value;
-      spareValue -= params.gap;
     });
     if (spareValue < 0) {
       spareValue = 0;
