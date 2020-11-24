@@ -9,7 +9,7 @@ import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
 
 export class GridManager implements GridManagerInterface {
   gridSize?: { width: number; height: number };
-  gridRect = {
+  #gridRect = {
     x: 0,
     y: 0,
     width: 0,
@@ -65,8 +65,12 @@ export class GridManager implements GridManagerInterface {
     rowGap?: { value: number; unit: string };
     columnGap?: { value: number; unit: string };
   }): GridManagerInterface {
-    if (!this.gridRect) {
-      console.error('SOID-UI-UTIL', 'GridAreaService', 'gridRect is undefined');
+    if (!this.#gridRect) {
+      console.error(
+        'SOID-UI-UTIL',
+        'GridAreaService',
+        '#gridRect is undefined'
+      );
       return this;
     }
     this.#gridRowInfo = [];
@@ -74,20 +78,20 @@ export class GridManager implements GridManagerInterface {
     if (params.rowGap) {
       this.#gridRowGap = this.changeSizeInfoToNumber(
         params.rowGap,
-        this.gridRect.height
+        this.#gridRect.height
       );
     }
     if (params.columnGap) {
       this.#gridColumnGap = this.changeSizeInfoToNumber(
         params.columnGap,
-        this.gridRect.width
+        this.#gridRect.width
       );
     }
     let rowIndex = 0;
     for (rowIndex; rowIndex < params.row; rowIndex += 1) {
       this.#gridRowInfo.push({
         value:
-          (this.gridRect.height - this.#gridRowGap * (params.row - 1)) /
+          (this.#gridRect.height - this.#gridRowGap * (params.row - 1)) /
           params.row,
         unit: 'px'
       });
@@ -96,7 +100,7 @@ export class GridManager implements GridManagerInterface {
     for (columnIndex; columnIndex < params.column; columnIndex += 1) {
       this.#gridColumnInfo.push({
         value:
-          (this.gridRect.width - this.#gridColumnGap * (params.column - 1)) /
+          (this.#gridRect.width - this.#gridColumnGap * (params.column - 1)) /
           params.column,
         unit: 'px'
       });
@@ -108,14 +112,18 @@ export class GridManager implements GridManagerInterface {
     row: { value: number; unit: string },
     column: { value: number; unit: string }
   ): GridManagerInterface {
-    if (!this.gridRect) {
-      console.error('SOID-UI-UTIL', 'GridAreaService', 'gridRect is undefined');
+    if (!this.#gridRect) {
+      console.error(
+        'SOID-UI-UTIL',
+        'GridAreaService',
+        '#gridRect is undefined'
+      );
       return this;
     }
-    this.#gridRowGap = this.changeSizeInfoToNumber(row, this.gridRect?.width);
+    this.#gridRowGap = this.changeSizeInfoToNumber(row, this.#gridRect?.width);
     this.#gridColumnGap = this.changeSizeInfoToNumber(
       column,
-      this.gridRect?.width
+      this.#gridRect?.width
     );
     return this;
   }
@@ -142,15 +150,15 @@ export class GridManager implements GridManagerInterface {
   }
 
   getGridItemRectList(): RectInfo[][] {
-    if (!this.gridRect) {
+    if (!this.#gridRect) {
       return [];
     }
     const gridColumnInfo = this.#gridColumnInfo ?? [];
     const gridRowInfo = this.#gridRowInfo ?? [];
     const gridWidth =
-      this.gridRect.width - (gridColumnInfo.length - 1) * this.#gridColumnGap;
+      this.#gridRect.width - (gridColumnInfo.length - 1) * this.#gridColumnGap;
     const gridHeight =
-      this.gridRect.height - (gridRowInfo.length - 1) * this.#gridRowGap;
+      this.#gridRect.height - (gridRowInfo.length - 1) * this.#gridRowGap;
     const columnsNumberArray = GridUtils.changeSizeInfoListToNumberList({
       sizeInfoList: gridColumnInfo,
       maxValue: gridWidth,
@@ -234,7 +242,7 @@ export class GridManager implements GridManagerInterface {
     return GridUtils.changeChildSizeInfoToNumber({
       gridArea: params.gridArea,
       gridItemRectList: params.gridItemRectList,
-      gridRect: this.gridRect
+      gridRect: this.#gridRect
     });
   }
 
@@ -269,7 +277,7 @@ export class GridManager implements GridManagerInterface {
 
   private setParentGridRect(): void {
     if (this.gridSize) {
-      this.gridRect = {
+      this.#gridRect = {
         x: this.#gridPadding.left,
         y: this.#gridPadding.top,
         width:
