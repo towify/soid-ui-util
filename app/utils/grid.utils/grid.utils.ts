@@ -2,6 +2,7 @@
  * @author allen
  * @data 2020/11/18 12:12
  */
+
 import { GridAreaInfo, RectInfo } from '../../type/common.type';
 
 export class GridUtils {

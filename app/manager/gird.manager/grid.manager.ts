@@ -2,6 +2,7 @@
  * @author allen
  * @data 2020/11/12 15:56
  */
+
 import { GridAreaInfo, PaddingInfo, RectInfo } from '../../type/common.type';
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
 import { GridManagerInterface } from './grid.manager.interface';
