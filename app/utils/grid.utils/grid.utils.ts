@@ -4,12 +4,7 @@
  */
 import { GridAreaInfo, RectInfo } from '../../type/common.type';
 
-enum GridAreaLineType {
-  Horizontal = 'horizontal',
-  Vertical = 'vertical'
-}
-
-export class GridAreaUtils {
+export class GridUtils {
   static AutoNumber = -10000;
 
   static NotSetNumber = -20000;
@@ -23,7 +18,7 @@ export class GridAreaUtils {
     return checkXIn && checkYIn;
   }
 
-  static changeNumberToSizeInfo(params: {
+  static convertNumberToSizeInfo(params: {
     valueNumber: number;
     unit: string;
     windowSize?: { width: number; height: number };
@@ -63,10 +58,10 @@ export class GridAreaUtils {
     maxValue?: number;
   }): number {
     let valueNumber = params.sizeInfo.value;
-    if (valueNumber === GridAreaUtils.AutoNumber) {
+    if (valueNumber === GridUtils.AutoNumber) {
       return 0;
     }
-    if (valueNumber === GridAreaUtils.NotSetNumber) {
+    if (valueNumber === GridUtils.NotSetNumber) {
       return 0;
     }
     if (params.sizeInfo.unit === 'vw') {
@@ -93,16 +88,56 @@ export class GridAreaUtils {
     return valueNumber;
   }
 
+  static changeSizeInfoListToNumberList(params: {
+    sizeInfoList: { value: number; unit: string }[];
+    gap: number;
+    windowSize?: { width: number; height: number };
+    maxValue?: number;
+  }): number[] {
+    let spareValue = params.maxValue ?? 0;
+    let autoNumber = 0;
+    let isAuto = false;
+    const valueList: number[] = new Array(params.sizeInfoList.length);
+    params.sizeInfoList.forEach((value, index) => {
+      isAuto = value.value === GridUtils.AutoNumber;
+      if (isAuto) {
+        valueList[index] = 0;
+        autoNumber += 1;
+      } else {
+        valueList[index] = GridUtils.convertSizeInfoToNumber({
+          sizeInfo: value,
+          maxValue: params.maxValue,
+          windowSize: params.windowSize
+        });
+      }
+    });
+    if (valueList.length > 0) {
+      spareValue += params.gap;
+    }
+    valueList.forEach(value => {
+      spareValue -= value;
+      spareValue -= params.gap;
+    });
+    if (spareValue < 0) {
+      spareValue = 0;
+    }
+    if (spareValue !== 0 && autoNumber !== 0) {
+      const autoValue = spareValue / autoNumber;
+      params.sizeInfoList.forEach((value, index) => {
+        isAuto = value.value === GridUtils.AutoNumber;
+        if (isAuto) {
+          valueList[index] = autoValue;
+        }
+      });
+    }
+    return valueList;
+  }
+
   static changeChildSizeInfoToNumber(params: {
     gridArea: GridAreaInfo;
     gridItemRectList: RectInfo[][];
     gridRect: RectInfo;
-  }): {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } {
+  }): RectInfo {
     const rowStart = params.gridArea.rowStart - 1;
     const columnStart = params.gridArea.columnStart - 1;
     const rowEnd = params.gridArea.rowEnd - 1;
@@ -164,191 +199,6 @@ export class GridAreaUtils {
     return childGridRect;
   }
 
-  static getGridLineList(params: {
-    gridItemRectList: RectInfo[][];
-    gridSize: { width: number; height: number };
-    isShowBorder: boolean;
-  }): { fromX: number; fromY: number; toX: number; toY: number }[] {
-    const result: {
-      fromX: number;
-      fromY: number;
-      toX: number;
-      toY: number;
-    }[] = [];
-    params.gridItemRectList.forEach(rowItem => {
-      rowItem.forEach(rect => {
-        result.push({
-          fromX: rect.x,
-          toX: rect.x + rect.width,
-          fromY: rect.y,
-          toY: rect.y
-        });
-        result.push({
-          fromX: rect.x + rect.width,
-          toX: rect.x + rect.width,
-          fromY: rect.y,
-          toY: rect.y + rect.height
-        });
-        result.push({
-          fromX: rect.x,
-          toX: rect.x + rect.width,
-          fromY: rect.y + rect.height,
-          toY: rect.y + rect.height
-        });
-        result.push({
-          fromX: rect.x,
-          toX: rect.x,
-          fromY: rect.y,
-          toY: rect.y + rect.height
-        });
-      });
-    });
-    result.sort((a, b) => {
-      const aType =
-        a.fromY === a.toY
-          ? GridAreaLineType.Horizontal
-          : GridAreaLineType.Vertical;
-      const bType =
-        b.fromY === b.toY
-          ? GridAreaLineType.Horizontal
-          : GridAreaLineType.Vertical;
-      if (
-        aType === GridAreaLineType.Horizontal &&
-        bType === GridAreaLineType.Vertical
-      ) {
-        return -1;
-      }
-      if (
-        aType === GridAreaLineType.Vertical &&
-        bType === GridAreaLineType.Horizontal
-      ) {
-        return 1;
-      }
-      if (aType === bType) {
-        if (aType === GridAreaLineType.Horizontal) {
-          if (a.fromY < b.fromY) {
-            return -1;
-          }
-          if (a.fromY > b.fromY) {
-            return 1;
-          }
-          if (a.fromY === b.fromY) {
-            return a.fromX < b.fromX ? -1 : 1;
-          }
-        }
-        if (aType === GridAreaLineType.Vertical) {
-          if (a.fromX < b.fromX) {
-            return -1;
-          }
-          if (a.fromX > b.fromX) {
-            return 1;
-          }
-          if (a.fromX === b.fromX) {
-            return a.fromY < b.fromY ? -1 : 1;
-          }
-        }
-      }
-      return 1;
-    });
-    let previousItem: {
-      fromX: number;
-      fromY: number;
-      toX: number;
-      toY: number;
-    };
-    return result.filter(item => {
-      if (
-        !params.isShowBorder &&
-        item.fromX === item.toX &&
-        (item.fromX === 0 || item.fromX === params.gridSize.width)
-      ) {
-        return false;
-      }
-      if (
-        !params.isShowBorder &&
-        item.fromY === item.toY &&
-        (item.fromY === 0 || item.fromY === params.gridSize.height)
-      ) {
-        return false;
-      }
-      if (!previousItem) {
-        previousItem = item;
-        return true;
-      }
-      if (
-        previousItem.fromX === item.fromX &&
-        previousItem.fromY === item.fromY &&
-        previousItem.toX === item.toX &&
-        previousItem.toY === item.toY
-      ) {
-        return false;
-      }
-      if (
-        previousItem.fromY === item.fromY &&
-        previousItem.toY === item.toY &&
-        (previousItem.toX === item.fromX || previousItem.toX === item.toX)
-      ) {
-        previousItem.toX = item.toX;
-        return false;
-      }
-      if (
-        previousItem.fromX === item.fromX &&
-        previousItem.toX === item.toX &&
-        (previousItem.toY === item.fromY || previousItem.toY === item.toY)
-      ) {
-        previousItem.toY = item.toY;
-        return false;
-      }
-      previousItem = item;
-      return true;
-    });
-  }
-
-  static changeSizeInfoListToNumberList(params: {git
-    sizeInfoList: { value: number; unit: string }[];
-    gap: number;
-    windowSize?: { width: number; height: number };
-    maxValue?: number;
-  }): number[] {
-    let spareValue = params.maxValue ?? 0;
-    let autoNumber = 0;
-    let isAuto = false;
-    const valueList: number[] = new Array(params.sizeInfoList.length);
-    params.sizeInfoList.forEach((value, index) => {
-      isAuto = value.value === GridAreaUtils.AutoNumber;
-      if (isAuto) {
-        valueList[index] = 0;
-        autoNumber += 1;
-      } else {
-        valueList[index] = GridAreaUtils.convertSizeInfoToNumber({
-          sizeInfo: value,
-          maxValue: params.maxValue,
-          windowSize: params.windowSize
-        });
-      }
-    });
-    if (valueList.length > 0) {
-      spareValue += params.gap;
-    }
-    valueList.forEach(value => {
-      spareValue -= value;
-      spareValue -= params.gap;
-    });
-    if (spareValue < 0) {
-      spareValue = 0;
-    }
-    if (spareValue !== 0 && autoNumber !== 0) {
-      const autoValue = spareValue / autoNumber;
-      params.sizeInfoList.forEach((value, index) => {
-        isAuto = value.value === GridAreaUtils.AutoNumber;
-        if (isAuto) {
-          valueList[index] = autoValue;
-        }
-      });
-    }
-    return valueList;
-  }
-
   static getGridAreaInfoByRect(params: {
     rect: RectInfo;
     gridItemRectList: RectInfo[][];
@@ -380,7 +230,7 @@ export class GridAreaUtils {
         params.gridItemRectList[rowLength - 1][0].height
     };
     if (
-      !GridAreaUtils.checkPointIsInRect(
+      !GridUtils.checkPointIsInRect(
         { x: params.rect.x, y: gridAreaRect.y },
         gridAreaRect
       )
@@ -396,7 +246,7 @@ export class GridAreaUtils {
       }
     }
     if (
-      !GridAreaUtils.checkPointIsInRect(
+      !GridUtils.checkPointIsInRect(
         { x: maxWidth, y: gridAreaRect.y },
         gridAreaRect
       )
@@ -409,7 +259,7 @@ export class GridAreaUtils {
       }
     }
     if (
-      !GridAreaUtils.checkPointIsInRect(
+      !GridUtils.checkPointIsInRect(
         { x: gridAreaRect.x, y: params.rect.y },
         gridAreaRect
       )
@@ -424,7 +274,7 @@ export class GridAreaUtils {
       }
     }
     if (
-      !GridAreaUtils.checkPointIsInRect(
+      !GridUtils.checkPointIsInRect(
         { x: gridAreaRect.x, y: maxHeight },
         gridAreaRect
       )
@@ -451,7 +301,7 @@ export class GridAreaUtils {
           activeRect.height += params.rowGap;
         }
         if (
-          GridAreaUtils.checkPointIsInRect(
+          GridUtils.checkPointIsInRect(
             { x: params.rect.x, y: activeRect.y },
             activeRect
           )
@@ -460,7 +310,7 @@ export class GridAreaUtils {
           marginLeft = params.rect.x - activeRect.x;
         }
         if (
-          GridAreaUtils.checkPointIsInRect(
+          GridUtils.checkPointIsInRect(
             { x: activeRect.x, y: params.rect.y },
             activeRect
           )
@@ -469,7 +319,7 @@ export class GridAreaUtils {
           marginTop = params.rect.y - activeRect.y;
         }
         if (
-          GridAreaUtils.checkPointIsInRect(
+          GridUtils.checkPointIsInRect(
             { x: activeRect.x, y: maxHeight },
             activeRect
           )
@@ -477,7 +327,7 @@ export class GridAreaUtils {
           rowEnd = rowIndex + 2;
         }
         if (
-          GridAreaUtils.checkPointIsInRect(
+          GridUtils.checkPointIsInRect(
             { x: maxWidth, y: activeRect.y },
             activeRect
           )
