@@ -13,7 +13,7 @@ Use grid Area service to manage grid area.
 After set grid rect / grid row info / grid column info / drop rect, base grid row / column info get dropped grid info.
 
 ```typescript
-const gridService: GridChildrenServiceInterface = GridChildrenService.getInstance();
+const gridService = GridChildrenService.getInstance();
 gridService
   .setWindowSize(1024, 768)
   .setParentGridSize(500, 400)
@@ -63,7 +63,7 @@ gridService
 After set window size / parent grid size / grid row info / grid column info / grid children rect info and change grid row / column info , you can adjust children grid info.
 
 ```typescript
-const gridService: GridChildrenServiceInterface = GridChildrenService.getInstance();
+const gridService = GridChildrenService.getInstance();
 gridService
   .setWindowSize(1024, 768)
   .setParentGridSize(500, 400)
@@ -110,7 +110,7 @@ gridService
 If you want draw grid lines, you can get grid lines coordinates(eg: { fromX: 0; fromY: 0; toX: 100; toY: 0 }) to draw grid line
 
 ```typescript
-const gridService: GridLineServiceInterface = GridLineService.getInstance();
+const gridService = GridLineService.getInstance();
 gridService
   .setWindowSize(1024, 768)
   .setGridSize(500, 400)
@@ -158,7 +158,7 @@ const gridLineList = gridService.getGridLines();
 If you want draw grid gap area and lines, you can get grid gap area rects and lines coordinates(eg: { fromX: 0; fromY: 0; toX: 100; toY: 0 })
 
 ```typescript
-const gridService: GridLineServiceInterface = GridLineService.getInstance();
+const gridService = GridLineService.getInstance();
 gridService
   .setWindowSize(1024, 768)
   .setGridSize(500, 400)
@@ -211,7 +211,7 @@ const gridGapArea = gridService.getGridGapAreaAndLines(5).area;
 If you want draw grid gap area and lines, you can get grid gap area rects and lines coordinates(eg: { fromX: 0; fromY: 0; toX: 100; toY: 0 })
 
 ```typescript
-const gridService: GridLineServiceInterface = GridLineService.getInstance();
+const gridService = GridLineService.getInstance();
 gridService
   .setWindowSize(1024, 768)
   .setGridSize(500, 400)
