@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/11/23 22:17
  */
-import { PaddingInfo, RectInfo } from '../../type/common.type';
+import { OffSetInfo, RectInfo } from '../../type/common.type';
 
 export interface GridLineServiceInterface {
   /**
@@ -60,7 +60,7 @@ export interface GridLineServiceInterface {
    * @param info grid padding info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
    * 设置 grid padding
    */
-  setGridPaddingInfo(info: PaddingInfo): GridLineServiceInterface;
+  setGridPaddingInfo(info: OffSetInfo): GridLineServiceInterface;
 
   /**
    * @param row: grid row gap

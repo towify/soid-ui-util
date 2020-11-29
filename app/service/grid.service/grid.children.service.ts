@@ -3,7 +3,7 @@
  * @data 2020/11/23 22:24
  */
 import { GridChildrenServiceInterface } from './grid.children.service.interface';
-import { GridAreaInfo, PaddingInfo, RectInfo } from '../../type/common.type';
+import { GridAreaInfo, OffSetInfo, RectInfo } from '../../type/common.type';
 import { GridManager } from '../../manager/gird.manager/grid.manager';
 
 export class GridChildrenService implements GridChildrenServiceInterface {
@@ -92,8 +92,13 @@ export class GridChildrenService implements GridChildrenServiceInterface {
     return this;
   }
 
-  setParentGridPaddingInfo(padding: PaddingInfo): GridChildrenServiceInterface {
+  setParentGridPaddingInfo(padding: OffSetInfo): GridChildrenServiceInterface {
     this.gridManager.setGridPaddingInfo(padding);
+    return this;
+  }
+
+  setParentGridBorderInfo(border: OffSetInfo): GridChildrenServiceInterface {
+    this.gridManager.setGridBorderInfo(border);
     return this;
   }
 

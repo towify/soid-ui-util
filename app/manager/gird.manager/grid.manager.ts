@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/11/12 15:56
  */
-import { GridAreaInfo, PaddingInfo, RectInfo } from '../../type/common.type';
+import { GridAreaInfo, OffSetInfo, RectInfo } from '../../type/common.type';
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
 import { GridManagerInterface } from './grid.manager.interface';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
@@ -22,6 +22,13 @@ export class GridManager implements GridManagerInterface {
   #gridRowGap = 0;
   #gridColumnGap = 0;
   #gridPadding = {
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0
+  };
+
+  #gridBorder = {
     left: 0,
     top: 0,
     right: 0,
@@ -128,7 +135,7 @@ export class GridManager implements GridManagerInterface {
     return this;
   }
 
-  setGridPaddingInfo(padding: PaddingInfo): GridManagerInterface {
+  setGridPaddingInfo(padding: OffSetInfo): GridManagerInterface {
     this.#gridPadding.left = this.changeSizeInfoToNumber(
       padding.left,
       this.gridSize?.width
@@ -143,6 +150,27 @@ export class GridManager implements GridManagerInterface {
     );
     this.#gridPadding.bottom = this.changeSizeInfoToNumber(
       padding.bottom,
+      this.gridSize?.height
+    );
+    this.setParentGridRect();
+    return this;
+  }
+
+  setGridBorderInfo(border: OffSetInfo): GridManagerInterface {
+    this.#gridBorder.left = this.changeSizeInfoToNumber(
+      border.left,
+      this.gridSize?.width
+    );
+    this.#gridBorder.right = this.changeSizeInfoToNumber(
+      border.right,
+      this.gridSize?.width
+    );
+    this.#gridBorder.top = this.changeSizeInfoToNumber(
+      border.top,
+      this.gridSize?.height
+    );
+    this.#gridBorder.bottom = this.changeSizeInfoToNumber(
+      border.bottom,
       this.gridSize?.height
     );
     this.setParentGridRect();
@@ -270,6 +298,7 @@ export class GridManager implements GridManagerInterface {
   } {
     return GridLineUtils.getGridPaddingAreaAndLine({
       gridPadding: this.#gridPadding,
+      border: this.#gridBorder,
       gridSize: this.gridSize!,
       lineSpace
     });
@@ -278,16 +307,20 @@ export class GridManager implements GridManagerInterface {
   private setParentGridRect(): void {
     if (this.gridSize) {
       this.#gridRect = {
-        x: this.#gridPadding.left,
-        y: this.#gridPadding.top,
+        x: this.#gridPadding.left + this.#gridBorder.left,
+        y: this.#gridPadding.top + this.#gridBorder.top,
         width:
           this.gridSize.width -
           this.#gridPadding.left -
-          this.#gridPadding.right,
+          this.#gridPadding.right -
+          this.#gridBorder.left -
+          this.#gridBorder.right,
         height:
           this.gridSize.height -
           this.#gridPadding.top -
-          this.#gridPadding.bottom
+          this.#gridPadding.bottom -
+          this.#gridBorder.top -
+          this.#gridBorder.bottom
       };
     }
   }

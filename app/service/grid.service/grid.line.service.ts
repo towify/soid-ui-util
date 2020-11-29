@@ -3,7 +3,7 @@
  * @data 2020/11/23 22:51
  */
 import { GridLineServiceInterface } from './grid.line.service.interface';
-import { PaddingInfo, RectInfo } from '../../type/common.type';
+import { OffSetInfo, RectInfo } from '../../type/common.type';
 import { GridManager } from '../../manager/gird.manager/grid.manager';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
 
@@ -65,7 +65,7 @@ export class GridLineService implements GridLineServiceInterface {
     return this;
   }
 
-  setGridPaddingInfo(info: PaddingInfo): GridLineServiceInterface {
+  setGridPaddingInfo(info: OffSetInfo): GridLineServiceInterface {
     this.gridManager.setGridPaddingInfo(info);
     return this;
   }

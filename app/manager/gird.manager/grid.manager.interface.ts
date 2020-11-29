@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/11/12 15:42
  */
-import { PaddingInfo } from '../../type/common.type';
+import { OffSetInfo } from '../../type/common.type';
 
 export interface GridManagerInterface {
   /**
@@ -48,7 +48,7 @@ export interface GridManagerInterface {
    * @param info grid padding info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
    * 设置 grid padding
    */
-  setGridPaddingInfo(info: PaddingInfo): GridManagerInterface;
+  setGridPaddingInfo(info: OffSetInfo): GridManagerInterface;
 
   /**
    * @param row: grid row gap

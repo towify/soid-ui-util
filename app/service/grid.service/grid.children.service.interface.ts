@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/11/23 22:15
  */
-import { GridAreaInfo, PaddingInfo } from '../../type/common.type';
+import { GridAreaInfo, OffSetInfo } from '../../type/common.type';
 
 export interface GridChildrenServiceInterface {
   /**
@@ -63,8 +63,13 @@ export interface GridChildrenServiceInterface {
    * @param info grid padding info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
    * 设置 parent grid padding
    */
-  setParentGridPaddingInfo(info: PaddingInfo): GridChildrenServiceInterface;
+  setParentGridPaddingInfo(info: OffSetInfo): GridChildrenServiceInterface;
 
+  /**
+   * @param info grid border info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
+   * 设置 parent grid border
+   */
+  setParentGridBorderInfo(info: OffSetInfo): GridChildrenServiceInterface;
   /**
    * @param row: grid row gap
    * @param column: grid column gap
