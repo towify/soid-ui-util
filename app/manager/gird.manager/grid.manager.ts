@@ -5,7 +5,7 @@
 import {
   GridAreaInfo,
   GridChildInfo,
-  PaddingInfo,
+  OffSetInfo,
   RectInfo
 } from '../../type/common.type';
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
@@ -26,6 +26,13 @@ export class GridManager {
   #gridRowGap = 0;
   #gridColumnGap = 0;
   #gridPadding = {
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0
+  };
+
+  #gridBorder = {
     left: 0,
     top: 0,
     right: 0,
@@ -60,7 +67,7 @@ export class GridManager {
       width,
       height
     };
-    this.setParentGridRect();
+    this.updateGridRect();
   }
 
   setGridColumnInfo(info: { value: number; unit: string }[]): void {
@@ -138,7 +145,7 @@ export class GridManager {
     );
   }
 
-  setGridPaddingInfo(padding: PaddingInfo): void {
+  setGridPaddingInfo(padding: OffSetInfo): void {
     this.#gridPadding.left = this.convertSizeInfoToNumber(
       padding.left,
       this.gridSize?.width
@@ -155,7 +162,27 @@ export class GridManager {
       padding.bottom,
       this.gridSize?.height
     );
-    this.setParentGridRect();
+    this.updateGridRect();
+  }
+
+  setGridBorderInfo(border: OffSetInfo): void {
+    this.#gridBorder.left = this.convertSizeInfoToNumber(
+      border.left,
+      this.gridSize?.width
+    );
+    this.#gridBorder.right = this.convertSizeInfoToNumber(
+      border.right,
+      this.gridSize?.width
+    );
+    this.#gridBorder.top = this.convertSizeInfoToNumber(
+      border.top,
+      this.gridSize?.height
+    );
+    this.#gridBorder.bottom = this.convertSizeInfoToNumber(
+      border.bottom,
+      this.gridSize?.height
+    );
+    this.updateGridRect();
   }
 
   getGridAreaAutoNumber(params: {
@@ -326,24 +353,60 @@ export class GridManager {
   } {
     return GridLineUtils.getGridPaddingAreaAndLine({
       gridPadding: this.#gridPadding,
+      border: this.#gridBorder,
       gridSize: this.gridSize!,
       lineSpace
     });
   }
 
-  private setParentGridRect(): void {
+  updateChildRect(
+    child: GridChildInfo,
+    gridItemRectList: RectInfo[][]
+  ): GridChildInfo {
+    const childGridRect = this.convertChildSizeInfoToNumber({
+      gridArea: child.gridArea,
+      gridItemRectList
+    });
+    const childWidth = this.convertSizeInfoToNumber(
+      child.width,
+      childGridRect.width
+    );
+    const childHeight = this.convertSizeInfoToNumber(
+      child.height,
+      childGridRect.height
+    );
+    const childX =
+      childGridRect.x +
+      this.convertSizeInfoToNumber(child.marginLeft, childGridRect.width);
+    const childY =
+      childGridRect.y +
+      this.convertSizeInfoToNumber(child.marginTop, childGridRect.height);
+    child.rect = {
+      x: childX,
+      y: childY,
+      width: childWidth,
+      height: childHeight
+    };
+    return child;
+  }
+
+  private updateGridRect(): void {
     if (this.gridSize) {
       this.#gridRect = {
-        x: this.#gridPadding.left,
-        y: this.#gridPadding.top,
+        x: this.#gridPadding.left + this.#gridBorder.left,
+        y: this.#gridPadding.top + this.#gridBorder.top,
         width:
           this.gridSize.width -
           this.#gridPadding.left -
-          this.#gridPadding.right,
+          this.#gridPadding.right -
+          this.#gridBorder.left -
+          this.#gridBorder.right,
         height:
           this.gridSize.height -
           this.#gridPadding.top -
-          this.#gridPadding.bottom
+          this.#gridPadding.bottom -
+          this.#gridBorder.top -
+          this.#gridBorder.bottom
       };
     }
   }

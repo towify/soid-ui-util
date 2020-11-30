@@ -6,7 +6,7 @@ import { GridServiceInterface } from './grid.service.interface';
 import {
   GridAreaInfo,
   GridChildInfo,
-  PaddingInfo,
+  OffSetInfo,
   RectInfo
 } from '../../type/common.type';
 import { GridManager } from '../../manager/gird.manager/grid.manager';
@@ -79,8 +79,13 @@ export class GridService implements GridServiceInterface {
     return this;
   }
 
-  setGridPaddingInfo(padding: PaddingInfo): GridServiceInterface {
+  setGridPaddingInfo(padding: OffSetInfo): GridServiceInterface {
     this.gridManager.setGridPaddingInfo(padding);
+    return this;
+  }
+
+  setGridBorderInfo(border: OffSetInfo): GridServiceInterface {
+    this.gridManager.setGridBorderInfo(border);
     return this;
   }
 
@@ -92,7 +97,7 @@ export class GridService implements GridServiceInterface {
     this.gridManager.childInfoList = childrenInfo;
     const gridItemRectList = this.gridManager.getGridItemRectList();
     this.gridManager.childInfoList.forEach(childInfo => {
-      this.getChildRect(childInfo, gridItemRectList);
+      this.gridManager.updateChildRect(childInfo, gridItemRectList);
     });
     return this;
   }
@@ -207,7 +212,7 @@ export class GridService implements GridServiceInterface {
       height
     };
     this.gridManager.childInfoList.push(
-      this.getChildRect(droppedInfo, gridItemRectList)
+      this.gridManager.updateChildRect(droppedInfo, gridItemRectList)
     );
     return droppedInfo;
   }
@@ -242,10 +247,9 @@ export class GridService implements GridServiceInterface {
       updateChildInfo.width = child.width;
       updateChildInfo.height = child.height;
       const gridItemRectList = this.gridManager.getGridItemRectList();
-      this.gridManager.childInfoList[childIndex] = this.getChildRect(
-        updateChildInfo,
-        gridItemRectList
-      );
+      this.gridManager.childInfoList[
+        childIndex
+      ] = this.gridManager.updateChildRect(updateChildInfo, gridItemRectList);
     }
     return this;
   }
@@ -378,43 +382,6 @@ export class GridService implements GridServiceInterface {
       };
     }
     return this.gridManager.getGridPaddingAreaAndLine(lineSpace);
-  }
-
-  private getChildRect(
-    child: GridChildInfo,
-    gridItemRectList: RectInfo[][]
-  ): GridChildInfo {
-    const childGridRect = this.gridManager.convertChildSizeInfoToNumber({
-      gridArea: child.gridArea,
-      gridItemRectList
-    });
-    const childWidth = this.gridManager.convertSizeInfoToNumber(
-      child.width,
-      childGridRect.width
-    );
-    const childHeight = this.gridManager.convertSizeInfoToNumber(
-      child.height,
-      childGridRect.height
-    );
-    const childX =
-      childGridRect.x +
-      this.gridManager.convertSizeInfoToNumber(
-        child.marginLeft,
-        childGridRect.width
-      );
-    const childY =
-      childGridRect.y +
-      this.gridManager.convertSizeInfoToNumber(
-        child.marginTop,
-        childGridRect.height
-      );
-    child.rect = {
-      x: childX,
-      y: childY,
-      width: childWidth,
-      height: childHeight
-    };
-    return child;
   }
 
   private adjustChildGridInfo(params: {

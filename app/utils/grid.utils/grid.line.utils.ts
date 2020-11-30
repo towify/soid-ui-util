@@ -217,6 +217,12 @@ export class GridLineUtils {
       right: number;
       bottom: number;
     };
+    border: {
+      left: number;
+      top: number;
+      right: number;
+      bottom: number;
+    };
     gridSize: {
       width: number;
       height: number;
@@ -230,33 +236,41 @@ export class GridLineUtils {
     let rowPaddingArea: RectInfo[] = [];
     if (params.gridPadding.left > 0) {
       columnPaddingArea.push({
-        x: 0,
-        y: 0,
+        x: params.border.left,
+        y: params.border.top,
         width: params.gridPadding.left,
-        height: params.gridSize.height
+        height:
+          params.gridSize.height - params.border.top - params.border.bottom
       });
     }
     if (params.gridPadding.right > 0) {
       columnPaddingArea.push({
-        x: params.gridSize.width - params.gridPadding.right,
-        y: 0,
+        x:
+          params.gridSize.width -
+          params.gridPadding.right -
+          params.border.right,
+        y: params.border.top,
         width: params.gridPadding.right,
-        height: params.gridSize.height
+        height:
+          params.gridSize.height - params.border.top - params.border.bottom
       });
     }
     if (params.gridPadding.top) {
       rowPaddingArea.push({
-        x: 0,
-        y: 0,
-        width: params.gridSize.width,
+        x: params.border.left,
+        y: params.border.top,
+        width: params.gridSize.width - params.border.left - params.border.right,
         height: params.gridPadding.top
       });
     }
     if (params.gridPadding.bottom) {
       rowPaddingArea.push({
-        x: 0,
-        y: params.gridSize.height - params.gridPadding.bottom,
-        width: params.gridSize.width,
+        x: params.border.left,
+        y:
+          params.gridSize.height -
+          params.gridPadding.bottom -
+          params.border.bottom,
+        width: params.gridSize.width - params.border.left - params.border.right,
         height: params.gridPadding.bottom
       });
     }

@@ -5,7 +5,7 @@
 import {
   GridAreaInfo,
   GridChildInfo,
-  PaddingInfo,
+  OffSetInfo,
   RectInfo
 } from '../../type/common.type';
 
@@ -63,7 +63,13 @@ export interface GridServiceInterface {
    * @param info grid padding info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
    * 设置 parent grid padding
    */
-  setGridPaddingInfo(info: PaddingInfo): GridServiceInterface;
+  setGridPaddingInfo(info: OffSetInfo): GridServiceInterface;
+
+  /**
+   * @param info grid border info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
+   * 设置 parent grid border
+   */
+  setGridBorderInfo(info: OffSetInfo): GridServiceInterface;
 
   /**
    * @param row: grid row gap

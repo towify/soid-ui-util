@@ -10,7 +10,7 @@ type Rgba = {
   alpha: number;
 };
 
-type PaddingInfo = {
+type OffSetInfo = {
   left: { value: number; unit: string };
   top: { value: number; unit: string };
   right: { value: number; unit: string };
@@ -43,4 +43,4 @@ type RectInfo = {
   height: number;
 };
 
-export { Rgba, PaddingInfo, RectInfo, GridAreaInfo, GridChildInfo };
+export { Rgba, OffSetInfo, RectInfo, GridAreaInfo, GridChildInfo };
