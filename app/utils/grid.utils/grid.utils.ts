@@ -9,6 +9,8 @@ export class GridUtils {
 
   static NotSetNumber = -20000;
 
+  static PXUnit = 'px';
+
   static checkPointIsInRect(
     point: { x: number; y: number },
     rect: RectInfo
@@ -88,11 +90,11 @@ export class GridUtils {
     return valueNumber;
   }
 
-  static changeSizeInfoListToNumberList(params: {
+  static getGridRowOrColumnItemValues(params: {
     sizeInfoList: { value: number; unit: string }[];
-    gap: number;
     windowSize?: { width: number; height: number };
     maxValue?: number;
+    autoOffsetList?: number[];
   }): number[] {
     let spareValue = params.maxValue ?? 0;
     let autoNumber = 0;
@@ -117,19 +119,32 @@ export class GridUtils {
     if (spareValue < 0) {
       spareValue = 0;
     }
-    if (spareValue !== 0 && autoNumber !== 0) {
-      const autoValue = spareValue / autoNumber;
-      params.sizeInfoList.forEach((value, index) => {
-        isAuto = value.value === GridUtils.AutoNumber;
-        if (isAuto) {
-          valueList[index] = autoValue;
-        }
-      });
+    if (spareValue > 0) {
+      if (params.autoOffsetList) {
+        params.autoOffsetList.forEach(autoValue => {
+          spareValue -= autoValue;
+        });
+      }
+      if (autoNumber !== 0) {
+        const autoValue = spareValue / autoNumber;
+        params.sizeInfoList.forEach((value, index) => {
+          isAuto = value.value === GridUtils.AutoNumber;
+          if (isAuto) {
+            valueList[index] = autoValue;
+            if (
+              params.autoOffsetList &&
+              params.autoOffsetList.length === params.sizeInfoList.length
+            ) {
+              valueList[index] += params.autoOffsetList[index];
+            }
+          }
+        });
+      }
     }
     return valueList;
   }
 
-  static changeChildSizeInfoToNumber(params: {
+  static convertChildSizeInfoToNumber(params: {
     gridArea: GridAreaInfo;
     gridItemRectList: RectInfo[][];
     gridRect: RectInfo;
@@ -334,6 +349,32 @@ export class GridUtils {
     });
     return {
       gridArea: { rowStart, columnStart, rowEnd, columnEnd },
+      marginLeft: parseFloat(marginLeft.toFixed(1)),
+      marginTop: parseFloat(marginTop.toFixed(1))
+    };
+  }
+
+  static getGridMarginInfoByRect(params: {
+    rect: RectInfo;
+    gridArea: GridAreaInfo;
+    gridItemRectList: RectInfo[][];
+    rowGap: number;
+    columnGap: number;
+  }): {
+    marginLeft: number;
+    marginTop: number;
+  } {
+    const rowStart = params.gridArea.rowStart - 1;
+    const columnStart = params.gridArea.columnStart - 1;
+    let marginLeft = params.rect.x;
+    let marginTop = params.rect.y;
+    if (rowStart < params.gridItemRectList.length) {
+      marginTop = params.rect.y - params.gridItemRectList[rowStart][0].y;
+    }
+    if (columnStart < params.gridItemRectList[0].length) {
+      marginLeft = params.rect.x - params.gridItemRectList[0][columnStart].x;
+    }
+    return {
       marginLeft: parseFloat(marginLeft.toFixed(1)),
       marginTop: parseFloat(marginTop.toFixed(1))
     };

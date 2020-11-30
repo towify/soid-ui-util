@@ -24,6 +24,18 @@ type GridAreaInfo = {
   columnEnd: number;
 };
 
+type GridChildInfo = {
+  id: string;
+  gridArea: GridAreaInfo;
+  marginLeft: { value: number; unit: string };
+  marginTop: { value: number; unit: string };
+  marginRight: { value: number; unit: string };
+  marginBottom: { value: number; unit: string };
+  width: { value: number; unit: string };
+  height: { value: number; unit: string };
+  rect?: RectInfo;
+};
+
 type RectInfo = {
   x: number;
   y: number;
@@ -31,4 +43,4 @@ type RectInfo = {
   height: number;
 };
 
-export { Rgba, PaddingInfo, RectInfo, GridAreaInfo };
+export { Rgba, PaddingInfo, RectInfo, GridAreaInfo, GridChildInfo };
