@@ -12,6 +12,7 @@ import {
 import { GridManager } from '../../manager/gird.manager/grid.manager';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
+import { ErrorUtils } from '../../utils/error.utils/error.utils';
 
 export class GridService implements GridServiceInterface {
   private static instance?: GridServiceInterface;
@@ -91,7 +92,7 @@ export class GridService implements GridServiceInterface {
 
   setChildrenGridInfo(childrenInfo: GridChildInfo[]): GridServiceInterface {
     if (!this.gridManager.gridSize) {
-      console.error('SOID-UI-UTIL', 'GridAreaService', 'gridRect is undefined');
+      ErrorUtils.GridError('GridSize is undefined');
       return this;
     }
     this.gridManager.childInfoList = childrenInfo;
@@ -111,7 +112,7 @@ export class GridService implements GridServiceInterface {
     gridArea?: GridAreaInfo;
   }): GridChildInfo {
     if (!this.gridManager.gridSize) {
-      console.error('SOID-UI-UTIL', 'GridAreaService', 'gridRect is undefined');
+      ErrorUtils.GridError('GridSize is undefined');
       return {
         id: dropped.id,
         gridArea: {
@@ -128,12 +129,9 @@ export class GridService implements GridServiceInterface {
         height: { value: 0, unit: 'px' }
       };
     }
-    const childIndex = this.gridManager.childInfoList.findIndex(childInfo => {
-      if (childInfo.id === dropped.id) {
-        return true;
-      }
-      return false;
-    });
+    const childIndex = this.gridManager.childInfoList.findIndex(
+      childInfo => childInfo.id === dropped.id
+    );
     if (childIndex !== -1) {
       this.gridManager.childInfoList.splice(childIndex, 1);
     }
@@ -165,7 +163,7 @@ export class GridService implements GridServiceInterface {
         dropped.height
       );
     }
-    const gridInfo = this.gridManager.getGridAreaInfoByRect({
+    const gridInfo = this.gridManager.getChildGridAreaInfoByRect({
       rect: droppedRect,
       gridItemRectList
     });
@@ -218,12 +216,9 @@ export class GridService implements GridServiceInterface {
   }
 
   deleteChild(childId: string): GridServiceInterface {
-    const childIndex = this.gridManager.childInfoList.findIndex(childInfo => {
-      if (childInfo.id === childId) {
-        return true;
-      }
-      return false;
-    });
+    const childIndex = this.gridManager.childInfoList.findIndex(
+      childInfo => childInfo.id === childId
+    );
     if (childIndex !== -1) {
       this.gridManager.childInfoList.splice(childIndex, 1);
     }
@@ -231,12 +226,9 @@ export class GridService implements GridServiceInterface {
   }
 
   updateChild(child: GridChildInfo): GridServiceInterface {
-    const childIndex = this.gridManager.childInfoList.findIndex(childInfo => {
-      if (childInfo.id === child.id) {
-        return true;
-      }
-      return false;
-    });
+    const childIndex = this.gridManager.childInfoList.findIndex(
+      childInfo => childInfo.id === child.id
+    );
     if (childIndex !== -1) {
       const updateChildInfo = this.gridManager.childInfoList[childIndex];
       updateChildInfo.gridArea = child.gridArea;
@@ -255,10 +247,11 @@ export class GridService implements GridServiceInterface {
   }
 
   adjustChildrenGridInfo(): GridChildInfo[] {
-    if (!this.gridManager.gridSize || !this.gridManager.childInfoList.length) {
-      console.error('SOID-UI-UTIL', 'GridAreaService', 'gridRect is undefined');
+    if (!this.gridManager.gridSize) {
+      ErrorUtils.GridError('GridSize is undefined');
       return [];
     }
+    if (!this.gridManager.childInfoList.length) return [];
     const gridItemRectList = this.gridManager.getGridItemRectList(false);
     let areaInfo: {
       gridArea: GridAreaInfo;
@@ -273,7 +266,7 @@ export class GridService implements GridServiceInterface {
     };
     return this.gridManager.childInfoList.map(childInfo => {
       if (!childInfo.rect) return childInfo;
-      areaInfo = this.gridManager.getGridAreaInfoByRect({
+      areaInfo = this.gridManager.getChildGridAreaInfoByRect({
         rect: childInfo.rect,
         gridItemRectList
       });
@@ -294,7 +287,7 @@ export class GridService implements GridServiceInterface {
 
   updateChildrenGirdInfo(): GridChildInfo[] {
     if (!this.gridManager.gridSize || !this.gridManager.childInfoList.length) {
-      console.error('SOID-UI-UTIL', 'GridAreaService', 'gridRect is undefined');
+      ErrorUtils.GridError('GridSize is undefined');
       return [];
     }
     const gridItemRectList = this.gridManager.getGridItemRectList();
@@ -375,13 +368,18 @@ export class GridService implements GridServiceInterface {
     lines: { fromX: number; fromY: number; toX: number; toY: number }[];
   } {
     if (!this.gridManager.gridSize) {
-      console.error('SOID-UI-UTIL', 'GridAreaService', 'gridRect is undefined');
+      ErrorUtils.GridError('GridSize is undefined');
       return {
         area: [],
         lines: []
       };
     }
-    return this.gridManager.getGridPaddingAreaAndLine(lineSpace);
+    return GridLineUtils.getGridPaddingAreaAndLine({
+      gridPadding: this.gridManager.gridPadding,
+      border: this.gridManager.gridBorder,
+      gridSize: this.gridManager.gridSize,
+      lineSpace
+    });
   }
 
   private adjustChildGridInfo(params: {

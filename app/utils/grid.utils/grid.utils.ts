@@ -3,6 +3,7 @@
  * @data 2020/11/18 12:12
  */
 import { GridAreaInfo, RectInfo } from '../../type/common.type';
+import { ErrorUtils } from '../error.utils/error.utils';
 
 export class GridUtils {
   static AutoNumber = -10000;
@@ -29,20 +30,14 @@ export class GridUtils {
     let value = params.valueNumber;
     if (params.unit === 'vw') {
       value = (params.valueNumber / (params.windowSize?.width ?? 1)) * 100;
-      // todo: window width 为空和等于 0 分开处理
-      if (!params.windowSize?.width || params.windowSize?.width === 0) {
-        console.error('SOID-UI-UTIL', 'GridAreaService', 'windowWidth is zero');
+      if (!params.windowSize?.width) {
+        ErrorUtils.GridError('Window size is undefined');
       }
     }
     if (params.unit === 'vh') {
       value = (params.valueNumber / (params.windowSize?.height ?? 1)) * 100;
-      // todo: window width 为空和等于 0 分开处理
-      if (!params.windowSize?.height || params.windowSize?.height === 0) {
-        console.error(
-          'SOID-UI-UTIL',
-          'GridAreaService',
-          'windowHeight is zero'
-        );
+      if (!params.windowSize?.height) {
+        ErrorUtils.GridError('Window size is undefined');
       }
     }
     if (params.unit === '%') {
@@ -68,20 +63,14 @@ export class GridUtils {
     }
     if (params.sizeInfo.unit === 'vw') {
       valueNumber = ((params.windowSize?.width ?? 0) * valueNumber) / 100;
-      // todo: window width 为空和等于 0 分开处理
-      if (!params.windowSize?.width || params.windowSize?.width === 0) {
-        console.error('SOID-UI-UTIL', 'GridAreaService', 'windowWidth is zero');
+      if (!params.windowSize?.width) {
+        ErrorUtils.GridError('Window size is undefined');
       }
     }
     if (params.sizeInfo.unit === 'vh') {
       valueNumber = ((params.windowSize?.height ?? 0) * valueNumber) / 100;
-      // todo: window width 为空和等于 0 分开处理
-      if (!params.windowSize?.height || params.windowSize?.height === 0) {
-        console.error(
-          'SOID-UI-UTIL',
-          'GridAreaService',
-          'windowHeight is zero'
-        );
+      if (!params.windowSize?.height) {
+        ErrorUtils.GridError('Window size is undefined');
       }
     }
     if (params.sizeInfo.unit === '%') {
@@ -94,7 +83,11 @@ export class GridUtils {
     sizeInfoList: { value: number; unit: string }[];
     windowSize?: { width: number; height: number };
     maxValue?: number;
-    autoOffsetList?: number[];
+    autoOffsetList?: {
+      minusOffset: number;
+      plusOffset: number;
+      minusOffSetId: string;
+    }[];
   }): number[] {
     let spareValue = params.maxValue ?? 0;
     let autoNumber = 0;
@@ -121,24 +114,88 @@ export class GridUtils {
     }
     if (spareValue > 0) {
       if (params.autoOffsetList) {
-        params.autoOffsetList.forEach(autoValue => {
-          spareValue -= autoValue;
+        params.autoOffsetList.forEach(offSet => {
+          spareValue -= offSet.minusOffset;
         });
       }
       if (autoNumber !== 0) {
         const autoValue = spareValue / autoNumber;
-        params.sizeInfoList.forEach((value, index) => {
-          isAuto = value.value === GridUtils.AutoNumber;
-          if (isAuto) {
+        if (!params.autoOffsetList) {
+          params.sizeInfoList.forEach((value, index) => {
+            isAuto = value.value === GridUtils.AutoNumber;
+            if (isAuto) {
+              valueList[index] = autoValue;
+            }
+          });
+        } else if (
+          params.autoOffsetList.length === params.sizeInfoList.length
+        ) {
+          let autoOffsetIndexList;
+          let autoItemNumber = 0;
+          let leftAutoNumber = 0;
+          let leftAutoItemId = '';
+          let mapKey = '';
+          let mapValue = 0;
+          const autoMap = new Map<string, number>();
+          params.autoOffsetList.forEach((autoOffset, index) => {
             valueList[index] = autoValue;
-            if (
-              params.autoOffsetList &&
-              params.autoOffsetList.length === params.sizeInfoList.length
-            ) {
-              valueList[index] += params.autoOffsetList[index];
+            valueList[index] += autoOffset.plusOffset;
+            if (autoOffset.plusOffset !== autoOffset.minusOffset) {
+              leftAutoItemId = autoOffset.minusOffSetId;
+              mapKey = autoOffset.minusOffSetId;
+              mapValue = autoMap.get(mapKey) ?? 0;
+              mapValue += autoOffset.minusOffset - autoOffset.plusOffset;
+              autoMap.set(mapKey, mapValue);
+            }
+          });
+          autoMap.forEach((value, key) => {
+            if (value > 0) {
+              autoOffsetIndexList = params.autoOffsetList!.reduce<number[]>(
+                (preview, current, index) => {
+                  if (
+                    current.plusOffset === current.minusOffset &&
+                    current.minusOffSetId === key
+                  ) {
+                    return preview.concat(index);
+                  }
+                  return preview;
+                },
+                []
+              );
+              if (autoOffsetIndexList.length) {
+                autoItemNumber = value / autoOffsetIndexList.length;
+                autoOffsetIndexList.forEach(index => {
+                  valueList[index] += autoItemNumber;
+                });
+              } else {
+                leftAutoNumber += value;
+              }
+            }
+          });
+          if (leftAutoNumber > 0) {
+            autoOffsetIndexList = params.autoOffsetList.reduce<number[]>(
+              (preview, current, index) => {
+                if (
+                  current.minusOffSetId === leftAutoItemId &&
+                  current.plusOffset !== current.minusOffset
+                ) {
+                  return preview.concat(index);
+                }
+                return preview;
+              },
+              []
+            );
+            if (autoOffsetIndexList.length) {
+              autoItemNumber = leftAutoNumber / autoOffsetIndexList.length;
+              autoOffsetIndexList.forEach(index => {
+                valueList[index] += autoItemNumber;
+              });
+            } else {
+              valueList[0] += leftAutoNumber;
+              ErrorUtils.GridError('Calculation auto error');
             }
           }
-        });
+        }
       }
     }
     return valueList;
@@ -210,7 +267,7 @@ export class GridUtils {
     return childGridRect;
   }
 
-  static getGridAreaInfoByRect(params: {
+  static getChildGridAreaInfoByRect(params: {
     rect: RectInfo;
     gridItemRectList: RectInfo[][];
     rowGap: number;

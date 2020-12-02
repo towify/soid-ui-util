@@ -13,11 +13,11 @@ Use grid Area service to manage grid area.
 After set grid rect / grid row info / grid column info / drop rect, base grid row / column info get dropped grid info.
 
 ```typescript
-const gridService = GridChildrenService.getInstance();
+const gridService = GridService.getInstance();
 gridService
   .setWindowSize(1024, 768)
-  .setParentGridSize(500, 400)
-  .setParentGridRowInfo([
+  .setGridSize(500, 400)
+  .setGridRowInfo([
     {
       value: 20,
       unit: '%'
@@ -27,7 +27,7 @@ gridService
       unit: 'px'
     }
   ])
-  .setParentGridColumnInfo([
+  .setGridColumnInfo([
     {
       value: 20,
       unit: '%'
