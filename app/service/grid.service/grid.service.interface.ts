@@ -93,9 +93,18 @@ export interface GridServiceInterface {
    */
   setChildrenGridInfo(childrenInfo: GridChildInfo[]): GridServiceInterface;
 
-  deleteChild(childId: string): GridServiceInterface;
+  /**
+   * @description delete grid child
+   * @param childId delete grid child id
+   */
+  deleteChildById(childId: string): GridServiceInterface;
 
+  /**
+   * @description update grid child
+   * @param child grid child
+   */
   updateChild(child: GridChildInfo): GridServiceInterface;
+
   /**
    * @param dropped dropped rect
    * 设置 parent dropped rect

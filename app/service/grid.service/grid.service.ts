@@ -215,7 +215,7 @@ export class GridService implements GridServiceInterface {
     return droppedInfo;
   }
 
-  deleteChild(childId: string): GridServiceInterface {
+  deleteChildById(childId: string): GridServiceInterface {
     const childIndex = this.gridManager.childInfoList.findIndex(
       childInfo => childInfo.id === childId
     );

@@ -10,7 +10,7 @@ Use grid Area service to manage grid area.
 
 ### Get Dropped GridInfo
 
-After set grid rect / grid row info / grid column info / drop rect, base grid row / column info get dropped grid info.
+After set grid rect / grid row info / grid column info / drop rect, base grid row / column info set dropped info , get dropped grid info
 
 ```typescript
 const gridService = GridService.getInstance();
@@ -38,6 +38,7 @@ gridService
     }
   ])
   .setDroppedInfo({
+    id: 'test',
     x: 10,
     y: 10,
     width: {
@@ -54,21 +55,73 @@ gridService
       rowEnd: 2,
       columnEnd: 2
     }
-  })
-  .getDroppedGridInfo();
+  });
+
+const childGridInfo = gridService.updateChildrenGirdInfo();
+```
+
+### Update Child Grid Info
+
+update child width / height / margin
+
+```typescript
+const gridService = GridService.getInstance();
+gridService.updateChild({
+  id: 'test',
+  x: 10,
+  y: 10,
+  width: {
+    value: 20,
+    unit: '%'
+  },
+  height: {
+    value: 200,
+    unit: 'px'
+  },
+  gridArea: {
+    rowStart: 1,
+    columnStart: 1,
+    rowEnd: 2,
+    columnEnd: 2
+  }
+});
+
+const childGridInfo = gridService.updateChildrenGirdInfo();
+```
+
+### Delete Child Grid Info
+
+delete child grid
+
+```typescript
+const gridService = GridService.getInstance();
+gridService.deleteChildById('test');
+
+const childGridInfo = gridService.updateChildrenGirdInfo();
+```
+
+### Update Children Gird Info
+
+After change grid gap \ grid padding \ children info, you can update children grid info.
+
+```typescript
+const gridService = GridService.getInstance();
+gridService.setGridGap({ value: 10, unit: 'px' }, { value: 10, unit: 'px' });
+
+const childGridInfo = gridService.updateChildrenGirdInfo();
 ```
 
 ### Adjust Children Grid Info
 
-After set window size / parent grid size / grid row info / grid column info / grid children rect info and change grid row / column info , you can adjust children grid info.
+After change grid row / column info , you can adjust children grid info.
 
 ```typescript
-const gridService = GridChildrenService.getInstance();
+const gridService = GridService.getInstance();
 gridService
   .setWindowSize(1024, 768)
-  .setParentGridSize(500, 400)
-  .setParentGridCount(2, 2)
-  .setChildrenRectInfo([
+  .setGridSize(500, 400)
+  .setGridCount(2, 2)
+  .setChildrenGridInfo([
     {
       id: '1234',
       gridArea: [1, 1, 2, 2],
@@ -90,7 +143,7 @@ gridService
       }
     }
   ])
-  .setParentGridRowInfo([
+  .setGridRowInfo([
     {
       value: 20,
       unit: '%'
@@ -110,7 +163,7 @@ gridService
 If you want draw grid lines, you can get grid lines coordinates(eg: { fromX: 0; fromY: 0; toX: 100; toY: 0 }) to draw grid line
 
 ```typescript
-const gridService = GridLineService.getInstance();
+const gridService = GridService.getInstance();
 gridService
   .setWindowSize(1024, 768)
   .setGridSize(500, 400)
@@ -158,7 +211,7 @@ const gridLineList = gridService.getGridLines();
 If you want draw grid gap area and lines, you can get grid gap area rects and lines coordinates(eg: { fromX: 0; fromY: 0; toX: 100; toY: 0 })
 
 ```typescript
-const gridService = GridLineService.getInstance();
+const gridService = GridService.getInstance();
 gridService
   .setWindowSize(1024, 768)
   .setGridSize(500, 400)
@@ -211,7 +264,7 @@ const gridGapArea = gridService.getGridGapAreaAndLines(5).area;
 If you want draw grid gap area and lines, you can get grid gap area rects and lines coordinates(eg: { fromX: 0; fromY: 0; toX: 100; toY: 0 })
 
 ```typescript
-const gridService = GridLineService.getInstance();
+const gridService = GridService.getInstance();
 gridService
   .setWindowSize(1024, 768)
   .setGridSize(500, 400)
