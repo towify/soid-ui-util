@@ -84,9 +84,9 @@ export class GridUtils {
     windowSize?: { width: number; height: number };
     maxValue?: number;
     autoOffsetList?: {
+      minusOffsetId: string;
       minusOffset: number;
       plusOffset: number;
-      minusOffSetId: string;
     }[];
   }): number[] {
     const maxValue = params.maxValue ?? 0;
@@ -123,11 +123,9 @@ export class GridUtils {
           }
         });
       } else if (params.autoOffsetList.length === params.sizeInfoList.length) {
-        if (params.autoOffsetList) {
-          params.autoOffsetList.forEach(offSet => {
-            spareValue -= offSet.minusOffset;
-          });
-        }
+        params.autoOffsetList.forEach(offSet => {
+          spareValue -= offSet.minusOffset;
+        });
         if (spareValue < 0) {
           spareValue = 0;
         }
@@ -140,16 +138,15 @@ export class GridUtils {
         let mapValue = 0;
         const autoMap = new Map<string, number>();
         params.autoOffsetList.forEach((autoOffset, index) => {
-          if (autoOffset.minusOffSetId !== '-1') {
-            valueList[index] = autoValue;
-            valueList[index] += autoOffset.plusOffset;
-            if (autoOffset.plusOffset !== autoOffset.minusOffset) {
-              leftAutoItemId = autoOffset.minusOffSetId;
-              mapKey = autoOffset.minusOffSetId;
-              mapValue = autoMap.get(mapKey) ?? 0;
-              mapValue += autoOffset.minusOffset - autoOffset.plusOffset;
-              autoMap.set(mapKey, mapValue);
-            }
+          if (autoOffset.minusOffsetId !== '-1') {
+            valueList[index] += autoValue;
+          }
+          if (autoOffset.plusOffset !== autoOffset.minusOffset) {
+            leftAutoItemId = autoOffset.minusOffsetId;
+            mapKey = autoOffset.minusOffsetId;
+            mapValue = autoMap.get(mapKey) ?? 0;
+            mapValue += autoOffset.minusOffset - autoOffset.plusOffset;
+            autoMap.set(mapKey, mapValue);
           }
         });
         autoMap.forEach((value, key) => {
@@ -158,7 +155,7 @@ export class GridUtils {
               (preview, current, index) => {
                 if (
                   current.plusOffset === current.minusOffset &&
-                  current.minusOffSetId === key
+                  current.minusOffsetId === key
                 ) {
                   return preview.concat(index);
                 }
@@ -180,7 +177,7 @@ export class GridUtils {
           autoOffsetIndexList = params.autoOffsetList.reduce<number[]>(
             (preview, current, index) => {
               if (
-                current.minusOffSetId === leftAutoItemId &&
+                current.minusOffsetId === leftAutoItemId &&
                 current.plusOffset !== current.minusOffset
               ) {
                 return preview.concat(index);

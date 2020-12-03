@@ -166,9 +166,9 @@ export class GridManager {
           });
         }
         return {
+          minusOffsetId: '-1',
           minusOffset: 0,
-          plusOffset: 0,
-          minusOffSetId: '-1'
+          plusOffset: 0
         };
       });
       rowAutoOffsetList = gridRowInfo.map((rowInfo, index) => {
@@ -180,11 +180,12 @@ export class GridManager {
           });
         }
         return {
+          minusOffsetId: '-1',
           minusOffset: 0,
-          plusOffset: 0,
-          minusOffSetId: '-1'
+          plusOffset: 0
         };
       });
+      console.log('rowAutoOffsetList', rowAutoOffsetList);
     }
     const gridWidth =
       this.#gridRect.width - (gridColumnInfo.length - 1) * this.#gridColumnGap;
@@ -367,16 +368,16 @@ export class GridManager {
     sizeInfoList: { value: number; unit: string }[];
     isRow: boolean;
   }): {
+    minusOffsetId: string;
     minusOffset: number;
     plusOffset: number;
-    minusOffSetId: string;
   } {
     let start = 0;
     let end = 0;
     let minusOffset = 0;
     let plusOffset = 0;
     let offsetValue = 0;
-    let minusOffSetId = '';
+    let minusOffsetId = '';
     let rowDValue = 0;
     let haveSingleChild = false;
     let sizeValue: { value: number; unit: string };
@@ -408,7 +409,7 @@ export class GridManager {
         });
         if (offsetValue > minusOffset) {
           minusOffset = offsetValue;
-          minusOffSetId = child.id;
+          minusOffsetId = child.id;
         }
         if (rowDValue === 1) {
           if (!haveSingleChild || offsetValue > plusOffset) {
@@ -418,15 +419,12 @@ export class GridManager {
         } else if (!haveSingleChild && offsetValue > plusOffset) {
           plusOffset = offsetValue;
         }
-        if (offsetValue === 0) {
-          plusOffset = offsetValue;
-        }
       }
     });
     return {
+      minusOffsetId,
       minusOffset,
-      plusOffset,
-      minusOffSetId
+      plusOffset
     };
   }
 
@@ -444,7 +442,7 @@ export class GridManager {
     totalValue += this.convertSizeInfoToNumber(params.marginMin);
     totalValue += this.convertSizeInfoToNumber(params.marginMax);
     if (autoNumber > 0 && totalValue > 0) {
-      return parseFloat((totalValue / autoNumber).toFixed(2));
+      return parseFloat((totalValue / (params.end - params.start)).toFixed(2));
     }
     return 0;
   }
