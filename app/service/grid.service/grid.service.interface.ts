@@ -2,6 +2,7 @@
  * @author allen
  * @data 2020/11/23 22:15
  */
+import { UISize } from 'towify-editor-common-values';
 import {
   GridAreaInfo,
   GridChildInfo,
@@ -28,25 +29,20 @@ export interface GridServiceInterface {
    * @param info:  grid row info， eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
    * 设置 parent grid row info
    */
-  setGridRowInfo(info: { value: number; unit: string }[]): GridServiceInterface;
+  setGridRowInfo(info: UISize[]): GridServiceInterface;
 
   /**
    * @param info:  grid column info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
    * 设置 parent grid column info
    */
-  setGridColumnInfo(
-    info: { value: number; unit: string }[]
-  ): GridServiceInterface;
+  setGridColumnInfo(info: UISize[]): GridServiceInterface;
 
   /**
    * @param row: grid row info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
    * @param column: grid column info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
    * 设置 parent grid column info
    */
-  setGridInfo(
-    row: { value: number; unit: string }[],
-    column: { value: number; unit: string }[]
-  ): GridServiceInterface;
+  setGridInfo(row: UISize[], column: UISize[]): GridServiceInterface;
 
   /**
    * @param params: grid row count
@@ -55,8 +51,8 @@ export interface GridServiceInterface {
   setGridCount(params: {
     row: number;
     column: number;
-    rowGap?: { value: number; unit: string };
-    columnGap?: { value: number; unit: string };
+    rowGap?: UISize;
+    columnGap?: UISize;
   }): GridServiceInterface;
 
   /**
@@ -76,10 +72,7 @@ export interface GridServiceInterface {
    * @param column: grid column gap
    * 设置 parent grid row \ column gap
    */
-  setGridGap(
-    row: { value: number; unit: string },
-    column: { value: number; unit: string }
-  ): GridServiceInterface;
+  setGridGap(row: UISize, column: UISize): GridServiceInterface;
 
   /**
    * @description 设置 grid children rect
@@ -97,26 +90,31 @@ export interface GridServiceInterface {
    * @description delete grid child
    * @param childId delete grid child id
    */
-  deleteChildById(childId: string): GridServiceInterface;
+  deleteChildByIdAndGetParentGridChildrenUpdateStatus(childId: string): boolean;
 
   /**
    * @description update grid child
    * @param child grid child
    */
-  updateChild(child: GridChildInfo): GridServiceInterface;
+  updateChildInfoAndGetParentGridChildrenUpdateStatus(
+    child: GridChildInfo
+  ): boolean;
 
   /**
    * @param dropped dropped rect
    * 设置 parent dropped rect
    */
-  droppedChild(dropped: {
+  setDroppedInfo(dropped: {
     id: string;
     x: number;
     y: number;
-    width: { value: number; unit: string };
-    height: { value: number; unit: string };
+    width: UISize;
+    height: UISize;
     gridArea?: GridAreaInfo;
-  }): GridChildInfo;
+  }): {
+    info: GridChildInfo;
+    needUpdateGridChildren: boolean;
+  };
 
   /**
    * @description 校准 grid children info， 当更新 grid row / column info 后校准 children 的 grid area,  grid row / column info 设置为auto的将重置为不没有被挤压的状态
@@ -126,7 +124,7 @@ export interface GridServiceInterface {
   /**
    * @description 更新 grid children info, 当更新 grid rect / padding / gap 移动某个 child 之后，更新所有 child 的 grid info， 不会修改 grid area 只会调整 margin 的数值
    */
-  updateChildrenGirdInfo(): GridChildInfo[];
+  getModifiedChildrenGirdInfo(): GridChildInfo[];
 
   /**
    * @description 返回 grid item line info

@@ -2,6 +2,7 @@
  * @author allen
  * @data 2020/11/18 12:12
  */
+import { SizeUnit, UISize } from 'towify-editor-common-values';
 import { GridAreaInfo, RectInfo } from '../../type/common.type';
 import { ErrorUtils } from '../error.utils/error.utils';
 
@@ -23,10 +24,10 @@ export class GridUtils {
 
   static convertNumberToSizeInfo(params: {
     valueNumber: number;
-    unit: string;
+    unit: SizeUnit;
     windowSize?: { width: number; height: number };
     maxValue?: number;
-  }): { value: number; unit: string } {
+  }): UISize {
     let value = params.valueNumber;
     if (params.unit === 'vw') {
       value = (params.valueNumber / (params.windowSize?.width ?? 1)) * 100;
@@ -50,7 +51,7 @@ export class GridUtils {
   }
 
   static convertSizeInfoToNumber(params: {
-    sizeInfo: { value: number; unit: string };
+    sizeInfo: UISize;
     windowSize?: { width: number; height: number };
     maxValue?: number;
   }): number {
@@ -80,7 +81,7 @@ export class GridUtils {
   }
 
   static getGridRowOrColumnItemValues(params: {
-    sizeInfoList: { value: number; unit: string }[];
+    sizeInfoList: UISize[];
     windowSize?: { width: number; height: number };
     maxValue?: number;
     autoOffsetList?: {
@@ -89,8 +90,7 @@ export class GridUtils {
       plusOffset: number;
     }[];
   }): number[] {
-    const maxValue = params.maxValue ?? 0;
-    let spareValue = maxValue;
+    let spareValue = params.maxValue ?? 0;
     let autoNumber = 0;
     let isAuto = false;
     const valueList: number[] = new Array(params.sizeInfoList.length);
@@ -140,6 +140,7 @@ export class GridUtils {
         params.autoOffsetList.forEach((autoOffset, index) => {
           if (autoOffset.minusOffsetId !== '-1') {
             valueList[index] += autoValue;
+            valueList[index] += autoOffset.plusOffset;
           }
           if (autoOffset.plusOffset !== autoOffset.minusOffset) {
             leftAutoItemId = autoOffset.minusOffsetId;

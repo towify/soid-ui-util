@@ -2,6 +2,7 @@
  *  @Author KaySaith
  *  @Date 10/31/20
  */
+import { UISize } from 'towify-editor-common-values';
 
 type Rgba = {
   red: number;
@@ -11,10 +12,22 @@ type Rgba = {
 };
 
 type OffSetInfo = {
-  left: { value: number; unit: string };
-  top: { value: number; unit: string };
-  right: { value: number; unit: string };
-  bottom: { value: number; unit: string };
+  left: UISize;
+  top: UISize;
+  right: UISize;
+  bottom: UISize;
+};
+
+type MarginInfo = {
+  left: UISize;
+  right: UISize;
+  top: UISize;
+  bottom: UISize;
+};
+
+type SizeInfo = {
+  width: UISize;
+  height: UISize;
 };
 
 type GridAreaInfo = {
@@ -27,12 +40,8 @@ type GridAreaInfo = {
 type GridChildInfo = {
   id: string;
   gridArea: GridAreaInfo;
-  marginLeft: { value: number; unit: string };
-  marginTop: { value: number; unit: string };
-  marginRight: { value: number; unit: string };
-  marginBottom: { value: number; unit: string };
-  width: { value: number; unit: string };
-  height: { value: number; unit: string };
+  margin: MarginInfo;
+  size: SizeInfo;
   rect?: RectInfo;
 };
 
@@ -43,7 +52,7 @@ type RectInfo = {
   height: number;
 };
 
-export { Rgba, OffSetInfo, RectInfo, GridAreaInfo, GridChildInfo };
+export { Rgba, OffSetInfo, RectInfo, GridAreaInfo, GridChildInfo, UISize };
 
 export const DefaultRect = {
   x: 0,
@@ -57,4 +66,11 @@ export const DefaultOffset = {
   top: 0,
   right: 0,
   bottom: 0
+};
+
+export const DefaultGridArea = {
+  rowStart: 1,
+  columnStart: 1,
+  rowEnd: 2,
+  columnEnd: 2
 };

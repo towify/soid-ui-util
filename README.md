@@ -14,7 +14,7 @@ After set grid rect / grid row info / grid column info / drop rect, base grid ro
 
 ```typescript
 const gridService = GridService.getInstance();
-gridService
+const droppedInfo = gridService
   .setWindowSize(1024, 768)
   .setGridSize(500, 400)
   .setGridRowInfo([
@@ -57,7 +57,9 @@ gridService
     }
   });
 
-const childGridInfo = gridService.updateChildrenGirdInfo();
+if (droppedInfo.needUpdateGridChildren) {
+  const childrenGridInfo = gridService.getModifiedChildrenGirdInfo();
+}
 ```
 
 ### Update Child Grid Info
@@ -66,27 +68,31 @@ update child width / height / margin
 
 ```typescript
 const gridService = GridService.getInstance();
-gridService.updateChild({
-  id: 'test',
-  x: 10,
-  y: 10,
-  width: {
-    value: 20,
-    unit: '%'
-  },
-  height: {
-    value: 200,
-    unit: 'px'
-  },
-  gridArea: {
-    rowStart: 1,
-    columnStart: 1,
-    rowEnd: 2,
-    columnEnd: 2
+const isNeedUpdateGridChildren = gridService.updateChildInfoAndGetParentGridChildrenUpdateStatus(
+  {
+    id: 'test',
+    x: 10,
+    y: 10,
+    width: {
+      value: 20,
+      unit: '%'
+    },
+    height: {
+      value: 200,
+      unit: 'px'
+    },
+    gridArea: {
+      rowStart: 1,
+      columnStart: 1,
+      rowEnd: 2,
+      columnEnd: 2
+    }
   }
-});
+);
 
-const childGridInfo = gridService.updateChildrenGirdInfo();
+if (isNeedUpdateGridChildren) {
+  const childrenGridInfo = gridService.getModifiedChildrenGirdInfo();
+}
 ```
 
 ### Delete Child Grid Info
@@ -95,9 +101,13 @@ delete child grid
 
 ```typescript
 const gridService = GridService.getInstance();
-gridService.deleteChildById('test');
+const isNeedUpdateGridChildren = gridService.deleteChildByIdAndGetParentGridChildrenUpdateStatus(
+  'test'
+);
 
-const childGridInfo = gridService.updateChildrenGirdInfo();
+if (isNeedUpdateGridChildren) {
+  const childrenGridInfo = gridService.getModifiedChildrenGirdInfo();
+}
 ```
 
 ### Update Children Gird Info
@@ -108,7 +118,7 @@ After change grid gap \ grid padding \ children info, you can update children gr
 const gridService = GridService.getInstance();
 gridService.setGridGap({ value: 10, unit: 'px' }, { value: 10, unit: 'px' });
 
-const childGridInfo = gridService.updateChildrenGirdInfo();
+const childrenGridInfo = gridService.getModifiedChildrenGirdInfo();
 ```
 
 ### Adjust Children Grid Info

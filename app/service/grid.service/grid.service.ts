@@ -2,8 +2,10 @@
  * @author allen
  * @data 2020/11/23 22:24
  */
+import { SizeUnit, UISize } from 'towify-editor-common-values';
 import { GridServiceInterface } from './grid.service.interface';
 import {
+  DefaultGridArea,
   GridAreaInfo,
   GridChildInfo,
   OffSetInfo,
@@ -11,7 +13,6 @@ import {
 } from '../../type/common.type';
 import { GridManager } from '../../manager/gird.manager/grid.manager';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
-import { GridUtils } from '../../utils/grid.utils/grid.utils';
 import { ErrorUtils } from '../../utils/error.utils/error.utils';
 
 export class GridService implements GridServiceInterface {
@@ -39,24 +40,17 @@ export class GridService implements GridServiceInterface {
     return this;
   }
 
-  setGridColumnInfo(
-    info: { value: number; unit: string }[]
-  ): GridServiceInterface {
+  setGridColumnInfo(info: UISize[]): GridServiceInterface {
     this.gridManager.setGridColumnInfo(info);
     return this;
   }
 
-  setGridRowInfo(
-    info: { value: number; unit: string }[]
-  ): GridServiceInterface {
+  setGridRowInfo(info: UISize[]): GridServiceInterface {
     this.gridManager.setGridRowInfo(info);
     return this;
   }
 
-  setGridInfo(
-    row: { value: number; unit: string }[],
-    column: { value: number; unit: string }[]
-  ): GridServiceInterface {
+  setGridInfo(row: UISize[], column: UISize[]): GridServiceInterface {
     this.gridManager.setGridColumnInfo(column);
     this.gridManager.setGridRowInfo(row);
     return this;
@@ -65,17 +59,14 @@ export class GridService implements GridServiceInterface {
   setGridCount(params: {
     row: number;
     column: number;
-    rowGap?: { value: number; unit: string };
-    columnGap?: { value: number; unit: string };
+    rowGap?: UISize;
+    columnGap?: UISize;
   }): GridServiceInterface {
     this.gridManager.setGridCount(params);
     return this;
   }
 
-  setGridGap(
-    row: { value: number; unit: string },
-    column: { value: number; unit: string }
-  ): GridServiceInterface {
+  setGridGap(row: UISize, column: UISize): GridServiceInterface {
     this.gridManager.setGridGap(row, column);
     return this;
   }
@@ -103,30 +94,35 @@ export class GridService implements GridServiceInterface {
     return this;
   }
 
-  droppedChild(dropped: {
+  setDroppedInfo(dropped: {
     id: string;
     x: number;
     y: number;
-    width: { value: number; unit: string };
-    height: { value: number; unit: string };
+    width: UISize;
+    height: UISize;
     gridArea?: GridAreaInfo;
-  }): GridChildInfo {
+  }): {
+    info: GridChildInfo;
+    needUpdateGridChildren: boolean;
+  } {
     if (!this.gridManager.gridSize) {
       ErrorUtils.GridError('GridSize is undefined');
       return {
-        id: dropped.id,
-        gridArea: {
-          rowStart: 1,
-          columnStart: 1,
-          rowEnd: 2,
-          columnEnd: 2
+        info: {
+          id: dropped.id,
+          gridArea: DefaultGridArea,
+          size: {
+            width: { value: 0, unit: SizeUnit.PX },
+            height: { value: 0, unit: SizeUnit.PX }
+          },
+          margin: {
+            left: { value: 0, unit: SizeUnit.PX },
+            right: { value: 0, unit: SizeUnit.PX },
+            top: { value: 0, unit: SizeUnit.PX },
+            bottom: { value: 0, unit: SizeUnit.PX }
+          }
         },
-        marginLeft: { value: 0, unit: 'px' },
-        marginTop: { value: 0, unit: 'px' },
-        marginRight: { value: 0, unit: 'px' },
-        marginBottom: { value: 0, unit: 'px' },
-        width: { value: 0, unit: 'px' },
-        height: { value: 0, unit: 'px' }
+        needUpdateGridChildren: false
       };
     }
     const childIndex = this.gridManager.childInfoList.findIndex(
@@ -202,48 +198,52 @@ export class GridService implements GridServiceInterface {
     const droppedInfo: GridChildInfo = {
       id: dropped.id,
       gridArea: gridInfo.gridArea,
-      marginTop: { value: gridInfo.marginTop, unit: GridUtils.PXUnit },
-      marginLeft: { value: gridInfo.marginLeft, unit: GridUtils.PXUnit },
-      marginRight: { value: marginRight, unit: GridUtils.PXUnit },
-      marginBottom: { value: marginBottom, unit: GridUtils.PXUnit },
-      width,
-      height
+      margin: {
+        top: { value: gridInfo.marginTop, unit: SizeUnit.PX },
+        left: { value: gridInfo.marginLeft, unit: SizeUnit.PX },
+        right: { value: marginRight, unit: SizeUnit.PX },
+        bottom: { value: marginBottom, unit: SizeUnit.PX }
+      },
+      size: {
+        width,
+        height
+      }
     };
     this.gridManager.childInfoList.push(
       this.gridManager.updateChildRect(droppedInfo, gridItemRectList)
     );
-    return droppedInfo;
+    return {
+      info: droppedInfo,
+      needUpdateGridChildren: this.gridManager.needUpdateGridChildren()
+    };
   }
 
-  deleteChildById(childId: string): GridServiceInterface {
+  deleteChildByIdAndGetParentGridChildrenUpdateStatus(
+    childId: string
+  ): boolean {
     const childIndex = this.gridManager.childInfoList.findIndex(
       childInfo => childInfo.id === childId
     );
     if (childIndex !== -1) {
       this.gridManager.childInfoList.splice(childIndex, 1);
     }
-    return this;
+    return this.gridManager.needUpdateGridChildren();
   }
 
-  updateChild(child: GridChildInfo): GridServiceInterface {
-    const childIndex = this.gridManager.childInfoList.findIndex(
+  updateChildInfoAndGetParentGridChildrenUpdateStatus(
+    child: GridChildInfo
+  ): boolean {
+    const updateChildInfo = this.gridManager.childInfoList.find(
       childInfo => childInfo.id === child.id
     );
-    if (childIndex !== -1) {
-      const updateChildInfo = this.gridManager.childInfoList[childIndex];
+    if (updateChildInfo) {
       updateChildInfo.gridArea = child.gridArea;
-      updateChildInfo.marginLeft = child.marginLeft;
-      updateChildInfo.marginTop = child.marginTop;
-      updateChildInfo.marginRight = child.marginRight;
-      updateChildInfo.marginBottom = child.marginBottom;
-      updateChildInfo.width = child.width;
-      updateChildInfo.height = child.height;
+      updateChildInfo.margin = child.margin;
+      updateChildInfo.size = child.size;
       const gridItemRectList = this.gridManager.getGridItemRectList();
-      this.gridManager.childInfoList[
-        childIndex
-      ] = this.gridManager.updateChildRect(updateChildInfo, gridItemRectList);
+      this.gridManager.updateChildRect(updateChildInfo, gridItemRectList);
     }
-    return this;
+    return this.gridManager.needUpdateGridChildren();
   }
 
   adjustChildrenGridInfo(): GridChildInfo[] {
@@ -285,7 +285,7 @@ export class GridService implements GridServiceInterface {
     });
   }
 
-  updateChildrenGirdInfo(): GridChildInfo[] {
+  getModifiedChildrenGirdInfo(): GridChildInfo[] {
     if (!this.gridManager.gridSize || !this.gridManager.childInfoList.length) {
       ErrorUtils.GridError('GridSize is undefined');
       return [];
@@ -314,21 +314,21 @@ export class GridService implements GridServiceInterface {
       });
       const bottomOffset =
         this.gridManager.convertSizeInfoToNumber(
-          childInfo.marginTop,
+          childInfo.margin.top,
           childGridRect.height
         ) +
         this.gridManager.convertSizeInfoToNumber(
-          childInfo.marginBottom,
+          childInfo.margin.bottom,
           childGridRect.height
         ) +
         childInfo.rect.height;
       const rightOffset =
         this.gridManager.convertSizeInfoToNumber(
-          childInfo.marginLeft,
+          childInfo.margin.left,
           childGridRect.width
         ) +
         this.gridManager.convertSizeInfoToNumber(
-          childInfo.marginRight,
+          childInfo.margin.right,
           childGridRect.width
         ) +
         childInfo.rect.width;
@@ -399,22 +399,22 @@ export class GridService implements GridServiceInterface {
     if (!params.childInfo.rect) return params.childInfo;
     const marginLeft = this.gridManager.convertNumberToSizeInfo({
       valueNumber: params.areaInfo.marginLeft,
-      unit: params.childInfo.marginLeft.unit,
+      unit: params.childInfo.margin.left.unit,
       maxValue: params.childGridRect.width
     });
     const marginTop = this.gridManager.convertNumberToSizeInfo({
       valueNumber: params.areaInfo.marginTop,
-      unit: params.childInfo.marginTop.unit,
+      unit: params.childInfo.margin.top.unit,
       maxValue: params.childGridRect.height
     });
     const width = this.gridManager.convertNumberToSizeInfo({
       valueNumber: params.childInfo.rect.width,
-      unit: params.childInfo.width.unit,
+      unit: params.childInfo.size.width.unit,
       maxValue: params.childGridRect.width
     });
     const height = this.gridManager.convertNumberToSizeInfo({
       valueNumber: params.childInfo.rect.height,
-      unit: params.childInfo.height.unit,
+      unit: params.childInfo.size.height.unit,
       maxValue: params.childGridRect.height
     });
     const rowAutoNumber = this.gridManager.getGridAreaAutoNumber({
@@ -436,13 +436,13 @@ export class GridService implements GridServiceInterface {
         params.childInfo.rect.height;
       marginBottom = this.gridManager.convertNumberToSizeInfo({
         valueNumber: bottomValueNumber,
-        unit: params.childInfo.marginBottom.unit,
+        unit: params.childInfo.margin.bottom.unit,
         maxValue: params.childGridRect.height
       });
     } else {
       marginBottom = {
         value: 0,
-        unit: params.childInfo.marginBottom.unit
+        unit: params.childInfo.margin.bottom.unit
       };
     }
     if (columnAutoNumber) {
@@ -452,22 +452,22 @@ export class GridService implements GridServiceInterface {
         params.childInfo.rect.width;
       marginRight = this.gridManager.convertNumberToSizeInfo({
         valueNumber: rightValueNumber,
-        unit: params.childInfo.marginRight.unit,
+        unit: params.childInfo.margin.right.unit,
         maxValue: params.childGridRect.width
       });
     } else {
       marginRight = {
         value: 0,
-        unit: params.childInfo.marginRight.unit
+        unit: params.childInfo.margin.right.unit
       };
     }
     params.childInfo.gridArea = params.gridArea;
-    params.childInfo.marginLeft = marginLeft;
-    params.childInfo.marginRight = marginRight;
-    params.childInfo.marginTop = marginTop;
-    params.childInfo.marginBottom = marginBottom;
-    params.childInfo.width = width;
-    params.childInfo.height = height;
+    params.childInfo.margin.left = marginLeft;
+    params.childInfo.margin.right = marginRight;
+    params.childInfo.margin.top = marginTop;
+    params.childInfo.margin.bottom = marginBottom;
+    params.childInfo.size.width = width;
+    params.childInfo.size.height = height;
     return params.childInfo;
   }
 }
