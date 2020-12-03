@@ -185,7 +185,6 @@ export class GridManager {
           minusOffSetId: '-1'
         };
       });
-      console.log('rowAutoOffsetList', rowAutoOffsetList);
     }
     const gridWidth =
       this.#gridRect.width - (gridColumnInfo.length - 1) * this.#gridColumnGap;
