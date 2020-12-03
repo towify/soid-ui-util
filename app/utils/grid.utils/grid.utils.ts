@@ -89,7 +89,8 @@ export class GridUtils {
       minusOffSetId: string;
     }[];
   }): number[] {
-    let spareValue = params.maxValue ?? 0;
+    const maxValue = params.maxValue ?? 0;
+    let spareValue = maxValue;
     let autoNumber = 0;
     let isAuto = false;
     const valueList: number[] = new Array(params.sizeInfoList.length);
@@ -109,35 +110,37 @@ export class GridUtils {
     valueList.forEach(value => {
       spareValue -= value;
     });
-    if (spareValue < 0) {
-      spareValue = 0;
-    }
-    if (spareValue > 0) {
-      if (params.autoOffsetList) {
-        params.autoOffsetList.forEach(offSet => {
-          spareValue -= offSet.minusOffset;
-        });
-      }
-      if (autoNumber !== 0) {
+    if (autoNumber !== 0) {
+      if (!params.autoOffsetList) {
+        if (spareValue < 0) {
+          spareValue = 0;
+        }
         const autoValue = spareValue / autoNumber;
-        if (!params.autoOffsetList) {
-          params.sizeInfoList.forEach((value, index) => {
-            isAuto = value.value === GridUtils.AutoNumber;
-            if (isAuto) {
-              valueList[index] = autoValue;
-            }
+        params.sizeInfoList.forEach((value, index) => {
+          isAuto = value.value === GridUtils.AutoNumber;
+          if (isAuto) {
+            valueList[index] = autoValue;
+          }
+        });
+      } else if (params.autoOffsetList.length === params.sizeInfoList.length) {
+        if (params.autoOffsetList) {
+          params.autoOffsetList.forEach(offSet => {
+            spareValue -= offSet.minusOffset;
           });
-        } else if (
-          params.autoOffsetList.length === params.sizeInfoList.length
-        ) {
-          let autoOffsetIndexList;
-          let autoItemNumber = 0;
-          let leftAutoNumber = 0;
-          let leftAutoItemId = '';
-          let mapKey = '';
-          let mapValue = 0;
-          const autoMap = new Map<string, number>();
-          params.autoOffsetList.forEach((autoOffset, index) => {
+        }
+        if (spareValue < 0) {
+          spareValue = 0;
+        }
+        const autoValue = spareValue / autoNumber;
+        let autoOffsetIndexList;
+        let autoItemNumber = 0;
+        let leftAutoNumber = 0;
+        let leftAutoItemId = '';
+        let mapKey = '';
+        let mapValue = 0;
+        const autoMap = new Map<string, number>();
+        params.autoOffsetList.forEach((autoOffset, index) => {
+          if (autoOffset.minusOffSetId !== '-1') {
             valueList[index] = autoValue;
             valueList[index] += autoOffset.plusOffset;
             if (autoOffset.plusOffset !== autoOffset.minusOffset) {
@@ -147,37 +150,15 @@ export class GridUtils {
               mapValue += autoOffset.minusOffset - autoOffset.plusOffset;
               autoMap.set(mapKey, mapValue);
             }
-          });
-          autoMap.forEach((value, key) => {
-            if (value > 0) {
-              autoOffsetIndexList = params.autoOffsetList!.reduce<number[]>(
-                (preview, current, index) => {
-                  if (
-                    current.plusOffset === current.minusOffset &&
-                    current.minusOffSetId === key
-                  ) {
-                    return preview.concat(index);
-                  }
-                  return preview;
-                },
-                []
-              );
-              if (autoOffsetIndexList.length) {
-                autoItemNumber = value / autoOffsetIndexList.length;
-                autoOffsetIndexList.forEach(index => {
-                  valueList[index] += autoItemNumber;
-                });
-              } else {
-                leftAutoNumber += value;
-              }
-            }
-          });
-          if (leftAutoNumber > 0) {
-            autoOffsetIndexList = params.autoOffsetList.reduce<number[]>(
+          }
+        });
+        autoMap.forEach((value, key) => {
+          if (value > 0) {
+            autoOffsetIndexList = params.autoOffsetList!.reduce<number[]>(
               (preview, current, index) => {
                 if (
-                  current.minusOffSetId === leftAutoItemId &&
-                  current.plusOffset !== current.minusOffset
+                  current.plusOffset === current.minusOffset &&
+                  current.minusOffSetId === key
                 ) {
                   return preview.concat(index);
                 }
@@ -186,14 +167,36 @@ export class GridUtils {
               []
             );
             if (autoOffsetIndexList.length) {
-              autoItemNumber = leftAutoNumber / autoOffsetIndexList.length;
+              autoItemNumber = value / autoOffsetIndexList.length;
               autoOffsetIndexList.forEach(index => {
                 valueList[index] += autoItemNumber;
               });
             } else {
-              valueList[0] += leftAutoNumber;
-              ErrorUtils.GridError('Calculation auto error');
+              leftAutoNumber += value;
             }
+          }
+        });
+        if (leftAutoNumber !== 0) {
+          autoOffsetIndexList = params.autoOffsetList.reduce<number[]>(
+            (preview, current, index) => {
+              if (
+                current.minusOffSetId === leftAutoItemId &&
+                current.plusOffset !== current.minusOffset
+              ) {
+                return preview.concat(index);
+              }
+              return preview;
+            },
+            []
+          );
+          if (autoOffsetIndexList.length) {
+            autoItemNumber = leftAutoNumber / autoOffsetIndexList.length;
+            autoOffsetIndexList.forEach(index => {
+              valueList[index] += autoItemNumber;
+            });
+          } else {
+            valueList[0] += leftAutoNumber;
+            ErrorUtils.GridError('Calculation auto error');
           }
         }
       }
