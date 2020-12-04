@@ -2,13 +2,11 @@
  * @author allen
  * @data 2020/11/12 15:56
  */
-import { SizeUnit, UISize } from 'towify-editor-common-values';
+import {GridArea, SizeUnit, SpacingPadding, UISize} from 'towify-editor-common-values';
 import {
   DefaultOffset,
   DefaultRect,
-  GridAreaInfo,
   GridChildInfo,
-  OffSetInfo,
   RectInfo
 } from '../../type/common.type';
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
@@ -119,12 +117,12 @@ export class GridManager {
     );
   }
 
-  setGridPaddingInfo(padding: OffSetInfo): void {
+  setGridPaddingInfo(padding: SpacingPadding): void {
     this.gridPadding = this.convertOffsetValue(padding);
     this.updateGridRect();
   }
 
-  setGridBorderInfo(border: OffSetInfo): void {
+  setGridBorderInfo(border: SpacingPadding): void {
     this.gridBorder = this.convertOffsetValue(border);
     this.updateGridRect();
   }
@@ -262,7 +260,7 @@ export class GridManager {
   }
 
   convertChildSizeInfoToNumber(params: {
-    gridArea: GridAreaInfo;
+    gridArea: GridArea;
     gridItemRectList: RectInfo[][];
   }): RectInfo {
     return GridUtils.convertChildSizeInfoToNumber({
@@ -276,10 +274,10 @@ export class GridManager {
     rect: RectInfo;
     gridItemRectList: RectInfo[][];
   }): {
-    gridArea: GridAreaInfo;
-    marginLeft: number;
-    marginTop: number;
-  } {
+      gridArea: GridArea;
+      marginLeft: number;
+      marginTop: number;
+    } {
     return GridUtils.getChildGridAreaInfoByRect({
       rect: params.rect,
       gridItemRectList: params.gridItemRectList,
@@ -290,12 +288,12 @@ export class GridManager {
 
   getGridMarginInfoByRect(params: {
     rect: RectInfo;
-    gridArea: GridAreaInfo;
+    gridArea: GridArea;
     gridItemRectList: RectInfo[][];
   }): {
-    marginLeft: number;
-    marginTop: number;
-  } {
+      marginLeft: number;
+      marginTop: number;
+    } {
     return GridUtils.getGridMarginInfoByRect({
       rect: params.rect,
       gridArea: params.gridArea,
@@ -380,10 +378,10 @@ export class GridManager {
     sizeInfoList: UISize[];
     isRow: boolean;
   }): {
-    minusOffsetId: string;
-    minusOffset: number;
-    plusOffset: number;
-  } {
+      minusOffsetId: string;
+      minusOffset: number;
+      plusOffset: number;
+    } {
     let start = 0;
     let end = 0;
     let minusOffset = 0;
@@ -453,20 +451,29 @@ export class GridManager {
     totalValue += this.convertSizeInfoToNumber(params.sizeValue);
     totalValue += this.convertSizeInfoToNumber(params.marginMin);
     totalValue += this.convertSizeInfoToNumber(params.marginMax);
+    let startIndex = params.start;
+    for (startIndex; startIndex < params.end; startIndex += 1) {
+      if (startIndex < params.sizeInfoList.length && startIndex >= 0) {
+        if (params.sizeInfoList[startIndex].value !== GridUtils.AutoNumber &&
+          params.sizeInfoList[startIndex].value !== GridUtils.NotSetNumber) {
+          totalValue -=this.convertSizeInfoToNumber(params.sizeInfoList[startIndex]);
+        }
+      }
+    }
     if (autoNumber > 0 && totalValue > 0) {
-      return parseFloat((totalValue / (params.end - params.start)).toFixed(2));
+      return parseFloat((totalValue / autoNumber).toFixed(2));
     }
     return 0;
   }
 
   private convertOffsetValue(
-    offset: OffSetInfo
+    offset: SpacingPadding
   ): {
-    left: number;
-    right: number;
-    top: number;
-    bottom: number;
-  } {
+      left: number;
+      right: number;
+      top: number;
+      bottom: number;
+    } {
     const left = this.convertSizeInfoToNumber(
       offset.left,
       this.gridSize?.width

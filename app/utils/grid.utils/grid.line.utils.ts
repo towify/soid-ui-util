@@ -134,9 +134,9 @@ export class GridLineUtils {
     gridItemRectList: RectInfo[][];
     lineSpace: number;
   }): {
-    area: RectInfo[];
-    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
-  } {
+      area: RectInfo[];
+      lines: { fromX: number; fromY: number; toX: number; toY: number }[];
+    } {
     let columnGapArea: RectInfo[] = [];
     let rowGapArea: RectInfo[] = [];
     let columnIndex = 1;
@@ -229,9 +229,9 @@ export class GridLineUtils {
     };
     lineSpace: number;
   }): {
-    area: RectInfo[];
-    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
-  } {
+      area: RectInfo[];
+      lines: { fromX: number; fromY: number; toX: number; toY: number }[];
+    } {
     let columnPaddingArea: RectInfo[] = [];
     let rowPaddingArea: RectInfo[] = [];
     if (params.gridPadding.left > 0) {

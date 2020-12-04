@@ -2,12 +2,11 @@
  * @author allen
  * @data 2020/11/23 22:15
  */
-import { UISize } from 'towify-editor-common-values';
+import {GridArea, SpacingPadding, UISize} from 'towify-editor-common-values';
 import {
-  GridAreaInfo,
   GridChildInfo,
-  OffSetInfo,
-  RectInfo
+  RectInfo,
+  SizeInfo
 } from '../../type/common.type';
 
 export interface GridServiceInterface {
@@ -59,13 +58,13 @@ export interface GridServiceInterface {
    * @param info grid padding info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
    * 设置 parent grid padding
    */
-  setGridPaddingInfo(info: OffSetInfo): GridServiceInterface;
+  setGridPaddingInfo(info: SpacingPadding): GridServiceInterface;
 
   /**
    * @param info grid border info， eg: { left: '20px', top: '10%', right: '10vw', bottom: '20vh' };
    * 设置 parent grid border
    */
-  setGridBorderInfo(info: OffSetInfo): GridServiceInterface;
+  setGridBorderInfo(info: SpacingPadding): GridServiceInterface;
 
   /**
    * @param row: grid row gap
@@ -108,9 +107,8 @@ export interface GridServiceInterface {
     id: string;
     x: number;
     y: number;
-    width: UISize;
-    height: UISize;
-    gridArea?: GridAreaInfo;
+    size: SizeInfo;
+    gridArea?: GridArea;
   }): {
     info: GridChildInfo;
     needUpdateGridChildren: boolean;

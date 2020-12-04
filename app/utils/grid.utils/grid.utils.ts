@@ -2,8 +2,8 @@
  * @author allen
  * @data 2020/11/18 12:12
  */
-import { SizeUnit, UISize } from 'towify-editor-common-values';
-import { GridAreaInfo, RectInfo } from '../../type/common.type';
+import { GridArea, SizeUnit, UISize } from 'towify-editor-common-values';
+import { RectInfo } from '../../type/common.type';
 import { ErrorUtils } from '../error.utils/error.utils';
 
 export class GridUtils {
@@ -203,7 +203,7 @@ export class GridUtils {
   }
 
   static convertChildSizeInfoToNumber(params: {
-    gridArea: GridAreaInfo;
+    gridArea: GridArea;
     gridItemRectList: RectInfo[][];
     gridRect: RectInfo;
   }): RectInfo {
@@ -274,10 +274,10 @@ export class GridUtils {
     rowGap: number;
     columnGap: number;
   }): {
-    gridArea: GridAreaInfo;
-    marginLeft: number;
-    marginTop: number;
-  } {
+      gridArea: GridArea;
+      marginLeft: number;
+      marginTop: number;
+    } {
     const maxWidth = params.rect.x + params.rect.width;
     const maxHeight = params.rect.y + params.rect.height;
     const rowLength = params.gridItemRectList.length;
@@ -414,14 +414,14 @@ export class GridUtils {
 
   static getGridMarginInfoByRect(params: {
     rect: RectInfo;
-    gridArea: GridAreaInfo;
+    gridArea: GridArea;
     gridItemRectList: RectInfo[][];
     rowGap: number;
     columnGap: number;
   }): {
-    marginLeft: number;
-    marginTop: number;
-  } {
+      marginLeft: number;
+      marginTop: number;
+    } {
     const rowStart = params.gridArea.rowStart - 1;
     const columnStart = params.gridArea.columnStart - 1;
     let marginLeft = params.rect.x;

@@ -2,7 +2,7 @@
  *  @Author KaySaith
  *  @Date 10/31/20
  */
-import { UISize } from 'towify-editor-common-values';
+import { GridArea, SpacingMargin, UISize } from 'towify-editor-common-values';
 
 type Rgba = {
   red: number;
@@ -11,36 +11,15 @@ type Rgba = {
   alpha: number;
 };
 
-type OffSetInfo = {
-  left: UISize;
-  top: UISize;
-  right: UISize;
-  bottom: UISize;
-};
-
-type MarginInfo = {
-  left: UISize;
-  right: UISize;
-  top: UISize;
-  bottom: UISize;
-};
-
 type SizeInfo = {
   width: UISize;
   height: UISize;
 };
 
-type GridAreaInfo = {
-  rowStart: number;
-  columnStart: number;
-  rowEnd: number;
-  columnEnd: number;
-};
-
 type GridChildInfo = {
   id: string;
-  gridArea: GridAreaInfo;
-  margin: MarginInfo;
+  gridArea: GridArea;
+  margin: SpacingMargin;
   size: SizeInfo;
   rect?: RectInfo;
 };
@@ -52,7 +31,7 @@ type RectInfo = {
   height: number;
 };
 
-export { Rgba, OffSetInfo, RectInfo, GridAreaInfo, GridChildInfo, UISize };
+export { Rgba, RectInfo, GridChildInfo, SizeInfo };
 
 export const DefaultRect = {
   x: 0,
