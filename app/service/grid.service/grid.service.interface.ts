@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/11/23 22:15
  */
-import {GridArea, SpacingPadding, UISize} from 'towify-editor-common-values';
+import { GridArea, SpacingPadding, UISize } from 'towify-editor-common-values';
 import {
   GridChildInfo,
   RectInfo,
@@ -37,11 +37,12 @@ export interface GridServiceInterface {
   setGridColumnInfo(info: UISize[]): GridServiceInterface;
 
   /**
-   * @param row: grid row info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
-   * @param column: grid column info eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
-   * 设置 parent grid column info
+   * @param info
    */
-  setGridInfo(row: UISize[], column: UISize[]): GridServiceInterface;
+  setGridInfo(info: {
+    row: UISize[],
+    column: UISize[]
+  }): GridServiceInterface;
 
   /**
    * @param params: grid row count
@@ -50,8 +51,10 @@ export interface GridServiceInterface {
   setGridCount(params: {
     row: number;
     column: number;
-    rowGap?: UISize;
-    columnGap?: UISize;
+    gap?: {
+      row: UISize,
+      column: UISize
+    }
   }): GridServiceInterface;
 
   /**
@@ -67,11 +70,12 @@ export interface GridServiceInterface {
   setGridBorderInfo(info: SpacingPadding): GridServiceInterface;
 
   /**
-   * @param row: grid row gap
-   * @param column: grid column gap
-   * 设置 parent grid row \ column gap
+   * @param gap
    */
-  setGridGap(row: UISize, column: UISize): GridServiceInterface;
+  setGridGap(gap: {
+    row: UISize,
+    column: UISize
+  }): GridServiceInterface;
 
   /**
    * @description 设置 grid children rect
@@ -117,7 +121,7 @@ export interface GridServiceInterface {
   /**
    * @description 校准 grid children info， 当更新 grid row / column info 后校准 children 的 grid area,  grid row / column info 设置为auto的将重置为不没有被挤压的状态
    */
-  adjustChildrenGridInfo(): GridChildInfo[];
+  adjustChildrenAndResetAutoGridInfo(): GridChildInfo[];
 
   /**
    * @description 更新 grid children info, 当更新 grid rect / padding / gap 移动某个 child 之后，更新所有 child 的 grid info， 不会修改 grid area 只会调整 margin 的数值

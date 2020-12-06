@@ -15,8 +15,8 @@ import { ErrorUtils } from '../../utils/error.utils/error.utils';
 export class GridManager {
   gridSize?: { width: number; height: number };
   childInfoList: GridChildInfo[] = [];
-  #gridColumnInfo?: UISize[];
-  #gridRowInfo?: UISize[];
+  #gridColumnInfo: UISize[] = [];
+  #gridRowInfo: UISize[] = [];
   #windowSize?: { width: number; height: number };
   #gridRowGap = 0;
   #gridColumnGap = 0;
@@ -25,47 +25,43 @@ export class GridManager {
   gridBorder = DefaultOffset;
 
   get gridColumnInfo(): UISize[] {
-    if (this.#gridColumnInfo) {
-      return this.#gridColumnInfo;
-    }
-    return [];
+    return this.#gridColumnInfo;
   }
 
   get gridRowInfo(): UISize[] {
-    if (this.#gridRowInfo) {
-      return this.#gridRowInfo;
-    }
-    return [];
+    return this.#gridRowInfo;
   }
 
   setWindowSize(width: number, height: number): void {
-    this.#windowSize = {
-      width,
-      height
-    };
+    this.#windowSize = { width, height };
   }
 
   setGridSize(width: number, height: number): void {
-    this.gridSize = {
-      width,
-      height
-    };
+    this.gridSize = { width, height };
     this.updateGridRect();
   }
 
   setGridColumnInfo(info: UISize[]): void {
-    this.#gridColumnInfo = info;
+    this.#gridColumnInfo = [];
+    info.forEach((unit) => {
+      this.#gridColumnInfo.push(JSON.parse(JSON.stringify(unit)));
+    });
   }
 
   setGridRowInfo(info: UISize[]): void {
-    this.#gridRowInfo = info;
+    this.#gridRowInfo = [];
+    info.forEach((unit) => {
+      this.#gridRowInfo.push(JSON.parse(JSON.stringify(unit)));
+    });
   }
 
   setGridCount(params: {
     row: number;
     column: number;
-    rowGap?: UISize;
-    columnGap?: UISize;
+    gap?: {
+      row: UISize,
+      column: UISize
+    }
   }): void {
     if (!this.#gridRect) {
       ErrorUtils.GridError('GridSize is undefined');
@@ -73,15 +69,15 @@ export class GridManager {
     }
     this.#gridRowInfo = [];
     this.#gridColumnInfo = [];
-    if (params.rowGap) {
+    if (params.gap?.row) {
       this.#gridRowGap = this.convertSizeInfoToNumber(
-        params.rowGap,
+        params.gap.row,
         this.#gridRect.height
       );
     }
-    if (params.columnGap) {
+    if (params.gap?.column) {
       this.#gridColumnGap = this.convertSizeInfoToNumber(
-        params.columnGap,
+        params.gap.column,
         this.#gridRect.width
       );
     }
@@ -105,14 +101,17 @@ export class GridManager {
     }
   }
 
-  setGridGap(row: UISize, column: UISize): void {
+  setGridGap(params: {
+    row: UISize,
+    column: UISize
+  }): void {
     if (!this.#gridRect) {
       ErrorUtils.GridError('GridSize is undefined');
       return;
     }
-    this.#gridRowGap = this.convertSizeInfoToNumber(row, this.#gridRect?.width);
+    this.#gridRowGap = this.convertSizeInfoToNumber(params.row, this.#gridRect?.width);
     this.#gridColumnGap = this.convertSizeInfoToNumber(
-      column,
+      params.column,
       this.#gridRect?.width
     );
   }

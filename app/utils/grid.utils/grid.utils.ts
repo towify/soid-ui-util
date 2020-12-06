@@ -2,16 +2,15 @@
  * @author allen
  * @data 2020/11/18 12:12
  */
-import { GridArea, SizeUnit, UISize } from 'towify-editor-common-values';
+import { GridArea, Mark, SizeUnit, UISize } from 'towify-editor-common-values';
 import { RectInfo } from '../../type/common.type';
 import { ErrorUtils } from '../error.utils/error.utils';
+import { NumberUtils } from '../number.utils/number.utils';
 
 export class GridUtils {
-  static AutoNumber = -10000;
+  static AutoNumber = Mark.Auto;
 
-  static NotSetNumber = -20000;
-
-  static PXUnit = 'px';
+  static NotSetNumber = Mark.Unset;
 
   static checkPointIsInRect(
     point: { x: number; y: number },
@@ -29,20 +28,26 @@ export class GridUtils {
     maxValue?: number;
   }): UISize {
     let value = params.valueNumber;
-    if (params.unit === 'vw') {
+    if (params.unit === SizeUnit.VW) {
       value = (params.valueNumber / (params.windowSize?.width ?? 1)) * 100;
       if (!params.windowSize?.width) {
         ErrorUtils.GridError('Window size is undefined');
       }
     }
-    if (params.unit === 'vh') {
+    if (params.unit === SizeUnit.VH) {
       value = (params.valueNumber / (params.windowSize?.height ?? 1)) * 100;
       if (!params.windowSize?.height) {
         ErrorUtils.GridError('Window size is undefined');
       }
     }
-    if (params.unit === '%') {
+    if (params.unit === SizeUnit.Percent) {
       value = (params.valueNumber / (params.maxValue ?? 1)) * 100;
+    }
+    if (params.unit === SizeUnit.PX) {
+      return {
+        value: NumberUtils.parseViewNumber(value),
+        unit: params.unit
+      };
     }
     return {
       value: parseFloat(value.toFixed(1)),
@@ -407,8 +412,8 @@ export class GridUtils {
     });
     return {
       gridArea: { rowStart, columnStart, rowEnd, columnEnd },
-      marginLeft: parseFloat(marginLeft.toFixed(1)),
-      marginTop: parseFloat(marginTop.toFixed(1))
+      marginLeft: NumberUtils.parseViewNumber(marginLeft),
+      marginTop: NumberUtils.parseViewNumber(marginTop)
     };
   }
 
@@ -433,8 +438,8 @@ export class GridUtils {
       marginLeft = params.rect.x - params.gridItemRectList[0][columnStart].x;
     }
     return {
-      marginLeft: parseFloat(marginLeft.toFixed(1)),
-      marginTop: parseFloat(marginTop.toFixed(1))
+      marginLeft: NumberUtils.parseViewNumber(marginLeft),
+      marginTop: NumberUtils.parseViewNumber(marginTop)
     };
   }
 }

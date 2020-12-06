@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/11/23 22:24
  */
-import {GridArea, SizeUnit, SpacingPadding, UISize} from 'towify-editor-common-values';
+import { GridArea, SizeUnit, SpacingPadding, UISize } from 'towify-editor-common-values';
 import { GridServiceInterface } from './grid.service.interface';
 import {
   DefaultGridArea,
@@ -49,24 +49,32 @@ export class GridService implements GridServiceInterface {
     return this;
   }
 
-  setGridInfo(row: UISize[], column: UISize[]): GridServiceInterface {
-    this.gridManager.setGridColumnInfo(column);
-    this.gridManager.setGridRowInfo(row);
+  setGridInfo(info: {
+    row: UISize[],
+    column: UISize[]
+  }): GridServiceInterface {
+    this.gridManager.setGridColumnInfo(info.column);
+    this.gridManager.setGridRowInfo(info.row);
     return this;
   }
 
   setGridCount(params: {
     row: number;
     column: number;
-    rowGap?: UISize;
-    columnGap?: UISize;
+    gap?: {
+      row: UISize,
+      column: UISize
+    }
   }): GridServiceInterface {
     this.gridManager.setGridCount(params);
     return this;
   }
 
-  setGridGap(row: UISize, column: UISize): GridServiceInterface {
-    this.gridManager.setGridGap(row, column);
+  setGridGap(gap: {
+    row: UISize,
+    column: UISize
+  }): GridServiceInterface {
+    this.gridManager.setGridGap(gap);
     return this;
   }
 
@@ -85,7 +93,10 @@ export class GridService implements GridServiceInterface {
       ErrorUtils.GridError('GridSize is undefined');
       return this;
     }
-    this.gridManager.childInfoList = childrenInfo;
+    this.gridManager.childInfoList.splice(0, this.gridManager.childInfoList.length);
+    childrenInfo.forEach((child) => {
+      this.gridManager.childInfoList.push(child);
+    });
     const gridItemRectList = this.gridManager.getGridItemRectList();
     this.gridManager.childInfoList.forEach(childInfo => {
       this.gridManager.updateChildRect(childInfo, gridItemRectList);
@@ -193,7 +204,7 @@ export class GridService implements GridServiceInterface {
     if (columnAutoNumber) {
       marginRight = 0 - gridInfo.marginLeft - droppedRect.width;
     }
-    const droppedInfo: GridChildInfo = {
+    const droppedInfo = {
       id: dropped.id,
       gridArea: gridInfo.gridArea,
       margin: {
@@ -244,7 +255,7 @@ export class GridService implements GridServiceInterface {
     return this.gridManager.needUpdateGridChildren();
   }
 
-  adjustChildrenGridInfo(): GridChildInfo[] {
+  adjustChildrenAndResetAutoGridInfo(): GridChildInfo[] {
     if (!this.gridManager.gridSize) {
       ErrorUtils.GridError('GridSize is undefined');
       return [];
