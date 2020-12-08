@@ -5,6 +5,8 @@
 
 export * from './service/grid.service/grid.service';
 export * from './service/grid.service/grid.service.interface';
+export * from './service/operator.service/operator.service';
+export * from './service/operator.service/operator.service.interface';
 export * from './utils/number.utils/number.utils';
 export * from './manager/box.shadow.manager/box.shadow.manager';
 export * from './manager/box.shadow.manager/box.shadow.manager.interface';

@@ -31,7 +31,12 @@ type RectInfo = {
   height: number;
 };
 
-export { Rgba, RectInfo, GridChildInfo, SizeInfo };
+type RangeInfo = {
+  from: number;
+  to: number
+};
+
+export { Rgba, RectInfo, GridChildInfo, SizeInfo, RangeInfo };
 
 export const DefaultRect = {
   x: 0,
