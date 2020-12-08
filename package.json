@@ -13,15 +13,17 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
   "lint-staged": {
     "*.html": "prettier --write --parser angular",
     "*.component.html": "prettier --write --parser angular",
     "*.{js,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
+      "eslint --fix --cache --format=pretty",
+      "prettier --ignore-path .eslintignore --single-quote --write",
+      "git add"
     ],
     "*.js": "eslint --cache --fix",
     "*.{js,css,md,json,scss}": "prettier --write"
