@@ -7,6 +7,8 @@ import { Mark } from 'towify-editor-common-values';
 import { RangeInfo, RectInfo } from '../../type/common.type';
 
 export class OperatorUtils {
+  static Gap = 10;
+
   static checkY(yRange: RangeInfo, rect: RectInfo): boolean {
     return rect.y < yRange.to && rect.y + rect.height > yRange.from;
   }
@@ -56,8 +58,8 @@ export class OperatorUtils {
       }
     });
     return {
-      from,
-      to
+      from: from - OperatorUtils.Gap,
+      to: to + OperatorUtils.Gap
     };
   }
 
@@ -78,8 +80,8 @@ export class OperatorUtils {
       }
     });
     return {
-      from,
-      to
+      from: from - OperatorUtils.Gap,
+      to: to + OperatorUtils.Gap
     };
   }
 
@@ -87,36 +89,36 @@ export class OperatorUtils {
     if (rect.x > parentRect.x + parentRect.width) {
       if (
         rect.y >= parentRect.y &&
-        rect.y <= parentRect.y + parentRect.height
+        rect.y <= parentRect.y + parentRect.height - rect.height
       ) {
         return rect.x - (parentRect.x + parentRect.width);
       }
       if (rect.y < parentRect.y) {
         return Math.sqrt(
-          (parentRect.y - (rect.y + rect.height)) ** 2 +
+          (parentRect.y - rect.y) ** 2 +
             (rect.x - (parentRect.x + parentRect.width)) ** 2
         );
       }
       return Math.sqrt(
-        (rect.y - (parentRect.y + parentRect.height)) ** 2 +
+        (rect.y + rect.height - (parentRect.y + parentRect.height)) ** 2 +
           (rect.x - (parentRect.x + parentRect.width)) ** 2
       );
     }
-    if (parentRect.x > rect.x + rect.width) {
+    if (rect.x < parentRect.x - rect.width) {
       if (
         rect.y >= parentRect.y &&
-        rect.y <= parentRect.y + parentRect.height
+        rect.y <= parentRect.y + parentRect.height - rect.height
       ) {
         return parentRect.x - (rect.x + rect.width);
       }
       if (rect.y < parentRect.y) {
         return Math.sqrt(
-          (parentRect.y - (rect.y + rect.height)) ** 2 +
+          (parentRect.y - rect.y) ** 2 +
             (parentRect.x - (rect.x + rect.width)) ** 2
         );
       }
       return Math.sqrt(
-        (rect.y - (parentRect.y + parentRect.height)) ** 2 +
+        (rect.y + rect.height - (parentRect.y + parentRect.height)) ** 2 +
           (parentRect.x - (rect.x + rect.width)) ** 2
       );
     }

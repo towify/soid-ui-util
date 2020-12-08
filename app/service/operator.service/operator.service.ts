@@ -17,6 +17,8 @@ export class OperatorService implements OperatorServiceInterface {
 
   #size?: { width: number; height: number };
 
+  #minDistance = 10;
+
   #gap = 10;
 
   static getInstance(): OperatorServiceInterface {
@@ -25,7 +27,7 @@ export class OperatorService implements OperatorServiceInterface {
   }
 
   set minDistance(value: number) {
-    this.#gap = value;
+    this.#minDistance = value;
   }
 
   setPageContainerRectList(rectList: RectInfo[]): OperatorServiceInterface {
@@ -79,7 +81,7 @@ export class OperatorService implements OperatorServiceInterface {
         rect: DefaultRect,
         distance: -1
       };
-    let start = this.#parentRect.x + this.#parentRect.width;
+    let start = this.#parentRect.x + this.#parentRect.width + this.#minDistance;
     let rect;
     let xInfo;
     let range;
@@ -92,7 +94,7 @@ export class OperatorService implements OperatorServiceInterface {
       if (!xInfo.mergeList.length) {
         rect = {
           x: xInfo.x,
-          y: this.#parentRect.y + this.#gap,
+          y: this.#parentRect.y,
           width: this.#size.width,
           height: this.#size.height
         };
@@ -142,7 +144,7 @@ export class OperatorService implements OperatorServiceInterface {
         rect: DefaultRect,
         distance: -1
       };
-    let start = this.#parentRect.x;
+    let start = this.#parentRect.x - this.#minDistance;
     let rect;
     let xInfo;
     let range;
@@ -155,7 +157,7 @@ export class OperatorService implements OperatorServiceInterface {
       if (!xInfo.mergeList.length) {
         rect = {
           x: xInfo.x,
-          y: this.#parentRect.y + this.#gap,
+          y: this.#parentRect.y,
           width: this.#size.width,
           height: this.#size.height
         };
@@ -202,7 +204,7 @@ export class OperatorService implements OperatorServiceInterface {
         rect: DefaultRect,
         distance: -1
       };
-    let start = this.#parentRect.y;
+    let start = this.#parentRect.y - this.#minDistance;
     let rect;
     let yInfo;
     let range;
@@ -214,7 +216,7 @@ export class OperatorService implements OperatorServiceInterface {
       });
       if (!yInfo.mergeList.length) {
         rect = {
-          x: this.#parentRect.x + this.#gap,
+          x: this.#parentRect.x,
           y: yInfo.y,
           width: this.#size.width,
           height: this.#size.height
@@ -258,7 +260,8 @@ export class OperatorService implements OperatorServiceInterface {
         rect: DefaultRect,
         distance: -1
       };
-    let start = this.#parentRect.y + this.#parentRect.height;
+    let start =
+      this.#parentRect.y + this.#parentRect.height + this.#minDistance;
     let rect;
     let yInfo;
     let range;
@@ -270,7 +273,7 @@ export class OperatorService implements OperatorServiceInterface {
       });
       if (!yInfo.mergeList.length) {
         rect = {
-          x: this.#parentRect.x + this.#gap,
+          x: this.#parentRect.x,
           y: yInfo.y,
           width: this.#size.width,
           height: this.#size.height
@@ -322,9 +325,9 @@ export class OperatorService implements OperatorServiceInterface {
     let xEnd;
     if (params.positive) {
       xStart = params.start;
-      xEnd = params.start + this.#size.width + this.#gap;
+      xEnd = params.start + this.#size.width;
     } else {
-      xStart = params.start - this.#size.width - this.#gap;
+      xStart = params.start - this.#size.width;
       xEnd = params.start;
     }
     const mergeList = OperatorUtils.getRectListInXRange(
@@ -334,9 +337,6 @@ export class OperatorService implements OperatorServiceInterface {
       },
       params.rectList
     );
-    if (params.positive) {
-      xStart += this.#gap;
-    }
     if (!mergeList.length) {
       return {
         x: xStart,
@@ -374,7 +374,7 @@ export class OperatorService implements OperatorServiceInterface {
     }
     let negativeY;
     let negativeInfo;
-    let negativeStart = this.#parentRect.y;
+    let negativeStart = this.#parentRect.y + this.#size.height;
     while (!negativeY) {
       negativeInfo = this.findMinYPosition({
         start: negativeStart,
@@ -431,7 +431,7 @@ export class OperatorService implements OperatorServiceInterface {
     if (!this.#size || !this.#parentRect) return undefined;
     let positiveX;
     let positiveInfo;
-    let positiveStart = this.#parentRect.x;
+    let positiveStart = this.#parentRect.x - this.#size.width;
     while (!positiveX) {
       positiveInfo = this.findMinXPosition({
         start: positiveStart,
@@ -473,18 +473,15 @@ export class OperatorService implements OperatorServiceInterface {
     let yEnd;
     if (params.positive) {
       yStart = params.start;
-      yEnd = params.start + this.#size.height + this.#gap;
+      yEnd = params.start + this.#size.height;
     } else {
-      yStart = params.start - this.#size.height - this.#gap;
+      yStart = params.start - this.#size.height;
       yEnd = params.start;
     }
     const mergeList = OperatorUtils.getRectListInYRange(
       { from: yStart, to: yEnd },
       params.rectList
     );
-    if (params.positive) {
-      yStart += this.#gap;
-    }
     if (!mergeList.length) {
       return {
         y: yStart,
