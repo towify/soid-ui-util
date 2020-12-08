@@ -99,8 +99,12 @@ export class OperatorService implements OperatorServiceInterface {
         });
       }
       if (!rect) {
-        range = OperatorUtils.getXRangeInRectList(xInfo.mergeList.reduce<RectInfo[]>((previous, current) => {
-          if (OperatorUtils.checkY({from: current.y, to: current.y + current.height}, this.#parentRect!)) {
+        range = OperatorUtils.getXRangeInRectList(xInfo
+          .mergeList.reduce<RectInfo[]>((previous, current) => {
+          if (OperatorUtils.checkY({
+            from: current.y,
+            to: current.y + current.height
+          }, this.#parentRect!)) {
             return previous.concat(current);
           }
           return previous;
