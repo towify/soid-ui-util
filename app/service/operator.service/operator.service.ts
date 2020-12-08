@@ -2,9 +2,10 @@
  * @author allen
  * @data 2020/12/6 16:07
  */
+
 import { Mark } from 'towify-editor-common-values';
 import { OperatorServiceInterface } from './operator.service.interface';
-import { DefaultRect, RectInfo} from '../../type/common.type';
+import { DefaultRect, RectInfo } from '../../type/common.type';
 import { OperatorUtils } from '../../utils/operator.utils/operator.utils';
 
 export class OperatorService implements OperatorServiceInterface {
@@ -14,7 +15,7 @@ export class OperatorService implements OperatorServiceInterface {
 
   #parentRect?: RectInfo;
 
-  #size?: { width: number; height: number};
+  #size?: { width: number; height: number };
 
   #gap = 10;
 
@@ -27,7 +28,7 @@ export class OperatorService implements OperatorServiceInterface {
     this.#gap = value;
   }
 
-  setPageContainerRects(rectList: RectInfo[]): OperatorServiceInterface {
+  setPageContainerRectList(rectList: RectInfo[]): OperatorServiceInterface {
     this.#pageRectList = rectList;
     return this;
   }
@@ -50,13 +51,17 @@ export class OperatorService implements OperatorServiceInterface {
     const rightRectInfo = this.getRightMinDistanceRect();
     const topRectInfo = this.getTopMinDistanceRect();
     const bottomRectInfo = this.getBottomMinDistanceRect();
-    if (bottomRectInfo.distance < topRectInfo.distance &&
+    if (
+      bottomRectInfo.distance < topRectInfo.distance &&
       bottomRectInfo.distance < rightRectInfo.distance &&
-      bottomRectInfo.distance < leftRectInfo.distance) {
+      bottomRectInfo.distance < leftRectInfo.distance
+    ) {
       return bottomRectInfo.rect;
     }
-    if (topRectInfo.distance < rightRectInfo.distance &&
-      topRectInfo.distance < leftRectInfo.distance) {
+    if (
+      topRectInfo.distance < rightRectInfo.distance &&
+      topRectInfo.distance < leftRectInfo.distance
+    ) {
       return topRectInfo.rect;
     }
     if (leftRectInfo.distance < rightRectInfo.distance) {
@@ -66,13 +71,14 @@ export class OperatorService implements OperatorServiceInterface {
   }
 
   private getRightMinDistanceRect(): {
-    rect: RectInfo,
-    distance: number
+    rect: RectInfo;
+    distance: number;
   } {
-    if (!this.#size || !this.#parentRect) return {
-      rect: DefaultRect,
-      distance: -1
-    };
+    if (!this.#size || !this.#parentRect)
+      return {
+        rect: DefaultRect,
+        distance: -1
+      };
     let start = this.#parentRect.x + this.#parentRect.width;
     let rect;
     let xInfo;
@@ -98,16 +104,22 @@ export class OperatorService implements OperatorServiceInterface {
         });
       }
       if (!rect) {
-        range = OperatorUtils.getXRangeInRectList(xInfo
-          .mergeList.reduce<RectInfo[]>((previous, current) => {
-          if (OperatorUtils.checkY({
-            from: current.y,
-            to: current.y + current.height
-          }, this.#parentRect!)) {
-            return previous.concat(current);
-          }
-          return previous;
-        }, []));
+        range = OperatorUtils.getXRangeInRectList(
+          xInfo.mergeList.reduce<RectInfo[]>((previous, current) => {
+            if (
+              OperatorUtils.checkY(
+                {
+                  from: current.y,
+                  to: current.y + current.height
+                },
+                this.#parentRect!
+              )
+            ) {
+              return previous.concat(current);
+            }
+            return previous;
+          }, [])
+        );
         if (range.from !== Mark.Unset) {
           start = range.to;
         } else {
@@ -122,13 +134,14 @@ export class OperatorService implements OperatorServiceInterface {
   }
 
   private getLeftMinDistanceRect(): {
-    rect: RectInfo,
-    distance: number
+    rect: RectInfo;
+    distance: number;
   } {
-    if (!this.#size || !this.#parentRect) return {
-      rect: DefaultRect,
-      distance: -1
-    };
+    if (!this.#size || !this.#parentRect)
+      return {
+        rect: DefaultRect,
+        distance: -1
+      };
     let start = this.#parentRect.x;
     let rect;
     let xInfo;
@@ -154,12 +167,19 @@ export class OperatorService implements OperatorServiceInterface {
         });
       }
       if (!rect) {
-        range = OperatorUtils.getXRangeInRectList(xInfo.mergeList.reduce<RectInfo[]>((previous, current) => {
-          if (OperatorUtils.checkY({from: current.y, to: current.y + current.height}, this.#parentRect!)) {
-            return previous.concat(current);
-          }
-          return previous;
-        }, []));
+        range = OperatorUtils.getXRangeInRectList(
+          xInfo.mergeList.reduce<RectInfo[]>((previous, current) => {
+            if (
+              OperatorUtils.checkY(
+                { from: current.y, to: current.y + current.height },
+                this.#parentRect!
+              )
+            ) {
+              return previous.concat(current);
+            }
+            return previous;
+          }, [])
+        );
         if (range.from !== Mark.Unset) {
           start = range.from;
         } else {
@@ -174,13 +194,14 @@ export class OperatorService implements OperatorServiceInterface {
   }
 
   private getTopMinDistanceRect(): {
-    rect: RectInfo,
-    distance: number
+    rect: RectInfo;
+    distance: number;
   } {
-    if (!this.#size || !this.#parentRect) return {
-      rect: DefaultRect,
-      distance: -1
-    };
+    if (!this.#size || !this.#parentRect)
+      return {
+        rect: DefaultRect,
+        distance: -1
+      };
     let start = this.#parentRect.y;
     let rect;
     let yInfo;
@@ -202,12 +223,19 @@ export class OperatorService implements OperatorServiceInterface {
         rect = this.findHorizonRect(yInfo.y, yInfo.mergeList);
       }
       if (!rect) {
-        range = OperatorUtils.getYRangeInRectList(yInfo.mergeList.reduce<RectInfo[]>((previous, current) => {
-          if (OperatorUtils.checkX({from: current.x, to: current.x + current.width}, this.#parentRect!)) {
-            return previous.concat(current);
-          }
-          return previous;
-        }, []));
+        range = OperatorUtils.getYRangeInRectList(
+          yInfo.mergeList.reduce<RectInfo[]>((previous, current) => {
+            if (
+              OperatorUtils.checkX(
+                { from: current.x, to: current.x + current.width },
+                this.#parentRect!
+              )
+            ) {
+              return previous.concat(current);
+            }
+            return previous;
+          }, [])
+        );
         if (range.from !== Mark.Unset) {
           start = range.from;
         } else {
@@ -222,13 +250,14 @@ export class OperatorService implements OperatorServiceInterface {
   }
 
   private getBottomMinDistanceRect(): {
-    rect: RectInfo,
-    distance: number
+    rect: RectInfo;
+    distance: number;
   } {
-    if (!this.#size || !this.#parentRect) return {
-      rect: DefaultRect,
-      distance: -1
-    };
+    if (!this.#size || !this.#parentRect)
+      return {
+        rect: DefaultRect,
+        distance: -1
+      };
     let start = this.#parentRect.y + this.#parentRect.height;
     let rect;
     let yInfo;
@@ -250,12 +279,19 @@ export class OperatorService implements OperatorServiceInterface {
         rect = this.findHorizonRect(yInfo.y, yInfo.mergeList);
       }
       if (!rect) {
-        range = OperatorUtils.getYRangeInRectList(yInfo.mergeList.reduce<RectInfo[]>((previous, current) => {
-          if (OperatorUtils.checkX({from: current.x, to: current.x + current.width}, this.#parentRect!)) {
-            return previous.concat(current);
-          }
-          return previous;
-        }, []));
+        range = OperatorUtils.getYRangeInRectList(
+          yInfo.mergeList.reduce<RectInfo[]>((previous, current) => {
+            if (
+              OperatorUtils.checkX(
+                { from: current.x, to: current.x + current.width },
+                this.#parentRect!
+              )
+            ) {
+              return previous.concat(current);
+            }
+            return previous;
+          }, [])
+        );
         if (range.to !== Mark.Unset) {
           start = range.to;
         } else {
@@ -270,17 +306,18 @@ export class OperatorService implements OperatorServiceInterface {
   }
 
   private findMinXPosition(params: {
-    start: number,
-    rectList: RectInfo[],
-    positive: boolean
+    start: number;
+    rectList: RectInfo[];
+    positive: boolean;
   }): {
-      x: number,
-      mergeList: RectInfo[],
-    } {
-    if (!this.#size) return {
-      x: 0,
-      mergeList: []
-    };
+    x: number;
+    mergeList: RectInfo[];
+  } {
+    if (!this.#size)
+      return {
+        x: 0,
+        mergeList: []
+      };
     let xStart;
     let xEnd;
     if (params.positive) {
@@ -290,10 +327,13 @@ export class OperatorService implements OperatorServiceInterface {
       xStart = params.start - this.#size.width - this.#gap;
       xEnd = params.start;
     }
-    const mergeList = OperatorUtils.getRectListInXRange({
-      from: xStart,
-      to: xEnd
-    }, params.rectList);
+    const mergeList = OperatorUtils.getRectListInXRange(
+      {
+        from: xStart,
+        to: xEnd
+      },
+      params.rectList
+    );
     if (params.positive) {
       xStart += this.#gap;
     }
@@ -310,9 +350,9 @@ export class OperatorService implements OperatorServiceInterface {
   }
 
   private findVerticalRect(params: {
-    xStart: number,
-    rectList: RectInfo[],
-    positive: boolean
+    xStart: number;
+    rectList: RectInfo[];
+    positive: boolean;
   }): RectInfo | undefined {
     if (!this.#size || !this.#parentRect) return undefined;
     let positiveY;
@@ -360,8 +400,14 @@ export class OperatorService implements OperatorServiceInterface {
       width: this.#size.width,
       height: this.#size.height
     };
-    const negativeDistance = OperatorUtils.getRectDistance(negativeRect, this.#parentRect);
-    const positiveDistance = OperatorUtils.getRectDistance(positiveRect, this.#parentRect);
+    const negativeDistance = OperatorUtils.getRectDistance(
+      negativeRect,
+      this.#parentRect
+    );
+    const positiveDistance = OperatorUtils.getRectDistance(
+      positiveRect,
+      this.#parentRect
+    );
     const xRange = OperatorUtils.getXRangeInRectList(params.rectList);
     let maxDistance;
     if (params.positive) {
@@ -378,7 +424,10 @@ export class OperatorService implements OperatorServiceInterface {
     return undefined;
   }
 
-  private findHorizonRect(yStart: number, rectList: RectInfo[]): RectInfo | undefined {
+  private findHorizonRect(
+    yStart: number,
+    rectList: RectInfo[]
+  ): RectInfo | undefined {
     if (!this.#size || !this.#parentRect) return undefined;
     let positiveX;
     let positiveInfo;
@@ -396,7 +445,7 @@ export class OperatorService implements OperatorServiceInterface {
         positiveStart = range.to;
       }
     }
-    if (positiveX <= (this.#parentRect.x + this.#parentRect.width)) {
+    if (positiveX <= this.#parentRect.x + this.#parentRect.width) {
       return {
         x: positiveX,
         y: yStart,
@@ -408,17 +457,18 @@ export class OperatorService implements OperatorServiceInterface {
   }
 
   private findMinYPosition(params: {
-    start:number,
-    rectList: RectInfo[],
-    positive: boolean
+    start: number;
+    rectList: RectInfo[];
+    positive: boolean;
   }): {
-      y: number,
-      mergeList: RectInfo[]
-    } {
-    if (!this.#size) return {
-      y: 0,
-      mergeList: []
-    };
+    y: number;
+    mergeList: RectInfo[];
+  } {
+    if (!this.#size)
+      return {
+        y: 0,
+        mergeList: []
+      };
     let yStart;
     let yEnd;
     if (params.positive) {
@@ -428,7 +478,10 @@ export class OperatorService implements OperatorServiceInterface {
       yStart = params.start - this.#size.height - this.#gap;
       yEnd = params.start;
     }
-    const mergeList = OperatorUtils.getRectListInYRange({from: yStart, to: yEnd}, params.rectList);
+    const mergeList = OperatorUtils.getRectListInYRange(
+      { from: yStart, to: yEnd },
+      params.rectList
+    );
     if (params.positive) {
       yStart += this.#gap;
     }
@@ -444,4 +497,3 @@ export class OperatorService implements OperatorServiceInterface {
     };
   }
 }
-

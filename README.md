@@ -4,9 +4,9 @@
 
 utils for ui render
 
-## Grid Area
+## Grid Service
 
-Use grid Area service to manage grid area.
+Use grid service to manage grid info.
 
 ### Get Dropped GridInfo
 
@@ -338,4 +338,30 @@ const gridPaddingArea = gridService.getGridPaddingAreaAndLines(5).area;
           [attr.height]="paddingRect.height"
           [attr.fill]="'green'"
           fill-opacity="0.4"></rect>
+```
+
+## Operator Service
+
+Use operator service to manage you handle
+
+```typescript
+const operatorService = OperatorService.getInstance();
+operatorService.minDistance = 10;
+operatorService
+  .setPageContainerRects([
+    {
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100
+    }
+  ])
+  .setParentRect({
+    x: 50,
+    y: 50,
+    width: 100,
+    height: 100
+  })
+  .setOperatorSize(50, 20);
+const operatorRect = operatorService.getOperatorRect();
 ```
