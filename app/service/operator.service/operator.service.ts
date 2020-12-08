@@ -2,6 +2,7 @@
  * @author allen
  * @data 2020/12/6 16:07
  */
+
 import { Mark } from 'towify-editor-common-values';
 import { OperatorServiceInterface } from './operator.service.interface';
 import { DefaultRect, RectInfo} from '../../type/common.type';
