@@ -348,7 +348,7 @@ Use operator service to manage you handle
 const operatorService = OperatorService.getInstance();
 operatorService.minDistance = 10;
 operatorService
-  .setPageContainerRects([
+  .setPageContainerRectList([
     {
       x: 0,
       y: 0,
