@@ -2,12 +2,15 @@
  * @author allen
  * @data 2020/11/18 12:12
  */
-import { GridAreaInfo, RectInfo } from '../../type/common.type';
+import { GridArea, Mark, SizeUnit, UISize } from 'towify-editor-common-values';
+import { RectInfo } from '../../type/common.type';
+import { ErrorUtils } from '../error.utils/error.utils';
+import { NumberUtils } from '../number.utils/number.utils';
 
 export class GridUtils {
-  static AutoNumber = -10000;
+  static AutoNumber = Mark.Auto;
 
-  static NotSetNumber = -20000;
+  static NotSetNumber = Mark.Unset;
 
   static checkPointIsInRect(
     point: { x: number; y: number },
@@ -20,31 +23,31 @@ export class GridUtils {
 
   static convertNumberToSizeInfo(params: {
     valueNumber: number;
-    unit: string;
+    unit: SizeUnit;
     windowSize?: { width: number; height: number };
     maxValue?: number;
-  }): { value: number; unit: string } {
+  }): UISize {
     let value = params.valueNumber;
-    if (params.unit === 'vw') {
+    if (params.unit === SizeUnit.VW) {
       value = (params.valueNumber / (params.windowSize?.width ?? 1)) * 100;
-      // todo: window width 为空和等于 0 分开处理
-      if (!params.windowSize?.width || params.windowSize?.width === 0) {
-        console.error('SOID-UI-UTIL', 'GridAreaService', 'windowWidth is zero');
+      if (!params.windowSize?.width) {
+        ErrorUtils.GridError('Window size is undefined');
       }
     }
-    if (params.unit === 'vh') {
+    if (params.unit === SizeUnit.VH) {
       value = (params.valueNumber / (params.windowSize?.height ?? 1)) * 100;
-      // todo: window width 为空和等于 0 分开处理
-      if (!params.windowSize?.height || params.windowSize?.height === 0) {
-        console.error(
-          'SOID-UI-UTIL',
-          'GridAreaService',
-          'windowHeight is zero'
-        );
+      if (!params.windowSize?.height) {
+        ErrorUtils.GridError('Window size is undefined');
       }
     }
-    if (params.unit === '%') {
+    if (params.unit === SizeUnit.Percent) {
       value = (params.valueNumber / (params.maxValue ?? 1)) * 100;
+    }
+    if (params.unit === SizeUnit.PX) {
+      return {
+        value: NumberUtils.parseViewNumber(value),
+        unit: params.unit
+      };
     }
     return {
       value: parseFloat(value.toFixed(1)),
@@ -53,7 +56,7 @@ export class GridUtils {
   }
 
   static convertSizeInfoToNumber(params: {
-    sizeInfo: { value: number; unit: string };
+    sizeInfo: UISize;
     windowSize?: { width: number; height: number };
     maxValue?: number;
   }): number {
@@ -66,20 +69,14 @@ export class GridUtils {
     }
     if (params.sizeInfo.unit === 'vw') {
       valueNumber = ((params.windowSize?.width ?? 0) * valueNumber) / 100;
-      // todo: window width 为空和等于 0 分开处理
-      if (!params.windowSize?.width || params.windowSize?.width === 0) {
-        console.error('SOID-UI-UTIL', 'GridAreaService', 'windowWidth is zero');
+      if (!params.windowSize?.width) {
+        ErrorUtils.GridError('Window size is undefined');
       }
     }
     if (params.sizeInfo.unit === 'vh') {
       valueNumber = ((params.windowSize?.height ?? 0) * valueNumber) / 100;
-      // todo: window width 为空和等于 0 分开处理
-      if (!params.windowSize?.height || params.windowSize?.height === 0) {
-        console.error(
-          'SOID-UI-UTIL',
-          'GridAreaService',
-          'windowHeight is zero'
-        );
+      if (!params.windowSize?.height) {
+        ErrorUtils.GridError('Window size is undefined');
       }
     }
     if (params.sizeInfo.unit === '%') {
@@ -88,11 +85,15 @@ export class GridUtils {
     return valueNumber;
   }
 
-  static changeSizeInfoListToNumberList(params: {
-    sizeInfoList: { value: number; unit: string }[];
-    gap: number;
+  static getGridRowOrColumnItemValues(params: {
+    sizeInfoList: UISize[];
     windowSize?: { width: number; height: number };
     maxValue?: number;
+    autoOffsetList?: {
+      minusOffsetId: string;
+      minusOffset: number;
+      plusOffset: number;
+    }[];
   }): number[] {
     let spareValue = params.maxValue ?? 0;
     let autoNumber = 0;
@@ -114,23 +115,100 @@ export class GridUtils {
     valueList.forEach(value => {
       spareValue -= value;
     });
-    if (spareValue < 0) {
-      spareValue = 0;
-    }
-    if (spareValue !== 0 && autoNumber !== 0) {
-      const autoValue = spareValue / autoNumber;
-      params.sizeInfoList.forEach((value, index) => {
-        isAuto = value.value === GridUtils.AutoNumber;
-        if (isAuto) {
-          valueList[index] = autoValue;
+    if (autoNumber !== 0) {
+      if (!params.autoOffsetList) {
+        if (spareValue < 0) {
+          spareValue = 0;
         }
-      });
+        const autoValue = spareValue / autoNumber;
+        params.sizeInfoList.forEach((value, index) => {
+          isAuto = value.value === GridUtils.AutoNumber;
+          if (isAuto) {
+            valueList[index] = autoValue;
+          }
+        });
+      } else if (params.autoOffsetList.length === params.sizeInfoList.length) {
+        params.autoOffsetList.forEach(offSet => {
+          spareValue -= offSet.minusOffset;
+        });
+        if (spareValue < 0) {
+          spareValue = 0;
+        }
+        const autoValue = spareValue / autoNumber;
+        let autoOffsetIndexList;
+        let autoItemNumber = 0;
+        let leftAutoNumber = 0;
+        let leftAutoItemId = '';
+        let mapKey = '';
+        let mapValue = 0;
+        const autoMap = new Map<string, number>();
+        params.autoOffsetList.forEach((autoOffset, index) => {
+          if (autoOffset.minusOffsetId !== '-1') {
+            valueList[index] += autoValue;
+            valueList[index] += autoOffset.plusOffset;
+          }
+          if (autoOffset.plusOffset !== autoOffset.minusOffset) {
+            leftAutoItemId = autoOffset.minusOffsetId;
+            mapKey = autoOffset.minusOffsetId;
+            mapValue = autoMap.get(mapKey) ?? 0;
+            mapValue += autoOffset.minusOffset - autoOffset.plusOffset;
+            autoMap.set(mapKey, mapValue);
+          }
+        });
+        autoMap.forEach((value, key) => {
+          if (value > 0) {
+            autoOffsetIndexList = params.autoOffsetList!.reduce<number[]>(
+              (preview, current, index) => {
+                if (
+                  current.plusOffset === current.minusOffset &&
+                  current.minusOffsetId === key
+                ) {
+                  return preview.concat(index);
+                }
+                return preview;
+              },
+              []
+            );
+            if (autoOffsetIndexList.length) {
+              autoItemNumber = value / autoOffsetIndexList.length;
+              autoOffsetIndexList.forEach(index => {
+                valueList[index] += autoItemNumber;
+              });
+            } else {
+              leftAutoNumber += value;
+            }
+          }
+        });
+        if (leftAutoNumber !== 0) {
+          autoOffsetIndexList = params.autoOffsetList.reduce<number[]>(
+            (preview, current, index) => {
+              if (
+                current.minusOffsetId === leftAutoItemId &&
+                current.plusOffset !== current.minusOffset
+              ) {
+                return preview.concat(index);
+              }
+              return preview;
+            },
+            []
+          );
+          if (autoOffsetIndexList.length) {
+            autoItemNumber = leftAutoNumber / autoOffsetIndexList.length;
+            autoOffsetIndexList.forEach(index => {
+              valueList[index] += autoItemNumber;
+            });
+          } else {
+            valueList[0] += leftAutoNumber;
+            ErrorUtils.GridError('Calculation auto error');
+          }
+        }
+      }
     }
     return valueList;
   }
 
-  static changeChildSizeInfoToNumber(params: {
-    gridArea: GridAreaInfo;
+  static convertChildSizeInfoToNumber(params: {
+    gridArea: GridArea;
     gridItemRectList: RectInfo[][];
     gridRect: RectInfo;
   }): RectInfo {
@@ -195,16 +273,16 @@ export class GridUtils {
     return childGridRect;
   }
 
-  static getGridAreaInfoByRect(params: {
+  static getChildGridAreaInfoByRect(params: {
     rect: RectInfo;
     gridItemRectList: RectInfo[][];
     rowGap: number;
     columnGap: number;
   }): {
-    gridArea: GridAreaInfo;
-    marginLeft: number;
-    marginTop: number;
-  } {
+      gridArea: GridArea;
+      marginLeft: number;
+      marginTop: number;
+    } {
     const maxWidth = params.rect.x + params.rect.width;
     const maxHeight = params.rect.y + params.rect.height;
     const rowLength = params.gridItemRectList.length;
@@ -334,8 +412,34 @@ export class GridUtils {
     });
     return {
       gridArea: { rowStart, columnStart, rowEnd, columnEnd },
-      marginLeft: parseFloat(marginLeft.toFixed(1)),
-      marginTop: parseFloat(marginTop.toFixed(1))
+      marginLeft: NumberUtils.parseViewNumber(marginLeft),
+      marginTop: NumberUtils.parseViewNumber(marginTop)
+    };
+  }
+
+  static getGridMarginInfoByRect(params: {
+    rect: RectInfo;
+    gridArea: GridArea;
+    gridItemRectList: RectInfo[][];
+    rowGap: number;
+    columnGap: number;
+  }): {
+      marginLeft: number;
+      marginTop: number;
+    } {
+    const rowStart = params.gridArea.rowStart - 1;
+    const columnStart = params.gridArea.columnStart - 1;
+    let marginLeft = params.rect.x;
+    let marginTop = params.rect.y;
+    if (rowStart < params.gridItemRectList.length) {
+      marginTop = params.rect.y - params.gridItemRectList[rowStart][0].y;
+    }
+    if (columnStart < params.gridItemRectList[0].length) {
+      marginLeft = params.rect.x - params.gridItemRectList[0][columnStart].x;
+    }
+    return {
+      marginLeft: NumberUtils.parseViewNumber(marginLeft),
+      marginTop: NumberUtils.parseViewNumber(marginTop)
     };
   }
 }

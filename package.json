@@ -13,15 +13,17 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
   "lint-staged": {
     "*.html": "prettier --write --parser angular",
     "*.component.html": "prettier --write --parser angular",
     "*.{js,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
+      "eslint --fix --cache --format=pretty",
+      "prettier --ignore-path .eslintignore --single-quote --write",
+      "git add"
     ],
     "*.js": "eslint --cache --fix",
     "*.{js,css,md,json,scss}": "prettier --write"
@@ -40,7 +42,8 @@
     "lint-staged": "^10.5.1",
     "npm": "^6.14.8",
     "prettier": "^2.1.2",
-    "soid-data": "^0.0.28"
+    "soid-data": "^0.0.28",
+    "towify-editor-common-values": "^0.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
@@ -55,13 +58,14 @@
     "eslint-config-airbnb-typescript": "^8.0.2",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-import": "^2.22.1",
+    "glob": "^7.1.6",
     "husky": "^4.3.0",
     "lint-staged": "^10.5.1",
     "prettier": "^2.1.2",
     "ts-loader": "^6.2.2",
     "tslint": "^6.1.3",
     "tslint-loader": "^3.5.4",
-    "typescript": "^4.0.5"
+    "typescript": "^4.1.2"
   },
-  "version": "0.0.39"
+  "version": "0.0.57"
 }
