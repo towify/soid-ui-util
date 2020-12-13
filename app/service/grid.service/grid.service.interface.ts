@@ -2,9 +2,16 @@
  * @author allen
  * @data 2020/11/23 22:15
  */
-import { GridArea, SpacingPadding, UISize } from 'towify-editor-common-values';
+import {
+  CustomGrid,
+  GridArea,
+  GridGap,
+  SpacingPadding,
+  UISize
+} from 'towify-editor-common-values';
 import {
   GridChildInfo,
+  LineInfo,
   RectInfo,
   SizeInfo
 } from '../../type/common.type';
@@ -39,10 +46,7 @@ export interface GridServiceInterface {
   /**
    * @param info
    */
-  setGridInfo(info: {
-    row: UISize[],
-    column: UISize[]
-  }): GridServiceInterface;
+  setGridInfo(info: CustomGrid): GridServiceInterface;
 
   /**
    * @param params: grid row count
@@ -51,10 +55,7 @@ export interface GridServiceInterface {
   setGridCount(params: {
     row: number;
     column: number;
-    gap?: {
-      row: UISize,
-      column: UISize
-    }
+    gap?: GridGap;
   }): GridServiceInterface;
 
   /**
@@ -72,10 +73,7 @@ export interface GridServiceInterface {
   /**
    * @param gap
    */
-  setGridGap(gap: {
-    row: UISize,
-    column: UISize
-  }): GridServiceInterface;
+  setGridGap(gap: GridGap): GridServiceInterface;
 
   /**
    * @description 设置 grid children rect
@@ -131,7 +129,7 @@ export interface GridServiceInterface {
   /**
    * @description 返回 grid item line info
    */
-  getGridLines(): { fromX: number; fromY: number; toX: number; toY: number }[];
+  getGridLines(): LineInfo[];
 
   /**
    * @description 返回 grid gap area and line info
@@ -140,7 +138,7 @@ export interface GridServiceInterface {
     lineSpace: number
   ): {
     area: RectInfo[];
-    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
+    lines: LineInfo[];
   };
 
   /**
@@ -150,6 +148,6 @@ export interface GridServiceInterface {
     lineSpace: number
   ): {
     area: RectInfo[];
-    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
+    lines: LineInfo[];
   };
 }

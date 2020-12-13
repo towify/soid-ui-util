@@ -6,6 +6,7 @@ import { GridArea, Mark, SizeUnit, UISize } from 'towify-editor-common-values';
 import { RectInfo } from '../../type/common.type';
 import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';
+import { WindowUtils } from '../window.utils/window.utils';
 
 export class GridUtils {
   static AutoNumber = Mark.Auto;
@@ -57,7 +58,6 @@ export class GridUtils {
 
   static convertSizeInfoToNumber(params: {
     sizeInfo: UISize;
-    windowSize?: { width: number; height: number };
     maxValue?: number;
   }): number {
     let valueNumber = params.sizeInfo.value;
@@ -68,14 +68,14 @@ export class GridUtils {
       return 0;
     }
     if (params.sizeInfo.unit === 'vw') {
-      valueNumber = ((params.windowSize?.width ?? 0) * valueNumber) / 100;
-      if (!params.windowSize?.width) {
+      valueNumber = ((WindowUtils.WindowSize?.width ?? 0) * valueNumber) / 100;
+      if (!WindowUtils.WindowSize?.width) {
         ErrorUtils.GridError('Window size is undefined');
       }
     }
     if (params.sizeInfo.unit === 'vh') {
-      valueNumber = ((params.windowSize?.height ?? 0) * valueNumber) / 100;
-      if (!params.windowSize?.height) {
+      valueNumber = ((WindowUtils.WindowSize?.height ?? 0) * valueNumber) / 100;
+      if (!WindowUtils.WindowSize?.height) {
         ErrorUtils.GridError('Window size is undefined');
       }
     }
@@ -87,7 +87,6 @@ export class GridUtils {
 
   static getGridRowOrColumnItemValues(params: {
     sizeInfoList: UISize[];
-    windowSize?: { width: number; height: number };
     maxValue?: number;
     autoOffsetList?: {
       minusOffsetId: string;
@@ -107,8 +106,7 @@ export class GridUtils {
       } else {
         valueList[index] = GridUtils.convertSizeInfoToNumber({
           sizeInfo: value,
-          maxValue: params.maxValue,
-          windowSize: params.windowSize
+          maxValue: params.maxValue
         });
       }
     });
@@ -279,10 +277,10 @@ export class GridUtils {
     rowGap: number;
     columnGap: number;
   }): {
-      gridArea: GridArea;
-      marginLeft: number;
-      marginTop: number;
-    } {
+    gridArea: GridArea;
+    marginLeft: number;
+    marginTop: number;
+  } {
     const maxWidth = params.rect.x + params.rect.width;
     const maxHeight = params.rect.y + params.rect.height;
     const rowLength = params.gridItemRectList.length;
@@ -424,9 +422,9 @@ export class GridUtils {
     rowGap: number;
     columnGap: number;
   }): {
-      marginLeft: number;
-      marginTop: number;
-    } {
+    marginLeft: number;
+    marginTop: number;
+  } {
     const rowStart = params.gridArea.rowStart - 1;
     const columnStart = params.gridArea.columnStart - 1;
     let marginLeft = params.rect.x;

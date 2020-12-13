@@ -6,4 +6,8 @@ export class ErrorUtils {
   static GridError(message: string) {
     console.error('SOID-UI-UTIL', 'GridAreaService', message);
   }
+
+  static InteractError(message: string) {
+    console.error('SOID-UI-UTIL', 'InteractService', message);
+  }
 }

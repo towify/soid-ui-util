@@ -2,7 +2,14 @@
  * @author allen
  * @data 2020/11/23 22:24
  */
-import { GridArea, SizeUnit, SpacingPadding, UISize } from 'towify-editor-common-values';
+import {
+  CustomGrid,
+  GridArea,
+  GridGap,
+  SizeUnit,
+  SpacingPadding,
+  UISize
+} from 'towify-editor-common-values';
 import { GridServiceInterface } from './grid.service.interface';
 import {
   DefaultGridArea,
@@ -13,6 +20,7 @@ import {
 import { GridManager } from '../../manager/gird.manager/grid.manager';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
 import { ErrorUtils } from '../../utils/error.utils/error.utils';
+import { WindowUtils } from '../../utils/window.utils/window.utils';
 
 export class GridService implements GridServiceInterface {
   private static instance?: GridServiceInterface;
@@ -30,7 +38,10 @@ export class GridService implements GridServiceInterface {
   }
 
   setWindowSize(width: number, height: number): GridServiceInterface {
-    this.gridManager.setWindowSize(width, height);
+    WindowUtils.WindowSize = {
+      width,
+      height
+    };
     return this;
   }
 
@@ -49,10 +60,7 @@ export class GridService implements GridServiceInterface {
     return this;
   }
 
-  setGridInfo(info: {
-    row: UISize[],
-    column: UISize[]
-  }): GridServiceInterface {
+  setGridInfo(info: CustomGrid): GridServiceInterface {
     this.gridManager.setGridColumnInfo(info.column);
     this.gridManager.setGridRowInfo(info.row);
     return this;
@@ -61,30 +69,24 @@ export class GridService implements GridServiceInterface {
   setGridCount(params: {
     row: number;
     column: number;
-    gap?: {
-      row: UISize,
-      column: UISize
-    }
+    gap?: GridGap;
   }): GridServiceInterface {
     this.gridManager.setGridCount(params);
     return this;
   }
 
-  setGridGap(gap: {
-    row: UISize,
-    column: UISize
-  }): GridServiceInterface {
-    this.gridManager.setGridGap(gap);
+  setGridGap(gap: GridGap): GridServiceInterface {
+    this.gridManager.setGap(gap);
     return this;
   }
 
   setGridPaddingInfo(padding: SpacingPadding): GridServiceInterface {
-    this.gridManager.setGridPaddingInfo(padding);
+    this.gridManager.setPadding(padding);
     return this;
   }
 
   setGridBorderInfo(border: SpacingPadding): GridServiceInterface {
-    this.gridManager.setGridBorderInfo(border);
+    this.gridManager.setBorder(border);
     return this;
   }
 
@@ -93,10 +95,7 @@ export class GridService implements GridServiceInterface {
       ErrorUtils.GridError('GridSize is undefined');
       return this;
     }
-    this.gridManager.childInfoList.splice(0, this.gridManager.childInfoList.length);
-    childrenInfo.forEach((child) => {
-      this.gridManager.childInfoList.push(child);
-    });
+    this.gridManager.setChildrenInfo(childrenInfo);
     const gridItemRectList = this.gridManager.getGridItemRectList();
     this.gridManager.childInfoList.forEach(childInfo => {
       this.gridManager.updateChildRect(childInfo, gridItemRectList);
@@ -111,9 +110,9 @@ export class GridService implements GridServiceInterface {
     size: SizeInfo;
     gridArea?: GridArea;
   }): {
-      info: GridChildInfo;
-      needUpdateGridChildren: boolean;
-    } {
+    info: GridChildInfo;
+    needUpdateGridChildren: boolean;
+  } {
     if (!this.gridManager.gridSize) {
       ErrorUtils.GridError('GridSize is undefined');
       return {
@@ -361,9 +360,9 @@ export class GridService implements GridServiceInterface {
   getGridGapAreaAndLines(
     lineSpace: number
   ): {
-      area: RectInfo[];
-      lines: { fromX: number; fromY: number; toX: number; toY: number }[];
-    } {
+    area: RectInfo[];
+    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
+  } {
     return GridLineUtils.getGridGapAreaAndLine({
       gridItemRectList: this.gridManager.getGridItemRectList(),
       lineSpace
@@ -373,9 +372,9 @@ export class GridService implements GridServiceInterface {
   getGridPaddingAreaAndLines(
     lineSpace: number
   ): {
-      area: RectInfo[];
-      lines: { fromX: number; fromY: number; toX: number; toY: number }[];
-    } {
+    area: RectInfo[];
+    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
+  } {
     if (!this.gridManager.gridSize) {
       ErrorUtils.GridError('GridSize is undefined');
       return {
@@ -384,8 +383,8 @@ export class GridService implements GridServiceInterface {
       };
     }
     return GridLineUtils.getGridPaddingAreaAndLine({
-      gridPadding: this.gridManager.gridPadding,
-      border: this.gridManager.gridBorder,
+      gridPadding: this.gridManager.padding,
+      border: this.gridManager.border,
       gridSize: this.gridManager.gridSize,
       lineSpace
     });

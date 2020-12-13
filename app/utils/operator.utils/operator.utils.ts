@@ -4,21 +4,21 @@
  */
 
 import { Mark } from 'towify-editor-common-values';
-import { RangeInfo, RectInfo } from '../../type/common.type';
+import { RectInfo, RegionInfo } from '../../type/common.type';
 
 export class OperatorUtils {
   static Gap = 10;
 
-  static checkY(yRange: RangeInfo, rect: RectInfo): boolean {
+  static checkY(yRange: RegionInfo, rect: RectInfo): boolean {
     return rect.y < yRange.to && rect.y + rect.height > yRange.from;
   }
 
-  static checkX(xRange: RangeInfo, rect: RectInfo): boolean {
+  static checkX(xRange: RegionInfo, rect: RectInfo): boolean {
     return rect.x < xRange.to && rect.x + rect.width > xRange.from;
   }
 
   static getRectListInYRange(
-    yRange: RangeInfo,
+    yRange: RegionInfo,
     rectList: RectInfo[]
   ): RectInfo[] {
     return rectList.reduce<RectInfo[]>((previous, current) => {
@@ -30,7 +30,7 @@ export class OperatorUtils {
   }
 
   static getRectListInXRange(
-    xRange: RangeInfo,
+    xRange: RegionInfo,
     rectList: RectInfo[]
   ): RectInfo[] {
     return rectList.reduce<RectInfo[]>((previous, current) => {
@@ -41,7 +41,7 @@ export class OperatorUtils {
     }, []);
   }
 
-  static getXRangeInRectList(rectList: RectInfo[]): RangeInfo {
+  static getXRangeInRectList(rectList: RectInfo[]): RegionInfo {
     let from: number = Mark.Unset;
     let to: number = Mark.Unset;
     rectList.forEach((rect, index) => {
@@ -63,7 +63,7 @@ export class OperatorUtils {
     };
   }
 
-  static getYRangeInRectList(rectList: RectInfo[]): RangeInfo {
+  static getYRangeInRectList(rectList: RectInfo[]): RegionInfo {
     let from: number = Mark.Unset;
     let to: number = Mark.Unset;
     rectList.forEach((rect, index) => {

@@ -365,3 +365,84 @@ operatorService
   .setOperatorSize(50, 20);
 const operatorRect = operatorService.getOperatorRect();
 ```
+
+## Mover Service
+
+Use Mover service to get move container information
+
+```typescript
+const moverService = MoverService.getInstance();
+moverService.injectStructuredLayers([
+  {
+    id: 'testing',
+    parentId: '',
+    order: 0,
+    gridArea: {
+      rowStart: 1,
+      rowEnd: 2,
+      columnStart: 1,
+      columnEnd: 2
+    },
+    size: {
+      width: { value: 500, unit: 'px' },
+      height: { value: 800, unit: 'px' }
+    },
+    grid: {
+      row: [
+        { value: 100, unit: 'px' },
+        { value: -10000, unit: 'px' }
+      ],
+      column: [
+        { value: 100, unit: 'px' },
+        { value: -10000, unit: 'px' }
+      ]
+    },
+    margin: {
+      top: { value: 0, unit: 'px' },
+      right: { value: 0, unit: 'px' },
+      left: { value: 0, unit: 'px' },
+      bottom: { value: 0, unit: 'px' }
+    },
+    gap: {
+      row: { value: 0, unit: 'px' },
+      column: { value: 0, unit: 'px' }
+    },
+
+    padding: {
+      left: { value: 0, unit: 'px' },
+      right: { value: 0, unit: 'px' },
+      top: { value: 0, unit: 'px' },
+      bottom: { value: 0, unit: 'px' }
+    },
+    border: {
+      left: { value: 0, unit: 'px' },
+      right: { value: 0, unit: 'px' },
+      top: { value: 0, unit: 'px' },
+      bottom: { value: 0, unit: 'px' }
+    }
+  }
+]);
+moverService.startMovingLayerById('testing');
+moverService.movingLayer(100, 100);
+const assistLines = moverService.getAssistLinesAndSigns().lines;
+const assistSigns = moverService.getAssistLinesAndSigns().signs;
+```
+
+```HTML
+// draw area and line in angular eg:
+<line *ngFor="let line of assistLines"
+            [attr.x1]="line.fromX"
+            [attr.x2]="line.toX"
+            [attr.y1]="line.fromY"
+            [attr.y2]="line.toY"
+            [attr.stroke]="'white'"
+            [attr.stroke-width]="1"
+            [attr.stroke-dasharray]="'3, 2'"></line>
+
+<text *ngFor="let sign of assistSigns"
+            text-anchor="middle"
+            [attr.stroke]="'white'"
+            [attr.x]="sign.x"
+            [attr.y]="sign.y"
+            [attr.font-size]="12">{{sign.sign}}</text>
+```

@@ -2,7 +2,13 @@
  * @author allen
  * @data 2020/11/12 15:56
  */
-import {GridArea, SizeUnit, SpacingPadding, UISize} from 'towify-editor-common-values';
+import {
+  GridArea,
+  GridGap,
+  SizeUnit,
+  SpacingPadding,
+  UISize
+} from 'towify-editor-common-values';
 import {
   DefaultOffset,
   DefaultRect,
@@ -17,12 +23,11 @@ export class GridManager {
   childInfoList: GridChildInfo[] = [];
   #gridColumnInfo: UISize[] = [];
   #gridRowInfo: UISize[] = [];
-  #windowSize?: { width: number; height: number };
-  #gridRowGap = 0;
-  #gridColumnGap = 0;
+  #rowGap = 0;
+  #columnGap = 0;
   #gridRect = DefaultRect;
-  gridPadding = DefaultOffset;
-  gridBorder = DefaultOffset;
+  padding = DefaultOffset;
+  border = DefaultOffset;
 
   get gridColumnInfo(): UISize[] {
     return this.#gridColumnInfo;
@@ -32,51 +37,47 @@ export class GridManager {
     return this.#gridRowInfo;
   }
 
-  setWindowSize(width: number, height: number): void {
-    this.#windowSize = { width, height };
-  }
-
-  setGridSize(width: number, height: number): void {
+  setGridSize(width: number, height: number): GridManager {
     this.gridSize = { width, height };
     this.updateGridRect();
+    return this;
   }
 
-  setGridColumnInfo(info: UISize[]): void {
+  setGridColumnInfo(info: UISize[]): GridManager {
     this.#gridColumnInfo = [];
-    info.forEach((unit) => {
+    info.forEach(unit => {
       this.#gridColumnInfo.push(JSON.parse(JSON.stringify(unit)));
     });
+    return this;
   }
 
-  setGridRowInfo(info: UISize[]): void {
+  setGridRowInfo(info: UISize[]): GridManager {
     this.#gridRowInfo = [];
-    info.forEach((unit) => {
+    info.forEach(unit => {
       this.#gridRowInfo.push(JSON.parse(JSON.stringify(unit)));
     });
+    return this;
   }
 
   setGridCount(params: {
     row: number;
     column: number;
-    gap?: {
-      row: UISize,
-      column: UISize
-    }
-  }): void {
+    gap?: GridGap;
+  }): GridManager {
     if (!this.#gridRect) {
       ErrorUtils.GridError('GridSize is undefined');
-      return;
+      return this;
     }
     this.#gridRowInfo = [];
     this.#gridColumnInfo = [];
     if (params.gap?.row) {
-      this.#gridRowGap = this.convertSizeInfoToNumber(
+      this.#rowGap = this.convertSizeInfoToNumber(
         params.gap.row,
         this.#gridRect.height
       );
     }
     if (params.gap?.column) {
-      this.#gridColumnGap = this.convertSizeInfoToNumber(
+      this.#columnGap = this.convertSizeInfoToNumber(
         params.gap.column,
         this.#gridRect.width
       );
@@ -85,7 +86,7 @@ export class GridManager {
     for (rowIndex; rowIndex < params.row; rowIndex += 1) {
       this.#gridRowInfo.push({
         value:
-          (this.#gridRect.height - this.#gridRowGap * (params.row - 1)) /
+          (this.#gridRect.height - this.#rowGap * (params.row - 1)) /
           params.row,
         unit: SizeUnit.PX
       });
@@ -94,36 +95,45 @@ export class GridManager {
     for (columnIndex; columnIndex < params.column; columnIndex += 1) {
       this.#gridColumnInfo.push({
         value:
-          (this.#gridRect.width - this.#gridColumnGap * (params.column - 1)) /
+          (this.#gridRect.width - this.#columnGap * (params.column - 1)) /
           params.column,
         unit: SizeUnit.PX
       });
     }
+    return this;
   }
 
-  setGridGap(params: {
-    row: UISize,
-    column: UISize
-  }): void {
+  setGap(gap: GridGap): GridManager {
     if (!this.#gridRect) {
       ErrorUtils.GridError('GridSize is undefined');
-      return;
+      return this;
     }
-    this.#gridRowGap = this.convertSizeInfoToNumber(params.row, this.#gridRect?.width);
-    this.#gridColumnGap = this.convertSizeInfoToNumber(
-      params.column,
+    this.#rowGap = this.convertSizeInfoToNumber(gap.row, this.#gridRect?.width);
+    this.#columnGap = this.convertSizeInfoToNumber(
+      gap.column,
       this.#gridRect?.width
     );
+    return this;
   }
 
-  setGridPaddingInfo(padding: SpacingPadding): void {
-    this.gridPadding = this.convertOffsetValue(padding);
+  setPadding(padding: SpacingPadding): GridManager {
+    this.padding = this.convertOffsetValue(padding);
     this.updateGridRect();
+    return this;
   }
 
-  setGridBorderInfo(border: SpacingPadding): void {
-    this.gridBorder = this.convertOffsetValue(border);
+  setBorder(border: SpacingPadding): GridManager {
+    this.border = this.convertOffsetValue(border);
     this.updateGridRect();
+    return this;
+  }
+
+  setChildrenInfo(childrenInfo: GridChildInfo[]): GridManager {
+    this.childInfoList.splice(0, this.childInfoList.length);
+    childrenInfo.forEach(child => {
+      this.childInfoList.push(child);
+    });
+    return this;
   }
 
   getGridAreaAutoNumber(params: {
@@ -182,19 +192,17 @@ export class GridManager {
       });
     }
     const gridWidth =
-      this.#gridRect.width - (gridColumnInfo.length - 1) * this.#gridColumnGap;
+      this.#gridRect.width - (gridColumnInfo.length - 1) * this.#columnGap;
     const gridHeight =
-      this.#gridRect.height - (gridRowInfo.length - 1) * this.#gridRowGap;
+      this.#gridRect.height - (gridRowInfo.length - 1) * this.#rowGap;
     const columnsNumberArray = GridUtils.getGridRowOrColumnItemValues({
       sizeInfoList: gridColumnInfo,
       maxValue: gridWidth,
-      windowSize: this.#windowSize,
       autoOffsetList: columnAutoOffsetList
     });
     const rowsNumberArray = GridUtils.getGridRowOrColumnItemValues({
       sizeInfoList: gridRowInfo,
       maxValue: gridHeight,
-      windowSize: this.#windowSize,
       autoOffsetList: rowAutoOffsetList
     });
     let rowIndex = 0;
@@ -210,14 +218,14 @@ export class GridManager {
       columnLength = 1;
       columnsNumberArray.push(gridWidth);
     }
-    let rowY = this.gridPadding.top;
+    let rowY = this.#gridRect.y;
     let rowHeight = 0;
-    let columnX = this.gridPadding.left;
+    let columnX = this.#gridRect.x;
     let columnWidth = 0;
     let rowArray: RectInfo[] = [];
     for (rowIndex; rowIndex < rowLength; rowIndex += 1) {
       rowArray = [];
-      columnX = this.gridPadding.left;
+      columnX = this.#gridRect.x;
       rowHeight = rowsNumberArray[rowIndex];
       for (columnIndex = 0; columnIndex < columnLength; columnIndex += 1) {
         columnWidth = columnsNumberArray[columnIndex];
@@ -228,10 +236,10 @@ export class GridManager {
           height: rowHeight
         });
         columnX += columnWidth;
-        columnX += this.#gridColumnGap;
+        columnX += this.#columnGap;
       }
       rowY += rowHeight;
-      rowY += this.#gridRowGap;
+      rowY += this.#rowGap;
       itemRectList.push(rowArray);
     }
     return itemRectList;
@@ -240,8 +248,7 @@ export class GridManager {
   convertSizeInfoToNumber(sizeInfo: UISize, maxValue?: number): number {
     return GridUtils.convertSizeInfoToNumber({
       sizeInfo,
-      maxValue,
-      windowSize: this.#windowSize
+      maxValue
     });
   }
 
@@ -253,8 +260,7 @@ export class GridManager {
     return GridUtils.convertNumberToSizeInfo({
       valueNumber: params.valueNumber,
       unit: params.unit,
-      maxValue: params.maxValue,
-      windowSize: this.#windowSize
+      maxValue: params.maxValue
     });
   }
 
@@ -273,15 +279,15 @@ export class GridManager {
     rect: RectInfo;
     gridItemRectList: RectInfo[][];
   }): {
-      gridArea: GridArea;
-      marginLeft: number;
-      marginTop: number;
-    } {
+    gridArea: GridArea;
+    marginLeft: number;
+    marginTop: number;
+  } {
     return GridUtils.getChildGridAreaInfoByRect({
       rect: params.rect,
       gridItemRectList: params.gridItemRectList,
-      rowGap: this.#gridRowGap,
-      columnGap: this.#gridColumnGap
+      rowGap: this.#rowGap,
+      columnGap: this.#columnGap
     });
   }
 
@@ -290,15 +296,15 @@ export class GridManager {
     gridArea: GridArea;
     gridItemRectList: RectInfo[][];
   }): {
-      marginLeft: number;
-      marginTop: number;
-    } {
+    marginLeft: number;
+    marginTop: number;
+  } {
     return GridUtils.getGridMarginInfoByRect({
       rect: params.rect,
       gridArea: params.gridArea,
       gridItemRectList: params.gridItemRectList,
-      rowGap: this.#gridColumnGap,
-      columnGap: this.#gridColumnGap
+      rowGap: this.#columnGap,
+      columnGap: this.#columnGap
     });
   }
 
@@ -354,20 +360,20 @@ export class GridManager {
   private updateGridRect(): void {
     if (this.gridSize) {
       this.#gridRect = {
-        x: this.gridPadding.left + this.gridBorder.left,
-        y: this.gridPadding.top + this.gridBorder.top,
+        x: this.padding.left + this.border.left,
+        y: this.padding.top + this.border.top,
         width:
           this.gridSize.width -
-          this.gridPadding.left -
-          this.gridPadding.right -
-          this.gridBorder.left -
-          this.gridBorder.right,
+          this.padding.left -
+          this.padding.right -
+          this.border.left -
+          this.border.right,
         height:
           this.gridSize.height -
-          this.gridPadding.top -
-          this.gridPadding.bottom -
-          this.gridBorder.top -
-          this.gridBorder.bottom
+          this.padding.top -
+          this.padding.bottom -
+          this.border.top -
+          this.border.bottom
       };
     }
   }
@@ -377,10 +383,10 @@ export class GridManager {
     sizeInfoList: UISize[];
     isRow: boolean;
   }): {
-      minusOffsetId: string;
-      minusOffset: number;
-      plusOffset: number;
-    } {
+    minusOffsetId: string;
+    minusOffset: number;
+    plusOffset: number;
+  } {
     let start = 0;
     let end = 0;
     let minusOffset = 0;
@@ -453,9 +459,13 @@ export class GridManager {
     let startIndex = params.start;
     for (startIndex; startIndex < params.end; startIndex += 1) {
       if (startIndex < params.sizeInfoList.length && startIndex >= 0) {
-        if (params.sizeInfoList[startIndex].value !== GridUtils.AutoNumber &&
-          params.sizeInfoList[startIndex].value !== GridUtils.NotSetNumber) {
-          totalValue -=this.convertSizeInfoToNumber(params.sizeInfoList[startIndex]);
+        if (
+          params.sizeInfoList[startIndex].value !== GridUtils.AutoNumber &&
+          params.sizeInfoList[startIndex].value !== GridUtils.NotSetNumber
+        ) {
+          totalValue -= this.convertSizeInfoToNumber(
+            params.sizeInfoList[startIndex]
+          );
         }
       }
     }
@@ -468,11 +478,11 @@ export class GridManager {
   private convertOffsetValue(
     offset: SpacingPadding
   ): {
-      left: number;
-      right: number;
-      top: number;
-      bottom: number;
-    } {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+  } {
     const left = this.convertSizeInfoToNumber(
       offset.left,
       this.gridSize?.width

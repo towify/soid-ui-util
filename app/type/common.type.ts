@@ -12,6 +12,7 @@ type Rgba = {
 };
 
 type SizeInfo = {
+  [key: string]: UISize;
   width: UISize;
   height: UISize;
 };
@@ -31,12 +32,19 @@ type RectInfo = {
   height: number;
 };
 
-type RangeInfo = {
+type RegionInfo = {
   from: number;
-  to: number
+  to: number;
 };
 
-export { Rgba, RectInfo, GridChildInfo, SizeInfo, RangeInfo };
+type LineInfo = {
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+};
+
+export { Rgba, RectInfo, GridChildInfo, SizeInfo, RegionInfo, LineInfo };
 
 export const DefaultRect = {
   x: 0,
