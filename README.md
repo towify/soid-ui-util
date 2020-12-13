@@ -372,56 +372,38 @@ Use Mover service to get move container information
 
 ```typescript
 const moverService = MoverService.getInstance();
-moverService.injectStructuredLayers([
-  {
-    id: 'testing',
-    parentId: '',
-    order: 0,
-    gridArea: {
-      rowStart: 1,
-      rowEnd: 2,
-      columnStart: 1,
-      columnEnd: 2
+moverService
+  .setWindowSize(1024, 768)
+  .setGridSize(500, 400)
+  .setGridInfo({
+    row: [
+      { value: 20, unit: 'px' },
+      { value: 150, unit: 'px' }
+    ],
+    column: [
+      { value: 20, unit: 'px' },
+      { value: 150, unit: 'px' }
+    ]
+  })
+  .setGridPaddingInfo({
+    left: {
+      value: 20,
+      unit: 'px'
     },
-    size: {
-      width: { value: 500, unit: 'px' },
-      height: { value: 800, unit: 'px' }
+    right: {
+      value: 20,
+      unit: 'px'
     },
-    grid: {
-      row: [
-        { value: 100, unit: 'px' },
-        { value: -10000, unit: 'px' }
-      ],
-      column: [
-        { value: 100, unit: 'px' },
-        { value: -10000, unit: 'px' }
-      ]
+    top: {
+      value: 20,
+      unit: 'px'
     },
-    margin: {
-      top: { value: 0, unit: 'px' },
-      right: { value: 0, unit: 'px' },
-      left: { value: 0, unit: 'px' },
-      bottom: { value: 0, unit: 'px' }
-    },
-    gap: {
-      row: { value: 0, unit: 'px' },
-      column: { value: 0, unit: 'px' }
-    },
-
-    padding: {
-      left: { value: 0, unit: 'px' },
-      right: { value: 0, unit: 'px' },
-      top: { value: 0, unit: 'px' },
-      bottom: { value: 0, unit: 'px' }
-    },
-    border: {
-      left: { value: 0, unit: 'px' },
-      right: { value: 0, unit: 'px' },
-      top: { value: 0, unit: 'px' },
-      bottom: { value: 0, unit: 'px' }
+    bottom: {
+      value: 20,
+      unit: 'px'
     }
-  }
-]);
+  })
+  .setGridGap({ value: 10, unit: 'px' }, { value: 10, unit: 'px' });
 moverService.startMovingLayerById('testing');
 moverService.movingLayer(100, 100);
 const assistLines = moverService.getAssistLinesAndSigns().lines;

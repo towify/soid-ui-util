@@ -2,27 +2,26 @@
  * @author allen
  * @data 2020/12/9 14:36
  */
-import { Mark, SizeUnit } from 'towify-editor-common-values';
+import {
+  CustomGrid,
+  GridGap,
+  Mark,
+  SizeUnit,
+  SpacingPadding
+} from 'towify-editor-common-values';
 import { MoverServiceInterface } from './mover.service.interface';
 import {
-  DefaultGrid,
-  DefaultGridGap,
-  DefaultSpacingPadding,
-  LayerInfo,
-  RangeInfo,
+  AlignDefaultOffset,
+  AlignOffsetInfo,
   SignInfo
 } from '../../type/interact.type';
-import { LineInfo, RectInfo } from '../../type/common.type';
-import { RectModel } from '../../model/rect.model';
+import { GridChildInfo, LineInfo, RectInfo } from '../../type/common.type';
 import { GridManager } from '../../manager/gird.manager/grid.manager';
 import { ErrorUtils } from '../../utils/error.utils/error.utils';
-import { GridUtils } from '../../utils/grid.utils/grid.utils';
 import { NumberUtils } from '../../utils/number.utils/number.utils';
 import { WindowUtils } from '../../utils/window.utils/window.utils';
 
 export class MoverService implements MoverServiceInterface {
-  #ranges: RangeInfo[] = [];
-
   #movingLayerId = '';
 
   #movingOffsetX = 0;
@@ -48,37 +47,73 @@ export class MoverService implements MoverServiceInterface {
     return this;
   }
 
+  setGridSize(width: number, height: number): MoverServiceInterface {
+    this.gridManager.setGridSize(width, height);
+    return this;
+  }
+
+  setGridInfo(info: CustomGrid): MoverServiceInterface {
+    this.gridManager.setGridColumnInfo(info.column);
+    this.gridManager.setGridRowInfo(info.row);
+    return this;
+  }
+
+  setGridCount(params: {
+    row: number;
+    column: number;
+    gap?: GridGap;
+  }): MoverServiceInterface {
+    this.gridManager.setGridCount(params);
+    return this;
+  }
+
+  setGridGap(gap: GridGap): MoverServiceInterface {
+    this.gridManager.setGap(gap);
+    return this;
+  }
+
+  setGridPaddingInfo(padding: SpacingPadding): MoverServiceInterface {
+    this.gridManager.setPadding(padding);
+    return this;
+  }
+
+  setGridBorderInfo(border: SpacingPadding): MoverServiceInterface {
+    this.gridManager.setBorder(border);
+    return this;
+  }
+
+  setChildrenGridInfo(childrenInfo: GridChildInfo[]): MoverServiceInterface {
+    if (!this.gridManager.gridSize) {
+      ErrorUtils.InteractError('GridSize is undefined');
+      return this;
+    }
+    this.gridManager.setChildrenInfo(childrenInfo);
+    const gridItemRectList = this.gridManager.getGridItemRectList();
+    this.gridManager.childInfoList.forEach(childInfo => {
+      this.gridManager.updateChildRect(childInfo, gridItemRectList);
+    });
+    return this;
+  }
+
   get gridManager(): GridManager {
     this.#gridManager ??= new GridManager();
     return this.#gridManager;
   }
 
-  injectStructuredLayers(info: LayerInfo[]): MoverServiceInterface {
-    this.#ranges = [];
-    const firstLayerInfo = info.filter(layer => !layer.parentId);
-    this.initRangeModelByLayers({
-      childrenLayInfos: firstLayerInfo,
-      totalLayerInfos: info,
-      ancestorIds: [],
-      addRanges: this.#ranges
-    });
-    return this;
-  }
-
-  startMovingLayerById(id: string): MoverServiceInterface {
+  startMovingChildById(id: string): MoverServiceInterface {
     this.#movingLayerId = id;
     this.#movingOffsetX = 0;
     this.#movingOffsetY = 0;
     return this;
   }
 
-  movingLayer(offset: { x: number; y: number }): MoverServiceInterface {
+  movingChild(offset: { x: number; y: number }): MoverServiceInterface {
     this.#movingOffsetX = offset.x;
     this.#movingOffsetY = offset.y;
     return this;
   }
 
-  stopMovingLayer(): MoverServiceInterface {
+  stopMovingChild(): MoverServiceInterface {
     this.#movingLayerId = '';
     this.#movingOffsetX = 0;
     this.#movingOffsetY = 0;
@@ -96,95 +131,59 @@ export class MoverService implements MoverServiceInterface {
         signs: []
       };
     }
-    const movingRange = this.#ranges.find(
-      item => item.id === this.#movingLayerId
-    );
-    if (!movingRange) {
+    const moveChild = this.gridManager.childInfoList.find(child => {
+      return child.id === this.#movingLayerId;
+    });
+    if (!moveChild || !moveChild.rect) {
       ErrorUtils.InteractError('Moving layer is not find');
       return {
         lines: [],
         signs: []
       };
     }
-    const movingRect = movingRange.rect.adjustRect(
-      this.#movingOffsetX,
-      this.#movingOffsetY
-    );
-    const activeRange = this.getActiveRangeByRect(
-      movingRect,
-      this.#movingLayerId
-    );
-    if (!activeRange) {
-      return this.getAssistLinesAndSignsByActivePoint(movingRect, {
-        left: 0,
-        top: 0,
-        right: Mark.Unset,
-        bottom: Mark.Unset
-      });
-    }
-    if (!activeRange.grid) {
-      return this.getAssistLinesAndSignsByActivePoint(movingRect, {
-        left: activeRange.rect.x,
-        top: activeRange.rect.y,
-        right: activeRange.rect.x + activeRange.rect.width,
-        bottom: activeRange.rect.y + activeRange.rect.height
-      });
-    }
-    const activeChildrenInfo = this.#ranges
-      .reduce<RangeInfo[]>((previous, current) => {
-        if (current.parentId === activeRange.id && current.gridArea) {
-          return previous.concat(current);
-        }
-        return previous;
-      }, [])
-      .map(range => {
-        return {
-          id: range.id,
-          gridArea: range.gridArea!,
-          margin: range.margin,
-          size: range.size
-        };
-      });
-    const gridItemRectList = this.gridManager
-      .setGridSize(activeRange.rect.width, activeRange.rect.height)
-      .setGridColumnInfo(activeRange.grid.column)
-      .setGridRowInfo(activeRange.grid.row)
-      .setGap(activeRange.gap)
-      .setPadding(activeRange.padding)
-      .setBorder(activeRange.border)
-      .setChildrenInfo(activeChildrenInfo)
-      .getGridItemRectList();
+    const movingRect = {
+      x: moveChild.rect.x + this.#movingOffsetX,
+      y: moveChild.rect.y + this.#movingOffsetY,
+      width: moveChild.rect.width,
+      height: moveChild.rect.height
+    };
+    const gridItemRectList = this.gridManager.getGridItemRectList();
     let activeGridItemRect: RectInfo | undefined;
     gridItemRectList.forEach(rowList => {
       rowList.forEach(rect => {
-        if (
-          rect.x + activeRange.rect.x < movingRect.x &&
-          rect.y + activeRange.rect.y < movingRect.y
-        ) {
+        if (rect.x < movingRect.x && rect.y < movingRect.y) {
           activeGridItemRect = rect;
         }
       });
     });
     if (activeGridItemRect) {
       return this.getAssistLinesAndSignsByActivePoint(movingRect, {
-        left: activeGridItemRect.x + activeRange.rect.x,
-        top: activeGridItemRect.y + activeRange.rect.y,
-        right:
-          activeGridItemRect.x + activeGridItemRect.width + activeRange.rect.x,
-        bottom:
-          activeGridItemRect.y + activeGridItemRect.height + activeRange.rect.y
+        left: activeGridItemRect.x,
+        top: activeGridItemRect.y,
+        right: activeGridItemRect.x + activeGridItemRect.width,
+        bottom: activeGridItemRect.y + activeGridItemRect.height
       });
     }
     return this.getAssistLinesAndSignsByActivePoint(movingRect, {
-      left: activeRange.rect.x,
-      top: activeRange.rect.y,
-      right: activeRange.rect.x + activeRange.rect.width,
-      bottom: activeRange.rect.y + activeRange.rect.height
+      left: 0,
+      top: 0,
+      right: Mark.Unset,
+      bottom: Mark.Unset
     });
   }
 
+  getAlignLinesAndOffset(): {
+    lines: LineInfo[];
+    offset: AlignOffsetInfo;
+  } {
+    return {
+      lines: [],
+      offset: AlignDefaultOffset
+    };
+  }
+
   private getAssistLinesAndSignsByActivePoint(
-    rect: RectModel,
+    rect: RectInfo,
     activeBorder: {
       left: number;
       top: number;
@@ -269,131 +268,5 @@ export class MoverService implements MoverServiceInterface {
       lines,
       signs
     };
-  }
-
-  private initRangeModelByLayers(params: {
-    childrenLayInfos: LayerInfo[];
-    totalLayerInfos: LayerInfo[];
-    ancestorIds: string[];
-    addRanges: RangeInfo[];
-    parentRange?: RangeInfo;
-  }) {
-    const sortLayInfos = params.childrenLayInfos.sort((a, b) => {
-      return a.order - b.order;
-    });
-    let newChildrenLayerInfos;
-    let childRect: RectModel;
-    let gridItemRectList: RectInfo[][] | undefined;
-    if (params.parentRange) {
-      const parentRange = params.parentRange;
-      const activeChildrenInfo = sortLayInfos.map(range => {
-        return {
-          id: range.id,
-          gridArea: range.gridArea,
-          margin: range.margin,
-          size: range.size
-        };
-      });
-      gridItemRectList = this.gridManager
-        .setGridSize(parentRange.rect.width, parentRange.rect.height)
-        .setGridColumnInfo(parentRange.grid.column)
-        .setGridRowInfo(parentRange.grid.row)
-        .setGap(parentRange.gap)
-        .setPadding(parentRange.padding)
-        .setBorder(parentRange.border)
-        .setChildrenInfo(activeChildrenInfo)
-        .getGridItemRectList();
-    }
-    sortLayInfos.forEach(layer => {
-      newChildrenLayerInfos = params.totalLayerInfos.filter(
-        item => item.parentId === layer.id
-      );
-      if (params.parentRange && gridItemRectList) {
-        const gridAreaItemRect = this.gridManager.convertChildSizeInfoToNumber({
-          gridArea: layer.gridArea,
-          gridItemRectList
-        });
-        childRect = new RectModel(
-          params.parentRange.rect.x +
-            gridAreaItemRect.x +
-            GridUtils.convertSizeInfoToNumber({
-              sizeInfo: layer.margin.left,
-              maxValue: gridAreaItemRect.width
-            }),
-          params.parentRange.rect.y +
-            gridAreaItemRect.y +
-            GridUtils.convertSizeInfoToNumber({
-              sizeInfo: layer.margin.top,
-              maxValue: gridAreaItemRect.height
-            }),
-          GridUtils.convertSizeInfoToNumber({
-            sizeInfo: layer.size.width,
-            maxValue: gridAreaItemRect.width
-          }),
-          GridUtils.convertSizeInfoToNumber({
-            sizeInfo: layer.size.height,
-            maxValue: gridAreaItemRect.height
-          })
-        );
-      } else {
-        childRect = new RectModel(
-          GridUtils.convertSizeInfoToNumber({
-            sizeInfo: layer.margin.left
-          }),
-          GridUtils.convertSizeInfoToNumber({
-            sizeInfo: layer.margin.top
-          }),
-          GridUtils.convertSizeInfoToNumber({
-            sizeInfo: layer.size.width
-          }),
-          GridUtils.convertSizeInfoToNumber({
-            sizeInfo: layer.size.height
-          })
-        );
-      }
-      const rangeInfo: RangeInfo = {
-        id: layer.id,
-        parentId: layer.parentId,
-        childIds: newChildrenLayerInfos.map(item => item.id),
-        ancestorIds: params.ancestorIds,
-        order: layer.order,
-        rect: childRect,
-        gridArea: layer.gridArea,
-        size: layer.size,
-        margin: layer.margin,
-        grid: layer.grid ?? DefaultGrid,
-        gap: layer.gap ?? DefaultGridGap,
-        padding: layer.padding ?? DefaultSpacingPadding,
-        border: layer.border ?? DefaultSpacingPadding
-      };
-      params.addRanges.push(rangeInfo);
-      this.initRangeModelByLayers({
-        childrenLayInfos: newChildrenLayerInfos,
-        totalLayerInfos: params.totalLayerInfos,
-        ancestorIds: params.ancestorIds.concat(layer.id),
-        addRanges: params.addRanges,
-        parentRange: rangeInfo
-      });
-    });
-  }
-
-  private getActiveRangeByRect(
-    activeRect: RectModel,
-    activeId: string
-  ): RangeInfo | undefined {
-    const rangLength = this.#ranges.length;
-    let item: RangeInfo;
-    for (let index = rangLength - 1; index >= 0; index -= 1) {
-      item = this.#ranges[index];
-      if (
-        item &&
-        item.rect &&
-        item.rect.containerRect(activeRect) &&
-        item.id !== activeId
-      ) {
-        return item;
-      }
-    }
-    return undefined;
   }
 }
