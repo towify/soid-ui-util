@@ -18,6 +18,7 @@ import { GridManager } from '../../manager/gird.manager/grid.manager';
 import { ErrorUtils } from '../../utils/error.utils/error.utils';
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
 import { NumberUtils } from '../../utils/number.utils/number.utils';
+import { WindowUtils } from '../../utils/window.utils/window.utils';
 
 export class MoverService implements MoverServiceInterface {
   #ranges: RangeInfo[] = [];
@@ -37,6 +38,14 @@ export class MoverService implements MoverServiceInterface {
   static getInstance(): MoverServiceInterface {
     MoverService.instance ??= new MoverService();
     return MoverService.instance;
+  }
+
+  setWindowSize(width: number, height: number): MoverServiceInterface {
+    WindowUtils.WindowSize = {
+      width,
+      height
+    };
+    return this;
   }
 
   get gridManager(): GridManager {
