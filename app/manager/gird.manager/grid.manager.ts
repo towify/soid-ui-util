@@ -25,7 +25,7 @@ export class GridManager {
   #gridRowInfo: UISize[] = [];
   #rowGap = 0;
   #columnGap = 0;
-  #gridRect = DefaultRect;
+  gridRect = DefaultRect;
   padding = DefaultOffset;
   border = DefaultOffset;
 
@@ -64,7 +64,7 @@ export class GridManager {
     column: number;
     gap?: GridGap;
   }): GridManager {
-    if (!this.#gridRect) {
+    if (!this.gridRect) {
       ErrorUtils.GridError('GridSize is undefined');
       return this;
     }
@@ -73,21 +73,20 @@ export class GridManager {
     if (params.gap?.row) {
       this.#rowGap = this.convertSizeInfoToNumber(
         params.gap.row,
-        this.#gridRect.height
+        this.gridRect.height
       );
     }
     if (params.gap?.column) {
       this.#columnGap = this.convertSizeInfoToNumber(
         params.gap.column,
-        this.#gridRect.width
+        this.gridRect.width
       );
     }
     let rowIndex = 0;
     for (rowIndex; rowIndex < params.row; rowIndex += 1) {
       this.#gridRowInfo.push({
         value:
-          (this.#gridRect.height - this.#rowGap * (params.row - 1)) /
-          params.row,
+          (this.gridRect.height - this.#rowGap * (params.row - 1)) / params.row,
         unit: SizeUnit.PX
       });
     }
@@ -95,7 +94,7 @@ export class GridManager {
     for (columnIndex; columnIndex < params.column; columnIndex += 1) {
       this.#gridColumnInfo.push({
         value:
-          (this.#gridRect.width - this.#columnGap * (params.column - 1)) /
+          (this.gridRect.width - this.#columnGap * (params.column - 1)) /
           params.column,
         unit: SizeUnit.PX
       });
@@ -104,14 +103,14 @@ export class GridManager {
   }
 
   setGap(gap: GridGap): GridManager {
-    if (!this.#gridRect) {
+    if (!this.gridRect) {
       ErrorUtils.GridError('GridSize is undefined');
       return this;
     }
-    this.#rowGap = this.convertSizeInfoToNumber(gap.row, this.#gridRect?.width);
+    this.#rowGap = this.convertSizeInfoToNumber(gap.row, this.gridRect?.height);
     this.#columnGap = this.convertSizeInfoToNumber(
       gap.column,
-      this.#gridRect?.width
+      this.gridRect?.width
     );
     return this;
   }
@@ -154,7 +153,7 @@ export class GridManager {
   }
 
   getGridItemRectList(autoActive: boolean = true): RectInfo[][] {
-    if (!this.#gridRect) {
+    if (!this.gridRect) {
       return [];
     }
     const gridColumnInfo = this.#gridColumnInfo ?? [];
@@ -192,9 +191,9 @@ export class GridManager {
       });
     }
     const gridWidth =
-      this.#gridRect.width - (gridColumnInfo.length - 1) * this.#columnGap;
+      this.gridRect.width - (gridColumnInfo.length - 1) * this.#columnGap;
     const gridHeight =
-      this.#gridRect.height - (gridRowInfo.length - 1) * this.#rowGap;
+      this.gridRect.height - (gridRowInfo.length - 1) * this.#rowGap;
     const columnsNumberArray = GridUtils.getGridRowOrColumnItemValues({
       sizeInfoList: gridColumnInfo,
       maxValue: gridWidth,
@@ -218,14 +217,14 @@ export class GridManager {
       columnLength = 1;
       columnsNumberArray.push(gridWidth);
     }
-    let rowY = this.#gridRect.y;
+    let rowY = this.gridRect.y;
     let rowHeight = 0;
-    let columnX = this.#gridRect.x;
+    let columnX = this.gridRect.x;
     let columnWidth = 0;
     let rowArray: RectInfo[] = [];
     for (rowIndex; rowIndex < rowLength; rowIndex += 1) {
       rowArray = [];
-      columnX = this.#gridRect.x;
+      columnX = this.gridRect.x;
       rowHeight = rowsNumberArray[rowIndex];
       for (columnIndex = 0; columnIndex < columnLength; columnIndex += 1) {
         columnWidth = columnsNumberArray[columnIndex];
@@ -271,7 +270,7 @@ export class GridManager {
     return GridUtils.convertChildSizeInfoToNumber({
       gridArea: params.gridArea,
       gridItemRectList: params.gridItemRectList,
-      gridRect: this.#gridRect
+      gridRect: this.gridRect
     });
   }
 
@@ -359,7 +358,7 @@ export class GridManager {
 
   private updateGridRect(): void {
     if (this.gridSize) {
-      this.#gridRect = {
+      this.gridRect = {
         x: this.padding.left + this.border.left,
         y: this.padding.top + this.border.top,
         width:

@@ -15,6 +15,7 @@ import {
   RectInfo,
   SizeInfo
 } from '../../type/common.type';
+import { AlignOffsetInfo, SignInfo } from '../../type/interact.type';
 
 export interface GridServiceInterface {
   /**
@@ -149,5 +150,33 @@ export interface GridServiceInterface {
   ): {
     area: RectInfo[];
     lines: LineInfo[];
+  };
+
+  /**
+   * @param id: 开始移动 Layer 的id
+   */
+  startMovingChildById(id: string): GridServiceInterface;
+
+  /**
+   * @param offset: 移动 Layer 的偏移量
+   */
+  movingChild(offset: { x: number; y: number }): GridServiceInterface;
+
+  /**
+   * @description 结束移动 Layer
+   */
+  stopMovingChild(): GridServiceInterface;
+
+  /**
+   * @description 获取 assist lines 的信息
+   */
+  getAssistLinesAndSigns(): {
+    lines: LineInfo[];
+    signs: SignInfo[];
+  };
+
+  getAlignLinesAndOffset(): {
+    lines: LineInfo[];
+    offset: AlignOffsetInfo;
   };
 }

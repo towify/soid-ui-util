@@ -340,6 +340,52 @@ const gridPaddingArea = gridService.getGridPaddingAreaAndLines(5).area;
           fill-opacity="0.4"></rect>
 ```
 
+### Assist Line And Align Line
+
+```typescript
+const moveX = 100;
+const moveY = 100;
+const gridService = GridService.getInstance();
+gridService.startMovingChildById('testing');
+gridService.movingChild(moveX, moveY);
+
+const alignInfo = gridService.getAlignLinesAndOffset();
+const alignLines = alignInfo.lines;
+const alignOffset = alignLine.offset;
+
+gridService.movingChild(moveX + alignOffset.x, moveY + alignOffset.y);
+const assistLines = gridService.getAssistLinesAndSigns().lines;
+const assistSigns = gridService.getAssistLinesAndSigns().signs;
+```
+
+```HTML
+// draw area and line in angular eg:
+<line *ngFor="let line of alignLines"
+            [attr.x1]="line.fromX"
+            [attr.x2]="line.toX"
+            [attr.y1]="line.fromY"
+            [attr.y2]="line.toY"
+            [attr.stroke]="'red'"
+            [attr.stroke-width]="1"
+            [attr.stroke-dasharray]="'3, 2'"></line>
+
+<line *ngFor="let line of assistLines"
+            [attr.x1]="line.fromX"
+            [attr.x2]="line.toX"
+            [attr.y1]="line.fromY"
+            [attr.y2]="line.toY"
+            [attr.stroke]="'white'"
+            [attr.stroke-width]="1"
+            [attr.stroke-dasharray]="'3, 2'"></line>
+
+<text *ngFor="let sign of assistSigns"
+            text-anchor="middle"
+            [attr.stroke]="'white'"
+            [attr.x]="sign.x"
+            [attr.y]="sign.y"
+            [attr.font-size]="12">{{sign.sign}}</text>
+```
+
 ## Operator Service
 
 Use operator service to manage you handle
@@ -364,67 +410,4 @@ operatorService
   })
   .setOperatorSize(50, 20);
 const operatorRect = operatorService.getOperatorRect();
-```
-
-## Mover Service
-
-Use Mover service to get move container information
-
-```typescript
-const moverService = MoverService.getInstance();
-moverService
-  .setWindowSize(1024, 768)
-  .setGridSize(500, 400)
-  .setGridInfo({
-    row: [
-      { value: 20, unit: 'px' },
-      { value: 150, unit: 'px' }
-    ],
-    column: [
-      { value: 20, unit: 'px' },
-      { value: 150, unit: 'px' }
-    ]
-  })
-  .setGridPaddingInfo({
-    left: {
-      value: 20,
-      unit: 'px'
-    },
-    right: {
-      value: 20,
-      unit: 'px'
-    },
-    top: {
-      value: 20,
-      unit: 'px'
-    },
-    bottom: {
-      value: 20,
-      unit: 'px'
-    }
-  })
-  .setGridGap({ value: 10, unit: 'px' }, { value: 10, unit: 'px' });
-moverService.startMovingLayerById('testing');
-moverService.movingLayer(100, 100);
-const assistLines = moverService.getAssistLinesAndSigns().lines;
-const assistSigns = moverService.getAssistLinesAndSigns().signs;
-```
-
-```HTML
-// draw area and line in angular eg:
-<line *ngFor="let line of assistLines"
-            [attr.x1]="line.fromX"
-            [attr.x2]="line.toX"
-            [attr.y1]="line.fromY"
-            [attr.y2]="line.toY"
-            [attr.stroke]="'white'"
-            [attr.stroke-width]="1"
-            [attr.stroke-dasharray]="'3, 2'"></line>
-
-<text *ngFor="let sign of assistSigns"
-            text-anchor="middle"
-            [attr.stroke]="'white'"
-            [attr.x]="sign.x"
-            [attr.y]="sign.y"
-            [attr.font-size]="12">{{sign.sign}}</text>
 ```
