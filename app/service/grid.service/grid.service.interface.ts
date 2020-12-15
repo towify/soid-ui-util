@@ -175,8 +175,11 @@ export interface GridServiceInterface {
     signs: SignInfo[];
   };
 
+  /**
+   * @description 获取 align lines 的信息
+   */
   getAlignLinesAndOffset(
-    offset: number
+    offset?: number
   ): {
     lines: LineInfo[];
     offset: AlignOffsetInfo;
