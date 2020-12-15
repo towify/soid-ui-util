@@ -11,10 +11,10 @@ export class GridAlignLineUtils {
   static getClosestValueInPositionList(params: {
     value: number;
     list: number[];
-    maxOff: number;
+    offset: number;
   }): number | undefined {
     const checkNumber = params.list.find(
-      item => Math.abs(item - params.value) < params.maxOff
+      item => Math.abs(item - params.value) < params.offset
     );
     if (checkNumber !== undefined) {
       if (checkNumber === params.value) {
@@ -31,7 +31,7 @@ export class GridAlignLineUtils {
     yList: number[];
     centerList: number[];
     middleList: number[];
-    offSet: number;
+    offset: number;
     gridManager: GridManager;
   }): {
     lines: LineInfo[];
@@ -51,12 +51,12 @@ export class GridAlignLineUtils {
     const offsetCenter = GridAlignLineUtils.getClosestValueInPositionList({
       value: params.rect.x + params.rect.width / 2,
       list: params.centerList,
-      maxOff: params.offSet
+      offset: params.offset
     });
     const offsetMiddle = GridAlignLineUtils.getClosestValueInPositionList({
       value: params.rect.y + params.rect.height / 2,
       list: params.middleList,
-      maxOff: params.offSet
+      offset: params.offset
     });
     let offsetLeft: number | undefined;
     let offsetRight: number | undefined;
@@ -69,12 +69,12 @@ export class GridAlignLineUtils {
       offsetLeft = GridAlignLineUtils.getClosestValueInPositionList({
         value: params.rect.x,
         list: params.xList,
-        maxOff: params.offSet
+        offset: params.offset
       });
       offsetRight = GridAlignLineUtils.getClosestValueInPositionList({
         value: params.rect.x + params.rect.width,
         list: params.xList,
-        maxOff: params.offSet
+        offset: params.offset
       });
       if (offsetLeft !== undefined) {
         offsetX = offsetLeft;
@@ -94,12 +94,12 @@ export class GridAlignLineUtils {
       offsetTop = GridAlignLineUtils.getClosestValueInPositionList({
         value: params.rect.y,
         list: params.yList,
-        maxOff: params.offSet
+        offset: params.offset
       });
       offsetBottom = GridAlignLineUtils.getClosestValueInPositionList({
         value: params.rect.y + params.rect.height,
         list: params.yList,
-        maxOff: params.offSet
+        offset: params.offset
       });
       if (offsetTop !== undefined) {
         offsetY = offsetTop;

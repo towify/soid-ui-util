@@ -175,7 +175,9 @@ export interface GridServiceInterface {
     signs: SignInfo[];
   };
 
-  getAlignLinesAndOffset(): {
+  getAlignLinesAndOffset(
+    offset: number
+  ): {
     lines: LineInfo[];
     offset: AlignOffsetInfo;
   };

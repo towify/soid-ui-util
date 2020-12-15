@@ -263,7 +263,9 @@ export class GridService implements GridServiceInterface {
     );
   }
 
-  getAlignLinesAndOffset(): {
+  getAlignLinesAndOffset(
+    offset: number = 4
+  ): {
     lines: LineInfo[];
     offset: AlignOffsetInfo;
   } {
@@ -289,7 +291,7 @@ export class GridService implements GridServiceInterface {
       centerList: this.#layerCenterList,
       xList: this.#layerXList,
       yList: this.#layerYList,
-      offSet: 4,
+      offset,
       gridManager: this.gridManager
     });
   }
