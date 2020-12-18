@@ -2,7 +2,6 @@
  * @author allen
  * @data 2020/12/6 16:02
  */
-
 import { RectInfo } from '../../type/common.type';
 
 export interface OperatorServiceInterface {

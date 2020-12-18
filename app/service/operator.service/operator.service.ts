@@ -2,7 +2,6 @@
  * @author allen
  * @data 2020/12/6 16:07
  */
-
 import { Mark } from 'towify-editor-common-values';
 import { OperatorServiceInterface } from './operator.service.interface';
 import { DefaultRect, RectInfo } from '../../type/common.type';
@@ -18,8 +17,6 @@ export class OperatorService implements OperatorServiceInterface {
   #size?: { width: number; height: number };
 
   #minDistance = 10;
-
-  #gap = 10;
 
   static getInstance(): OperatorServiceInterface {
     OperatorService.instance ??= new OperatorService();

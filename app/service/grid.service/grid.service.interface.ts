@@ -170,7 +170,10 @@ export interface GridServiceInterface {
   /**
    * @description 获取 assist lines 的信息
    */
-  getAssistLinesAndSigns(): {
+  getAssistLinesAndSigns(offset?: {
+    x: number;
+    y: number;
+  }): {
     lines: LineInfo[];
     signs: SignInfo[];
   };

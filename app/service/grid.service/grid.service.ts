@@ -242,7 +242,10 @@ export class GridService implements GridServiceInterface {
     return this;
   }
 
-  getAssistLinesAndSigns(): {
+  getAssistLinesAndSigns(offset?: {
+    x: number;
+    y: number;
+  }): {
     lines: LineInfo[];
     signs: SignInfo[];
   } {
@@ -256,8 +259,8 @@ export class GridService implements GridServiceInterface {
     return GridAssistLineUtils.getAssistLinesAndSigns(
       {
         movingId: this.#movingLayerId,
-        movingOffsetX: this.#movingOffsetX,
-        movingOffsetY: this.#movingOffsetY
+        movingOffsetX: offset ? offset.x : this.#movingOffsetX,
+        movingOffsetY: offset ? offset.y : this.#movingOffsetY
       },
       this.gridManager
     );
