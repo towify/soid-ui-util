@@ -347,20 +347,26 @@ const moveX = 100;
 const moveY = 100;
 const gridService = GridService.getInstance();
 gridService.startMovingChildById('testing');
-gridService.movingChild(moveX, moveY);
+gridService.movingChild({
+  x: moveX,
+  y: moveY
+});
 
 const alignInfo = gridService.getAlignLinesAndOffset();
-const alignLines = alignInfo.lines;
-const alignOffset = alignLine.offset;
+const { lines } = alignInfo;
+const { offset } = alignLine;
 
-gridService.movingChild(moveX + alignOffset.x, moveY + alignOffset.y);
-const assistLines = gridService.getAssistLinesAndSigns().lines;
-const assistSigns = gridService.getAssistLinesAndSigns().signs;
+const assistLineInfo = gridService.getAssistLinesAndSigns({
+  x: moveX + alignOffset.x,
+  y: moveY + alignOffset.y
+});
+const { assistLines } = assistLineInfo.lines;
+const { signs } = assistLineInfo;
 ```
 
 ```HTML
 // draw area and line in angular eg:
-<line *ngFor="let line of alignLines"
+<line *ngFor="let line of lines"
             [attr.x1]="line.fromX"
             [attr.x2]="line.toX"
             [attr.y1]="line.fromY"
@@ -378,7 +384,7 @@ const assistSigns = gridService.getAssistLinesAndSigns().signs;
             [attr.stroke-width]="1"
             [attr.stroke-dasharray]="'3, 2'"></line>
 
-<text *ngFor="let sign of assistSigns"
+<text *ngFor="let sign of signs"
             text-anchor="middle"
             [attr.stroke]="'white'"
             [attr.x]="sign.x"
