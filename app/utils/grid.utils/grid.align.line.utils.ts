@@ -37,7 +37,7 @@ export class GridAlignLineUtils {
     lines: LineInfo[];
     offset: AlignOffsetInfo;
   } {
-    if (!params.gridManager.gridRect) {
+    if (!params.gridManager.gridActiveRect) {
       ErrorUtils.InteractError('GridSize is undefined');
       return {
         lines: [],
@@ -113,12 +113,14 @@ export class GridAlignLineUtils {
       }
     }
     const lines: LineInfo[] = [];
-    const minX = params.gridManager.gridRect.x;
+    const minX = params.gridManager.gridActiveRect.x;
     const maxX =
-      params.gridManager.gridRect.x + params.gridManager.gridRect.width;
-    const minY = params.gridManager.gridRect.y;
+      params.gridManager.gridActiveRect.x +
+      params.gridManager.gridActiveRect.width;
+    const minY = params.gridManager.gridActiveRect.y;
     const maxY =
-      params.gridManager.gridRect.y + params.gridManager.gridRect.height;
+      params.gridManager.gridActiveRect.y +
+      params.gridManager.gridActiveRect.height;
     xAlignLines.forEach(xNumber => {
       lines.push({
         fromX: xNumber,

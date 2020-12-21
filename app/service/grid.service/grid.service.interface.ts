@@ -30,7 +30,7 @@ export interface GridServiceInterface {
    * @param height Window height
    * 设置 parent grid size
    */
-  setGridSize(width: number, height: number): GridServiceInterface;
+  setGridRect(rect: RectInfo): GridServiceInterface;
 
   /**
    * @param info:  grid row info， eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
@@ -170,21 +170,12 @@ export interface GridServiceInterface {
   /**
    * @description 获取 assist lines 的信息
    */
-  getAssistLinesAndSigns(offset?: {
-    x: number;
-    y: number;
-  }): {
-    lines: LineInfo[];
-    signs: SignInfo[];
-  };
-
-  /**
-   * @description 获取 align lines 的信息
-   */
-  getAlignLinesAndOffset(
-    offset?: number
+  getAlignAndAssistLineInfo(
+    maxActiveLength?: number
   ): {
-    lines: LineInfo[];
+    assistLines: LineInfo[];
+    assistSigns: SignInfo[];
+    alignLines: LineInfo[];
     offset: AlignOffsetInfo;
   };
 }

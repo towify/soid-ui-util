@@ -16,7 +16,12 @@ After set grid rect / grid row info / grid column info / drop rect, base grid ro
 const gridService = GridService.getInstance();
 const droppedInfo = gridService
   .setWindowSize(1024, 768)
-  .setGridSize(500, 400)
+  .setGridRect({
+    x: 0,
+    y: 0,
+    width: 500,
+    height: 400
+  })
   .setGridRowInfo([
     {
       value: 20,
@@ -129,7 +134,12 @@ After change grid row / column info , you can adjust children grid info.
 const gridService = GridService.getInstance();
 gridService
   .setWindowSize(1024, 768)
-  .setGridSize(500, 400)
+  .setGridRect({
+    x: 0,
+    y: 0,
+    width: 500,
+    height: 400
+  })
   .setGridCount(2, 2)
   .setChildrenGridInfo([
     {
@@ -176,7 +186,12 @@ If you want draw grid lines, you can get grid lines coordinates(eg: { fromX: 0; 
 const gridService = GridService.getInstance();
 gridService
   .setWindowSize(1024, 768)
-  .setGridSize(500, 400)
+  .setGridRect({
+    x: 0,
+    y: 0,
+    width: 500,
+    height: 400
+  })
   .setGridRowInfo([
     {
       value: 20,
@@ -224,7 +239,12 @@ If you want draw grid gap area and lines, you can get grid gap area rects and li
 const gridService = GridService.getInstance();
 gridService
   .setWindowSize(1024, 768)
-  .setGridSize(500, 400)
+  .setGridRect({
+    x: 0,
+    y: 0,
+    width: 500,
+    height: 400
+  })
   .setGridRowInfo([
     {
       value: 20,
@@ -277,7 +297,12 @@ If you want draw grid gap area and lines, you can get grid gap area rects and li
 const gridService = GridService.getInstance();
 gridService
   .setWindowSize(1024, 768)
-  .setGridSize(500, 400)
+  .setGridRect({
+    x: 0,
+    y: 0,
+    width: 500,
+    height: 400
+  })
   .setGridRowInfo([
     {
       value: 20,
@@ -352,21 +377,16 @@ gridService.movingChild({
   y: moveY
 });
 
-const alignInfo = gridService.getAlignLinesAndOffset();
-const { lines } = alignInfo;
-const { offset } = alignLine;
-
-const assistLineInfo = gridService.getAssistLinesAndSigns({
-  x: moveX + alignOffset.x,
-  y: moveY + alignOffset.y
-});
-const { assistLines } = assistLineInfo.lines;
-const { signs } = assistLineInfo;
+const alignAndAssistLineInfo = gridService.getAlignAndAssistLineInfo();
+const { alignLines } = alignAndAssistLineInfo;
+const { assistLines } = alignAndAssistLineInfo;
+const { assistSigns } = alignAndAssistLineInfo;
+const { offset } = alignAndAssistLineInfo;
 ```
 
 ```HTML
 // draw area and line in angular eg:
-<line *ngFor="let line of lines"
+<line *ngFor="let line of alignLines"
             [attr.x1]="line.fromX"
             [attr.x2]="line.toX"
             [attr.y1]="line.fromY"
@@ -384,12 +404,12 @@ const { signs } = assistLineInfo;
             [attr.stroke-width]="1"
             [attr.stroke-dasharray]="'3, 2'"></line>
 
-<text *ngFor="let sign of signs"
+<text *ngFor="let sign of assistSigns"
             text-anchor="middle"
             [attr.stroke]="'white'"
             [attr.x]="sign.x"
             [attr.y]="sign.y"
-            [attr.font-size]="12">{{sign.sign}}</text>
+            [attr.font-size]="10">{{sign.sign}}</text>
 ```
 
 ## Operator Service

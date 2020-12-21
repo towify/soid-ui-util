@@ -26,17 +26,22 @@ export class GridAssistLineUtils {
     const signs: SignInfo[] = [];
     if (activeBorder.left !== Mark.Unset) {
       const offLeft = NumberUtils.parseViewNumber(rect.x - activeBorder.left);
-      if (offLeft >= 0) {
+      const leftY = rect.y + rect.height / 2;
+      if (
+        offLeft >= 0 &&
+        leftY < activeBorder.bottom &&
+        leftY > activeBorder.top
+      ) {
         lines.push({
           fromX: rect.x,
           toX: activeBorder.left,
-          fromY: rect.y + rect.height / 2,
-          toY: rect.y + rect.height / 2
+          fromY: leftY,
+          toY: leftY
         });
         signs.push({
           x: activeBorder.left + offLeft / 2,
-          y: rect.y + rect.height / 2 - 22,
-          sign: offLeft + SizeUnit.PX
+          y: leftY - 8,
+          sign: `${offLeft} ${SizeUnit.PX}`
         });
       }
     }
@@ -44,33 +49,43 @@ export class GridAssistLineUtils {
       const offRight = NumberUtils.parseViewNumber(
         activeBorder.right - (rect.x + rect.width)
       );
-      if (offRight >= 0) {
+      const rightY = rect.y + rect.height / 2;
+      if (
+        offRight >= 0 &&
+        rightY < activeBorder.bottom &&
+        rightY > activeBorder.top
+      ) {
         lines.push({
           fromX: rect.x + rect.width,
           toX: activeBorder.right,
-          fromY: rect.y + rect.height / 2,
-          toY: rect.y + rect.height / 2
+          fromY: rightY,
+          toY: rightY
         });
         signs.push({
           x: activeBorder.right - offRight / 2,
-          y: rect.y + rect.height / 2 - 22,
-          sign: offRight + SizeUnit.PX
+          y: rightY - 8,
+          sign: `${offRight} ${SizeUnit.PX}`
         });
       }
     }
     if (activeBorder.top !== Mark.Unset) {
       const offTop = NumberUtils.parseViewNumber(rect.y - activeBorder.top);
-      if (offTop >= 0) {
+      const topX = rect.x + rect.width / 2;
+      if (
+        offTop >= 0 &&
+        topX < activeBorder.right &&
+        topX > activeBorder.left
+      ) {
         lines.push({
-          fromX: rect.x + rect.width / 2,
-          toX: rect.x + rect.width / 2,
+          fromX: topX,
+          toX: topX,
           fromY: rect.y,
           toY: activeBorder.top
         });
         signs.push({
-          x: rect.x + rect.width / 2 + 35,
-          y: activeBorder.top + offTop / 2 + 5,
-          sign: offTop + SizeUnit.PX
+          x: topX + 15 + offTop.toString().length * 3,
+          y: activeBorder.top + offTop / 2 + 6,
+          sign: `${offTop} ${SizeUnit.PX}`
         });
       }
     }
@@ -78,17 +93,22 @@ export class GridAssistLineUtils {
       const offBottom = NumberUtils.parseViewNumber(
         activeBorder.bottom - (rect.y + rect.height)
       );
-      if (offBottom >= 0) {
+      const bottomX = rect.x + rect.width / 2;
+      if (
+        offBottom >= 0 &&
+        bottomX < activeBorder.right &&
+        bottomX > activeBorder.left
+      ) {
         lines.push({
-          fromX: rect.x + rect.width / 2,
-          toX: rect.x + rect.width / 2,
+          fromX: bottomX,
+          toX: bottomX,
           fromY: rect.y + rect.height,
           toY: activeBorder.bottom
         });
         signs.push({
-          x: rect.x + rect.width / 2 + 35,
-          y: activeBorder.bottom - offBottom / 2 + 5,
-          sign: offBottom + SizeUnit.PX
+          x: bottomX + 15 + offBottom.toString().length * 3,
+          y: activeBorder.bottom - offBottom / 2 + 6,
+          sign: `${offBottom} ${SizeUnit.PX}`
         });
       }
     }

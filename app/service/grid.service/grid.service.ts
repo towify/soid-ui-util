@@ -66,8 +66,8 @@ export class GridService implements GridServiceInterface {
     return this;
   }
 
-  setGridSize(width: number, height: number): GridServiceInterface {
-    this.gridManager.setGridSize(width, height);
+  setGridRect(rect: RectInfo): GridServiceInterface {
+    this.gridManager.setGridRect(rect);
     return this;
   }
 
@@ -112,7 +112,7 @@ export class GridService implements GridServiceInterface {
   }
 
   setChildrenGridInfo(childrenInfo: GridChildInfo[]): GridServiceInterface {
-    if (!this.gridManager.gridSize) {
+    if (!this.gridManager.gridRect) {
       ErrorUtils.GridError('GridSize is undefined');
       return this;
     }
@@ -166,7 +166,7 @@ export class GridService implements GridServiceInterface {
   }
 
   adjustChildrenAndResetAutoGridInfo(): GridChildInfo[] {
-    if (!this.gridManager.gridSize) {
+    if (!this.gridManager.gridRect) {
       ErrorUtils.GridError('GridSize is undefined');
       return [];
     }
@@ -175,7 +175,7 @@ export class GridService implements GridServiceInterface {
   }
 
   getModifiedChildrenGirdInfo(): GridChildInfo[] {
-    if (!this.gridManager.gridSize || !this.gridManager.childInfoList.length) {
+    if (!this.gridManager.gridRect || !this.gridManager.childInfoList.length) {
       ErrorUtils.GridError('GridSize is undefined');
       return [];
     }
@@ -206,7 +206,7 @@ export class GridService implements GridServiceInterface {
     area: RectInfo[];
     lines: { fromX: number; fromY: number; toX: number; toY: number }[];
   } {
-    if (!this.gridManager.gridSize) {
+    if (!this.gridManager.gridRect) {
       ErrorUtils.GridError('GridSize is undefined');
       return {
         area: [],
@@ -216,7 +216,7 @@ export class GridService implements GridServiceInterface {
     return GridLineUtils.getGridPaddingAreaAndLine({
       gridPadding: this.gridManager.padding,
       border: this.gridManager.border,
-      gridSize: this.gridManager.gridSize,
+      gridSize: this.gridManager.gridRect,
       lineSpace
     });
   }
@@ -242,34 +242,12 @@ export class GridService implements GridServiceInterface {
     return this;
   }
 
-  getAssistLinesAndSigns(offset?: {
-    x: number;
-    y: number;
-  }): {
-    lines: LineInfo[];
-    signs: SignInfo[];
-  } {
-    if (!this.#movingLayerId) {
-      ErrorUtils.InteractError('Moving layer is not set');
-      return {
-        lines: [],
-        signs: []
-      };
-    }
-    return GridAssistLineUtils.getAssistLinesAndSigns(
-      {
-        movingId: this.#movingLayerId,
-        movingOffsetX: offset ? offset.x : this.#movingOffsetX,
-        movingOffsetY: offset ? offset.y : this.#movingOffsetY
-      },
-      this.gridManager
-    );
-  }
-
-  getAlignLinesAndOffset(
-    offset: number = 4
+  getAlignAndAssistLineInfo(
+    maxActiveLength: number = 4
   ): {
-    lines: LineInfo[];
+    assistLines: LineInfo[];
+    assistSigns: SignInfo[];
+    alignLines: LineInfo[];
     offset: AlignOffsetInfo;
   } {
     const moveChild = this.gridManager.childInfoList.find(child => {
@@ -278,7 +256,18 @@ export class GridService implements GridServiceInterface {
     if (!moveChild || !moveChild.rect) {
       ErrorUtils.InteractError('Moving layer is not find');
       return {
-        lines: [],
+        assistLines: [],
+        alignLines: [],
+        assistSigns: [],
+        offset: AlignDefaultOffset
+      };
+    }
+    if (!this.gridManager.gridRect) {
+      ErrorUtils.GridError('GridSize is undefined');
+      return {
+        assistLines: [],
+        alignLines: [],
+        assistSigns: [],
         offset: AlignDefaultOffset
       };
     }
@@ -288,29 +277,64 @@ export class GridService implements GridServiceInterface {
       width: moveChild.rect.width,
       height: moveChild.rect.height
     };
-    return GridAlignLineUtils.getAlignLineByMoveRect({
+    const alignLineInfo = GridAlignLineUtils.getAlignLineByMoveRect({
       rect: movingRect,
       middleList: this.#layerMiddleList,
       centerList: this.#layerCenterList,
       xList: this.#layerXList,
       yList: this.#layerYList,
-      offset,
+      offset: maxActiveLength,
       gridManager: this.gridManager
     });
+    const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns(
+      {
+        movingId: this.#movingLayerId,
+        movingOffsetX: this.#movingOffsetX + alignLineInfo.offset.x,
+        movingOffsetY: this.#movingOffsetY + +alignLineInfo.offset.y
+      },
+      this.gridManager
+    );
+    const rect = this.gridManager.gridRect;
+    return {
+      assistLines: assistLineInfo.lines.map(line => {
+        return {
+          fromX: line.fromX + rect.x,
+          fromY: line.fromY + rect.y,
+          toX: line.toX + rect.x,
+          toY: line.toY + rect.y
+        };
+      }),
+      alignLines: alignLineInfo.lines.map(line => {
+        return {
+          fromX: line.fromX + rect.x,
+          fromY: line.fromY + rect.y,
+          toX: line.toX + rect.x,
+          toY: line.toY + rect.y
+        };
+      }),
+      assistSigns: assistLineInfo.signs.map(sign => {
+        return {
+          x: sign.x + rect.x,
+          y: sign.y + rect.y,
+          sign: sign.sign
+        };
+      }),
+      offset: alignLineInfo.offset
+    };
   }
 
   private prepareAlignLine(isNeedMiddle = true): void {
-    if (!this.gridManager.gridSize) {
+    if (!this.gridManager.gridRect) {
       ErrorUtils.InteractError('GridSize is undefined');
       return;
     }
     this.resetAlignLine();
     const canvasMinLeft = 0;
-    const canvasMaxRight = this.gridManager.gridSize.width;
+    const canvasMaxRight = this.gridManager.gridRect.width;
     const canvasMinTop = 0;
-    const canvasMaxBottom = this.gridManager.gridSize.height;
-    const canvasCenterX = this.gridManager.gridSize.width / 2;
-    const canvasCenterY = this.gridManager.gridSize.height / 2;
+    const canvasMaxBottom = this.gridManager.gridRect.height;
+    const canvasCenterX = this.gridManager.gridRect.width / 2;
+    const canvasCenterY = this.gridManager.gridRect.height / 2;
     if (isNeedMiddle) {
       this.#layerCenterList.push(canvasCenterX);
       this.#layerMiddleList.push(canvasCenterY);

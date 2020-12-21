@@ -209,7 +209,7 @@ export class GridChildUtils {
     info: GridChildInfo;
     needUpdateGridChildren: boolean;
   } {
-    if (!gridManager.gridSize) {
+    if (!gridManager.gridRect) {
       ErrorUtils.GridError('GridSize is undefined');
       return {
         info: {
