@@ -44,7 +44,22 @@ type LineInfo = {
   toY: number;
 };
 
-export { Rgba, RectInfo, GridChildInfo, SizeInfo, RegionInfo, LineInfo };
+type PaddingInfo = {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+};
+
+export {
+  Rgba,
+  RectInfo,
+  GridChildInfo,
+  SizeInfo,
+  RegionInfo,
+  LineInfo,
+  PaddingInfo
+};
 
 export const DefaultRect = {
   x: 0,

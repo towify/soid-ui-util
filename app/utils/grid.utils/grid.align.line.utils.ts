@@ -3,9 +3,7 @@
  * @data 2020/12/14 17:22
  */
 import { LineInfo, RectInfo } from '../../type/common.type';
-import { AlignDefaultOffset, AlignOffsetInfo } from '../../type/interact.type';
-import { ErrorUtils } from '../error.utils/error.utils';
-import { GridManager } from '../../manager/gird.manager/grid.manager';
+import { AlignOffsetInfo } from '../../type/interact.type';
 
 export class GridAlignLineUtils {
   static getClosestValueInPositionList(params: {
@@ -32,18 +30,11 @@ export class GridAlignLineUtils {
     centerList: number[];
     middleList: number[];
     offset: number;
-    gridManager: GridManager;
+    gridActiveRect: RectInfo;
   }): {
     lines: LineInfo[];
     offset: AlignOffsetInfo;
   } {
-    if (!params.gridManager.gridActiveRect) {
-      ErrorUtils.InteractError('GridSize is undefined');
-      return {
-        lines: [],
-        offset: AlignDefaultOffset
-      };
-    }
     let offsetX = 0;
     let offsetY = 0;
     const xAlignLines: number[] = [];
@@ -113,14 +104,10 @@ export class GridAlignLineUtils {
       }
     }
     const lines: LineInfo[] = [];
-    const minX = params.gridManager.gridActiveRect.x;
-    const maxX =
-      params.gridManager.gridActiveRect.x +
-      params.gridManager.gridActiveRect.width;
-    const minY = params.gridManager.gridActiveRect.y;
-    const maxY =
-      params.gridManager.gridActiveRect.y +
-      params.gridManager.gridActiveRect.height;
+    const minX = params.gridActiveRect.x;
+    const maxX = params.gridActiveRect.x + params.gridActiveRect.width;
+    const minY = params.gridActiveRect.y;
+    const maxY = params.gridActiveRect.y + params.gridActiveRect.height;
     xAlignLines.forEach(xNumber => {
       lines.push({
         fromX: xNumber,

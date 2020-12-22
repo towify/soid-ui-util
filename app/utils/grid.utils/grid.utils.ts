@@ -3,7 +3,7 @@
  * @data 2020/11/18 12:12
  */
 import { GridArea, Mark, SizeUnit, UISize } from 'towify-editor-common-values';
-import { RectInfo } from '../../type/common.type';
+import { PaddingInfo, RectInfo } from '../../type/common.type';
 import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';
 import { WindowUtils } from '../window.utils/window.utils';
@@ -220,6 +220,12 @@ export class GridUtils {
       width: 0,
       height: 0
     };
+    if (
+      params.gridItemRectList.length === 0 ||
+      params.gridItemRectList[0].length === 0
+    ) {
+      return childGridRect;
+    }
     if (rowStart < 0) {
       childGridRect.y = params.gridItemRectList[0][0].y;
     } else if (rowStart >= params.gridItemRectList.length) {
@@ -438,6 +444,29 @@ export class GridUtils {
     return {
       marginLeft: NumberUtils.parseViewNumber(marginLeft),
       marginTop: NumberUtils.parseViewNumber(marginTop)
+    };
+  }
+
+  static getActiveRect(params: {
+    rect: RectInfo;
+    padding: PaddingInfo;
+    border: PaddingInfo;
+  }): RectInfo {
+    return {
+      x: params.padding.left + params.border.left,
+      y: params.padding.top + params.border.top,
+      width:
+        params.rect.width -
+        params.padding.left -
+        params.padding.right -
+        params.border.left -
+        params.border.right,
+      height:
+        params.rect.height -
+        params.padding.top -
+        params.padding.bottom -
+        params.border.top -
+        params.border.bottom
     };
   }
 }

@@ -112,7 +112,7 @@ export class GridService implements GridServiceInterface {
   }
 
   setChildrenGridInfo(childrenInfo: GridChildInfo[]): GridServiceInterface {
-    if (!this.gridManager.gridRect) {
+    if (!this.gridManager.activeStatus) {
       ErrorUtils.GridError('GridSize is undefined');
       return this;
     }
@@ -166,7 +166,7 @@ export class GridService implements GridServiceInterface {
   }
 
   adjustChildrenAndResetAutoGridInfo(): GridChildInfo[] {
-    if (!this.gridManager.gridRect) {
+    if (!this.gridManager.activeStatus) {
       ErrorUtils.GridError('GridSize is undefined');
       return [];
     }
@@ -175,7 +175,10 @@ export class GridService implements GridServiceInterface {
   }
 
   getModifiedChildrenGirdInfo(): GridChildInfo[] {
-    if (!this.gridManager.gridRect || !this.gridManager.childInfoList.length) {
+    if (
+      !this.gridManager.activeStatus ||
+      !this.gridManager.childInfoList.length
+    ) {
       ErrorUtils.GridError('GridSize is undefined');
       return [];
     }
@@ -206,7 +209,7 @@ export class GridService implements GridServiceInterface {
     area: RectInfo[];
     lines: { fromX: number; fromY: number; toX: number; toY: number }[];
   } {
-    if (!this.gridManager.gridRect) {
+    if (!this.gridManager.activeStatus) {
       ErrorUtils.GridError('GridSize is undefined');
       return {
         area: [],
@@ -262,7 +265,7 @@ export class GridService implements GridServiceInterface {
         offset: AlignDefaultOffset
       };
     }
-    if (!this.gridManager.gridRect) {
+    if (!this.gridManager.activeStatus) {
       ErrorUtils.GridError('GridSize is undefined');
       return {
         assistLines: [],
@@ -284,7 +287,7 @@ export class GridService implements GridServiceInterface {
       xList: this.#layerXList,
       yList: this.#layerYList,
       offset: maxActiveLength,
-      gridManager: this.gridManager
+      gridActiveRect: this.gridManager.gridActiveRect
     });
     const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns(
       {
@@ -324,7 +327,7 @@ export class GridService implements GridServiceInterface {
   }
 
   private prepareAlignLine(isNeedMiddle = true): void {
-    if (!this.gridManager.gridRect) {
+    if (!this.gridManager.activeStatus) {
       ErrorUtils.InteractError('GridSize is undefined');
       return;
     }
@@ -347,7 +350,7 @@ export class GridService implements GridServiceInterface {
     this.gridManager.childInfoList.forEach(child => {
       if (child.rect && child.id !== this.#movingLayerId) {
         const minLeft = child.rect.x;
-        const maxRight = child.rect.y + child.rect.width;
+        const maxRight = child.rect.x + child.rect.width;
         const minTop = child.rect.y;
         const maxBottom = child.rect.y + child.rect.height;
         if (this.#layerXList.indexOf(maxRight) === -1) {
