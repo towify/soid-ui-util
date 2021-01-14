@@ -40,7 +40,7 @@ export class GridAssistLineUtils {
         });
         signs.push({
           x: activeBorder.left + offLeft / 2,
-          y: leftY - 8,
+          y: leftY - 16,
           sign: `${offLeft} ${SizeUnit.PX}`
         });
       }
@@ -63,7 +63,7 @@ export class GridAssistLineUtils {
         });
         signs.push({
           x: activeBorder.right - offRight / 2,
-          y: rightY - 8,
+          y: rightY - 16,
           sign: `${offRight} ${SizeUnit.PX}`
         });
       }
@@ -83,7 +83,7 @@ export class GridAssistLineUtils {
           toY: activeBorder.top
         });
         signs.push({
-          x: topX + 15 + offTop.toString().length * 3,
+          x: topX + 25 + offTop.toString().length * 3,
           y: activeBorder.top + offTop / 2 + 6,
           sign: `${offTop} ${SizeUnit.PX}`
         });
@@ -106,7 +106,7 @@ export class GridAssistLineUtils {
           toY: activeBorder.bottom
         });
         signs.push({
-          x: bottomX + 15 + offBottom.toString().length * 3,
+          x: bottomX + 25 + offBottom.toString().length * 3,
           y: activeBorder.bottom - offBottom / 2 + 6,
           sign: `${offBottom} ${SizeUnit.PX}`
         });

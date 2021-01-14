@@ -48,6 +48,8 @@ export class GridService implements GridServiceInterface {
 
   #gridManager?: GridManager;
 
+  #scale = 1;
+
   static getInstance(): GridServiceInterface {
     GridService.instance ??= new GridService();
     return GridService.instance;
@@ -66,8 +68,14 @@ export class GridService implements GridServiceInterface {
     return this;
   }
 
-  setGridRect(rect: RectInfo): GridServiceInterface {
-    this.gridManager.setGridRect(rect);
+  setGridRect(rect: RectInfo, scale: number = 1): GridServiceInterface {
+    this.#scale = scale;
+    this.gridManager.setGridRect({
+      x: rect.x,
+      y: rect.y,
+      width: parseFloat((rect.width / scale).toFixed(1)),
+      height: parseFloat((rect.height / scale).toFixed(1))
+    });
     return this;
   }
 
@@ -185,29 +193,39 @@ export class GridService implements GridServiceInterface {
     return GridChildUtils.getModifiedChildrenGirdInfo(this.gridManager);
   }
 
-  getGridLines(): { fromX: number; fromY: number; toX: number; toY: number }[] {
-    return GridLineUtils.getGridLineList(
+  getGridLines(needScale = false): LineInfo[] {
+    const lines = GridLineUtils.getGridLineList(
       this.gridManager.getGridItemRectList()
     );
+    if (needScale) {
+      this.getScaleLine(lines);
+    }
+    return lines;
   }
 
   getGridGapAreaAndLines(
-    lineSpace: number
+    lineSpace: number,
+    needScale = false
   ): {
     area: RectInfo[];
-    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
+    lines: LineInfo[];
   } {
-    return GridLineUtils.getGridGapAreaAndLine({
+    const areaAndLines = GridLineUtils.getGridGapAreaAndLine({
       gridItemRectList: this.gridManager.getGridItemRectList(),
       lineSpace
     });
+    if (needScale) {
+      return this.getScaleAreaAndLine(areaAndLines);
+    }
+    return areaAndLines;
   }
 
   getGridPaddingAreaAndLines(
-    lineSpace: number
+    lineSpace: number,
+    needScale = false
   ): {
     area: RectInfo[];
-    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
+    lines: LineInfo[];
   } {
     if (!this.gridManager.activeStatus) {
       ErrorUtils.GridError('GridSize is undefined');
@@ -216,12 +234,16 @@ export class GridService implements GridServiceInterface {
         lines: []
       };
     }
-    return GridLineUtils.getGridPaddingAreaAndLine({
+    const areaAndLines = GridLineUtils.getGridPaddingAreaAndLine({
       gridPadding: this.gridManager.padding,
       border: this.gridManager.border,
       gridSize: this.gridManager.gridRect,
       lineSpace
     });
+    if (needScale) {
+      return this.getScaleAreaAndLine(areaAndLines);
+    }
+    return areaAndLines;
   }
 
   startMovingChildById(id: string): GridServiceInterface {
@@ -246,6 +268,7 @@ export class GridService implements GridServiceInterface {
   }
 
   getAlignAndAssistLineInfo(
+    needScale = false,
     maxActiveLength: number = 4
   ): {
     assistLines: LineInfo[];
@@ -298,6 +321,17 @@ export class GridService implements GridServiceInterface {
       this.gridManager
     );
     const rect = this.gridManager.gridRect;
+    if (needScale) {
+      assistLineInfo.lines = this.getScaleLine(assistLineInfo.lines);
+      alignLineInfo.lines = this.getScaleLine(alignLineInfo.lines);
+      assistLineInfo.signs = assistLineInfo.signs.map(sign => {
+        return {
+          x: sign.x * this.#scale,
+          y: sign.y * this.#scale,
+          sign: sign.sign
+        };
+      });
+    }
     return {
       assistLines: assistLineInfo.lines.map(line => {
         return {
@@ -332,12 +366,19 @@ export class GridService implements GridServiceInterface {
       return;
     }
     this.resetAlignLine();
-    const canvasMinLeft = 0;
-    const canvasMaxRight = this.gridManager.gridRect.width;
-    const canvasMinTop = 0;
-    const canvasMaxBottom = this.gridManager.gridRect.height;
-    const canvasCenterX = this.gridManager.gridRect.width / 2;
-    const canvasCenterY = this.gridManager.gridRect.height / 2;
+    const canvasMinLeft = this.gridManager.gridActiveRect.x;
+    const canvasMaxRight =
+      this.gridManager.gridActiveRect.x + this.gridManager.gridActiveRect.width;
+    const canvasMinTop = this.gridManager.gridActiveRect.y;
+    const canvasMaxBottom =
+      this.gridManager.gridActiveRect.y +
+      this.gridManager.gridActiveRect.height;
+    const canvasCenterX =
+      this.gridManager.gridActiveRect.x +
+      this.gridManager.gridActiveRect.width / 2;
+    const canvasCenterY =
+      this.gridManager.gridActiveRect.y +
+      this.gridManager.gridActiveRect.height / 2;
     if (isNeedMiddle) {
       this.#layerCenterList.push(canvasCenterX);
       this.#layerMiddleList.push(canvasCenterY);
@@ -399,5 +440,36 @@ export class GridService implements GridServiceInterface {
     this.#layerYList = [];
     this.#layerCenterList = [];
     this.#layerMiddleList = [];
+  }
+
+  private getScaleAreaAndLine(areaAndLines: {
+    area: RectInfo[];
+    lines: LineInfo[];
+  }): {
+    area: RectInfo[];
+    lines: LineInfo[];
+  } {
+    return {
+      area: areaAndLines.area.map(rect => {
+        return {
+          x: parseFloat((rect.x * this.#scale).toFixed(1)),
+          y: parseFloat((rect.y * this.#scale).toFixed(1)),
+          width: parseFloat((rect.width * this.#scale).toFixed(1)),
+          height: parseFloat((rect.height * this.#scale).toFixed(1))
+        };
+      }),
+      lines: this.getScaleLine(areaAndLines.lines)
+    };
+  }
+
+  private getScaleLine(lines: LineInfo[]): LineInfo[] {
+    return lines.map(line => {
+      return {
+        fromX: parseFloat((line.fromX * this.#scale).toFixed(1)),
+        toX: parseFloat((line.toX * this.#scale).toFixed(1)),
+        fromY: parseFloat((line.fromY * this.#scale).toFixed(1)),
+        toY: parseFloat((line.toY * this.#scale).toFixed(1))
+      };
+    });
   }
 }

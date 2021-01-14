@@ -26,11 +26,11 @@ export interface GridServiceInterface {
   setWindowSize(width: number, height: number): GridServiceInterface;
 
   /**
-   * @param width Window width
-   * @param height Window height
+   * @param rect: grid rect
+   * @param scale: grid scale
    * 设置 parent grid size
    */
-  setGridRect(rect: RectInfo): GridServiceInterface;
+  setGridRect(rect: RectInfo, scale?: number): GridServiceInterface;
 
   /**
    * @param info:  grid row info， eg: [{ value: 20, uint: 'px'}, { value: 10, uint: 'vw'}]
@@ -129,14 +129,16 @@ export interface GridServiceInterface {
 
   /**
    * @description 返回 grid item line info
+   * @param needScale 是否需要计算缩放
    */
-  getGridLines(): LineInfo[];
+  getGridLines(needScale?: boolean): LineInfo[];
 
   /**
    * @description 返回 grid gap area and line info
    */
   getGridGapAreaAndLines(
-    lineSpace: number
+    lineSpace: number,
+    needScale?: boolean
   ): {
     area: RectInfo[];
     lines: LineInfo[];
@@ -146,7 +148,8 @@ export interface GridServiceInterface {
    * @description 返回 grid padding area and line info
    */
   getGridPaddingAreaAndLines(
-    lineSpace: number
+    lineSpace: number,
+    needScale?: boolean
   ): {
     area: RectInfo[];
     lines: LineInfo[];
@@ -171,6 +174,7 @@ export interface GridServiceInterface {
    * @description 获取 assist lines 的信息
    */
   getAlignAndAssistLineInfo(
+    needScale?: boolean,
     maxActiveLength?: number
   ): {
     assistLines: LineInfo[];

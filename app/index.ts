@@ -3,6 +3,8 @@
  * @date 2020/4/4 01:43
  */
 
+export * from './type/common.type';
+export * from './type/interact.type';
 export * from './service/grid.service/grid.service';
 export * from './service/grid.service/grid.service.interface';
 export * from './service/operator.service/operator.service';
