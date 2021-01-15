@@ -4,6 +4,8 @@
  */
 import { LineInfo, RectInfo } from '../../type/common.type';
 import { AlignOffsetInfo } from '../../type/interact.type';
+import {ErrorUtils} from '../error.utils/error.utils';
+import {GridManager} from '../../manager/gird.manager/grid.manager';
 
 export class GridAlignLineUtils {
   static getClosestValueInPositionList(params: {
@@ -32,9 +34,9 @@ export class GridAlignLineUtils {
     offset: number;
     gridActiveRect: RectInfo;
   }): {
-    lines: LineInfo[];
-    offset: AlignOffsetInfo;
-  } {
+      lines: LineInfo[];
+      offset: AlignOffsetInfo;
+    } {
     let offsetX = 0;
     let offsetY = 0;
     const xAlignLines: number[] = [];
@@ -130,6 +132,94 @@ export class GridAlignLineUtils {
         y: offsetY
       },
       lines
+    };
+  }
+
+  static prepareAlignLine(params: {
+    isNeedMiddle: boolean,
+    gridManager: GridManager
+    movingLayerId: string,
+  }): {
+      layerCenterList: number[],
+      layerMiddleList: number[],
+      layerXList: number[],
+      layerYList: number[],
+    } {
+    const layerCenterList: number[] = [];
+    const layerMiddleList: number[] = [];
+    const layerXList: number[] = [];
+    const layerYList: number[] = [];
+    const canvasMinLeft = params.gridManager.gridActiveRect.x;
+    const canvasMaxRight =
+      params.gridManager.gridActiveRect.x + params.gridManager.gridActiveRect.width;
+    const canvasMinTop = params.gridManager.gridActiveRect.y;
+    const canvasMaxBottom =
+      params.gridManager.gridActiveRect.y +
+      params.gridManager.gridActiveRect.height;
+    const canvasCenterX =
+      params.gridManager.gridActiveRect.x +
+      params.gridManager.gridActiveRect.width / 2;
+    const canvasCenterY =
+      params.gridManager.gridActiveRect.y +
+      params.gridManager.gridActiveRect.height / 2;
+    if (params.isNeedMiddle) {
+      layerCenterList.push(canvasCenterX);
+      layerMiddleList.push(canvasCenterY);
+    }
+    layerXList.push(canvasMinLeft);
+    layerXList.push(canvasMaxRight);
+    layerYList.push(canvasMinTop);
+    layerYList.push(canvasMaxBottom);
+    params.gridManager.childInfoList.forEach(child => {
+      if (child.rect && child.id !== params.movingLayerId) {
+        const minLeft = child.rect.x;
+        const maxRight = child.rect.x + child.rect.width;
+        const minTop = child.rect.y;
+        const maxBottom = child.rect.y + child.rect.height;
+        if (layerXList.indexOf(maxRight) === -1) {
+          layerXList.push(maxRight);
+        }
+        if (layerXList.indexOf(minLeft) === -1) {
+          layerXList.push(minLeft);
+        }
+        if (layerYList.indexOf(minTop) === -1) {
+          layerYList.push(minTop);
+        }
+        if (layerYList.indexOf(maxBottom) === -1) {
+          layerYList.push(maxBottom);
+        }
+        if (params.isNeedMiddle) {
+          const centerX = child.rect.x + child.rect.width / 2;
+          const centerY = child.rect.y + child.rect.height / 2;
+          if (layerCenterList.indexOf(centerX) === -1) {
+            layerCenterList.push(centerX);
+          }
+          if (layerMiddleList.indexOf(centerY) === -1) {
+            layerMiddleList.push(centerY);
+          }
+        }
+      }
+    });
+    const itemRectList = params.gridManager.getGridItemRectList();
+    itemRectList.forEach(rowItem => {
+      rowItem.forEach(rect => {
+        if (params.isNeedMiddle) {
+          const centerX = rect.x + rect.width / 2;
+          const centerY = rect.y + rect.height / 2;
+          if (layerCenterList.indexOf(centerX) === -1) {
+            layerCenterList.push(centerX);
+          }
+          if (layerMiddleList.indexOf(centerY) === -1) {
+            layerMiddleList.push(centerY);
+          }
+        }
+      });
+    });
+    return {
+      layerCenterList,
+      layerMiddleList,
+      layerXList,
+      layerYList
     };
   }
 }

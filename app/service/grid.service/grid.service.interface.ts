@@ -130,14 +130,16 @@ export interface GridServiceInterface {
   /**
    * @description 返回 grid item line info
    * @param needScale 是否需要计算缩放
+   * @param needBorder 是否需要计算边框
    */
-  getGridLines(needScale?: boolean): LineInfo[];
+  getGridLines(needBorder?: boolean, needScale?: boolean): LineInfo[];
 
   /**
    * @description 返回 grid gap area and line info
    */
   getGridGapAreaAndLines(
     lineSpace: number,
+    needBorder?: boolean,
     needScale?: boolean
   ): {
     area: RectInfo[];
@@ -149,6 +151,7 @@ export interface GridServiceInterface {
    */
   getGridPaddingAreaAndLines(
     lineSpace: number,
+    needBorder?: boolean,
     needScale?: boolean
   ): {
     area: RectInfo[];

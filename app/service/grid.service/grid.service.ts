@@ -193,27 +193,34 @@ export class GridService implements GridServiceInterface {
     return GridChildUtils.getModifiedChildrenGirdInfo(this.gridManager);
   }
 
-  getGridLines(needScale = false): LineInfo[] {
-    const lines = GridLineUtils.getGridLineList(
+  getGridLines(needBorder = false, needScale = false): LineInfo[] {
+    let lines = GridLineUtils.getGridLineList(
       this.gridManager.getGridItemRectList()
     );
+    if (!needBorder) {
+      lines = this.getNoCountBorderLine(lines);
+    }
     if (needScale) {
-      this.getScaleLine(lines);
+      return this.getScaleLine(lines);
     }
     return lines;
   }
 
   getGridGapAreaAndLines(
     lineSpace: number,
+    needBorder = false,
     needScale = false
   ): {
     area: RectInfo[];
     lines: LineInfo[];
   } {
-    const areaAndLines = GridLineUtils.getGridGapAreaAndLine({
+    let areaAndLines = GridLineUtils.getGridGapAreaAndLine({
       gridItemRectList: this.gridManager.getGridItemRectList(),
       lineSpace
     });
+    if (!needBorder) {
+      areaAndLines = this.getNoCountBorderAreaAndLine(areaAndLines);
+    }
     if (needScale) {
       return this.getScaleAreaAndLine(areaAndLines);
     }
@@ -222,6 +229,7 @@ export class GridService implements GridServiceInterface {
 
   getGridPaddingAreaAndLines(
     lineSpace: number,
+    needBorder = false,
     needScale = false
   ): {
     area: RectInfo[];
@@ -234,12 +242,15 @@ export class GridService implements GridServiceInterface {
         lines: []
       };
     }
-    const areaAndLines = GridLineUtils.getGridPaddingAreaAndLine({
+    let areaAndLines = GridLineUtils.getGridPaddingAreaAndLine({
       gridPadding: this.gridManager.padding,
       border: this.gridManager.border,
       gridSize: this.gridManager.gridRect,
       lineSpace
     });
+    if (!needBorder) {
+      areaAndLines = this.getNoCountBorderAreaAndLine(areaAndLines);
+    }
     if (needScale) {
       return this.getScaleAreaAndLine(areaAndLines);
     }
@@ -365,74 +376,17 @@ export class GridService implements GridServiceInterface {
       ErrorUtils.InteractError('GridSize is undefined');
       return;
     }
-    this.resetAlignLine();
-    const canvasMinLeft = this.gridManager.gridActiveRect.x;
-    const canvasMaxRight =
-      this.gridManager.gridActiveRect.x + this.gridManager.gridActiveRect.width;
-    const canvasMinTop = this.gridManager.gridActiveRect.y;
-    const canvasMaxBottom =
-      this.gridManager.gridActiveRect.y +
-      this.gridManager.gridActiveRect.height;
-    const canvasCenterX =
-      this.gridManager.gridActiveRect.x +
-      this.gridManager.gridActiveRect.width / 2;
-    const canvasCenterY =
-      this.gridManager.gridActiveRect.y +
-      this.gridManager.gridActiveRect.height / 2;
-    if (isNeedMiddle) {
-      this.#layerCenterList.push(canvasCenterX);
-      this.#layerMiddleList.push(canvasCenterY);
-    }
-    this.#layerXList.push(canvasMinLeft);
-    this.#layerXList.push(canvasMaxRight);
-    this.#layerYList.push(canvasMinTop);
-    this.#layerYList.push(canvasMaxBottom);
     if (!this.#movingLayerId) return;
-    this.gridManager.childInfoList.forEach(child => {
-      if (child.rect && child.id !== this.#movingLayerId) {
-        const minLeft = child.rect.x;
-        const maxRight = child.rect.x + child.rect.width;
-        const minTop = child.rect.y;
-        const maxBottom = child.rect.y + child.rect.height;
-        if (this.#layerXList.indexOf(maxRight) === -1) {
-          this.#layerXList.push(maxRight);
-        }
-        if (this.#layerXList.indexOf(minLeft) === -1) {
-          this.#layerXList.push(minLeft);
-        }
-        if (this.#layerYList.indexOf(minTop) === -1) {
-          this.#layerYList.push(minTop);
-        }
-        if (this.#layerYList.indexOf(maxBottom) === -1) {
-          this.#layerYList.push(maxBottom);
-        }
-        if (isNeedMiddle) {
-          const centerX = child.rect.x + child.rect.width / 2;
-          const centerY = child.rect.y + child.rect.height / 2;
-          if (this.#layerCenterList.indexOf(centerX) === -1) {
-            this.#layerCenterList.push(centerX);
-          }
-          if (this.#layerMiddleList.indexOf(centerY) === -1) {
-            this.#layerMiddleList.push(centerY);
-          }
-        }
-      }
+    this.resetAlignLine();
+    const layerLinesInfo = GridAlignLineUtils.prepareAlignLine({
+      isNeedMiddle,
+      gridManager: this.gridManager,
+      movingLayerId: this.#movingLayerId
     });
-    const itemRectList = this.gridManager.getGridItemRectList();
-    itemRectList.forEach(rowItem => {
-      rowItem.forEach(rect => {
-        if (isNeedMiddle) {
-          const centerX = rect.x + rect.width / 2;
-          const centerY = rect.y + rect.height / 2;
-          if (this.#layerCenterList.indexOf(centerX) === -1) {
-            this.#layerCenterList.push(centerX);
-          }
-          if (this.#layerMiddleList.indexOf(centerY) === -1) {
-            this.#layerMiddleList.push(centerY);
-          }
-        }
-      });
-    });
+    this.#layerCenterList = layerLinesInfo.layerCenterList;
+    this.#layerMiddleList = layerLinesInfo.layerMiddleList;
+    this.#layerXList = layerLinesInfo.layerXList;
+    this.#layerYList = layerLinesInfo.layerYList;
   }
 
   private resetAlignLine(): void {
@@ -470,6 +424,33 @@ export class GridService implements GridServiceInterface {
         fromY: parseFloat((line.fromY * this.#scale).toFixed(1)),
         toY: parseFloat((line.toY * this.#scale).toFixed(1))
       };
+    });
+  }
+
+  private getNoCountBorderAreaAndLine(areaAndLines: {
+    area: RectInfo[];
+    lines: LineInfo[];
+  }): {
+    area: RectInfo[];
+    lines: LineInfo[];
+  } {
+    return {
+      area: areaAndLines.area.map(rect => {
+        rect.x -= this.gridManager.border.left;
+        rect.y -= this.gridManager.border.top;
+        return rect;
+      }),
+      lines: this.getNoCountBorderLine(areaAndLines.lines)
+    };
+  }
+
+  private getNoCountBorderLine(lines: LineInfo[]): LineInfo[] {
+    return lines.map(line => {
+      line.fromY -= this.gridManager.border.top;
+      line.fromX -= this.gridManager.border.left;
+      line.toY -= this.gridManager.border.top;
+      line.toX -= this.gridManager.border.left;
+      return line;
     });
   }
 }
