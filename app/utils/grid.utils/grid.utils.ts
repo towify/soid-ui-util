@@ -7,11 +7,9 @@ import { PaddingInfo, RectInfo } from '../../type/common.type';
 import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';
 import { WindowUtils } from '../window.utils/window.utils';
+import {UISizeUtils} from "../ui.size.utils/ui.size.utils";
 
 export class GridUtils {
-  static AutoNumber = Mark.Auto;
-
-  static NotSetNumber = Mark.Unset;
 
   static checkPointIsInRect(
     point: { x: number; y: number },
@@ -22,68 +20,68 @@ export class GridUtils {
     return checkXIn && checkYIn;
   }
 
-  static convertNumberToSizeInfo(params: {
-    valueNumber: number;
-    unit: SizeUnit;
-    windowSize?: { width: number; height: number };
-    maxValue?: number;
-  }): UISize {
-    let value = params.valueNumber;
-    if (params.unit === SizeUnit.VW) {
-      value = (params.valueNumber / (params.windowSize?.width ?? 1)) * 100;
-      if (!params.windowSize?.width) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
-    if (params.unit === SizeUnit.VH) {
-      value = (params.valueNumber / (params.windowSize?.height ?? 1)) * 100;
-      if (!params.windowSize?.height) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
-    if (params.unit === SizeUnit.Percent) {
-      value = (params.valueNumber / (params.maxValue ?? 1)) * 100;
-    }
-    if (params.unit === SizeUnit.PX) {
-      return {
-        value: NumberUtils.parseViewNumber(value),
-        unit: params.unit
-      };
-    }
-    return {
-      value: parseFloat(value.toFixed(1)),
-      unit: params.unit
-    };
-  }
+  // static convertNumberToSizeInfo(params: {
+  //   valueNumber: number;
+  //   unit: SizeUnit;
+  //   windowSize?: { width: number; height: number };
+  //   maxValue?: number;
+  // }): UISize {
+  //   let value = params.valueNumber;
+  //   if (params.unit === SizeUnit.VW) {
+  //     value = (params.valueNumber / (params.windowSize?.width ?? 1)) * 100;
+  //     if (!params.windowSize?.width) {
+  //       ErrorUtils.GridError('Window size is undefined');
+  //     }
+  //   }
+  //   if (params.unit === SizeUnit.VH) {
+  //     value = (params.valueNumber / (params.windowSize?.height ?? 1)) * 100;
+  //     if (!params.windowSize?.height) {
+  //       ErrorUtils.GridError('Window size is undefined');
+  //     }
+  //   }
+  //   if (params.unit === SizeUnit.Percent) {
+  //     value = (params.valueNumber / (params.maxValue ?? 1)) * 100;
+  //   }
+  //   if (params.unit === SizeUnit.PX) {
+  //     return {
+  //       value: NumberUtils.parseViewNumber(value),
+  //       unit: params.unit
+  //     };
+  //   }
+  //   return {
+  //     value: parseFloat(value.toFixed(1)),
+  //     unit: params.unit
+  //   };
+  // }
 
-  static convertSizeInfoToNumber(params: {
-    sizeInfo: UISize;
-    maxValue?: number;
-  }): number {
-    let valueNumber = params.sizeInfo.value;
-    if (valueNumber === GridUtils.AutoNumber) {
-      return 0;
-    }
-    if (valueNumber === GridUtils.NotSetNumber) {
-      return 0;
-    }
-    if (params.sizeInfo.unit === 'vw') {
-      valueNumber = ((WindowUtils.WindowSize?.width ?? 0) * valueNumber) / 100;
-      if (!WindowUtils.WindowSize?.width) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
-    if (params.sizeInfo.unit === 'vh') {
-      valueNumber = ((WindowUtils.WindowSize?.height ?? 0) * valueNumber) / 100;
-      if (!WindowUtils.WindowSize?.height) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
-    if (params.sizeInfo.unit === '%') {
-      valueNumber = ((params.maxValue ?? 0) * valueNumber) / 100;
-    }
-    return valueNumber;
-  }
+  // static convertSizeInfoToNumber(params: {
+  //   sizeInfo: UISize;
+  //   maxValue?: number;
+  // }): number {
+  //   let valueNumber = params.sizeInfo.value;
+  //   if (valueNumber === GridUtils.AutoNumber) {
+  //     return 0;
+  //   }
+  //   if (valueNumber === GridUtils.NotSetNumber) {
+  //     return 0;
+  //   }
+  //   if (params.sizeInfo.unit === 'vw') {
+  //     valueNumber = ((WindowUtils.WindowSize?.width ?? 0) * valueNumber) / 100;
+  //     if (!WindowUtils.WindowSize?.width) {
+  //       ErrorUtils.GridError('Window size is undefined');
+  //     }
+  //   }
+  //   if (params.sizeInfo.unit === 'vh') {
+  //     valueNumber = ((WindowUtils.WindowSize?.height ?? 0) * valueNumber) / 100;
+  //     if (!WindowUtils.WindowSize?.height) {
+  //       ErrorUtils.GridError('Window size is undefined');
+  //     }
+  //   }
+  //   if (params.sizeInfo.unit === '%') {
+  //     valueNumber = ((params.maxValue ?? 0) * valueNumber) / 100;
+  //   }
+  //   return valueNumber;
+  // }
 
   static getGridRowOrColumnItemValues(params: {
     sizeInfoList: UISize[];
@@ -99,15 +97,12 @@ export class GridUtils {
     let isAuto = false;
     const valueList: number[] = new Array(params.sizeInfoList.length);
     params.sizeInfoList.forEach((value, index) => {
-      isAuto = value.value === GridUtils.AutoNumber;
+      isAuto = value.value === Mark.Auto;
       if (isAuto) {
         valueList[index] = 0;
         autoNumber += 1;
       } else {
-        valueList[index] = GridUtils.convertSizeInfoToNumber({
-          sizeInfo: value,
-          maxValue: params.maxValue
-        });
+        valueList[index] = UISizeUtils.convertSizeInfoToNumber(value, params.maxValue);
       }
     });
     valueList.forEach(value => {
@@ -120,7 +115,7 @@ export class GridUtils {
         }
         const autoValue = spareValue / autoNumber;
         params.sizeInfoList.forEach((value, index) => {
-          isAuto = value.value === GridUtils.AutoNumber;
+          isAuto = value.value === Mark.Auto;
           if (isAuto) {
             valueList[index] = autoValue;
           }
