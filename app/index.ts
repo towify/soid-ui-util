@@ -10,6 +10,7 @@ export * from './service/grid.service/grid.service.interface';
 export * from './service/operator.service/operator.service';
 export * from './service/operator.service/operator.service.interface';
 export * from './utils/number.utils/number.utils';
+export * from './utils/ui.size.utils/ui.size.utils';
 export * from './manager/box.shadow.manager/box.shadow.manager';
 export * from './manager/box.shadow.manager/box.shadow.manager.interface';
 export * from './manager/color.manager/color.manager.interface';
