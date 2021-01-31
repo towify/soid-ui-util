@@ -2,12 +2,11 @@
  * @author allen
  * @data 2020/11/18 12:12
  */
-import { GridArea, Mark, SizeUnit, UISize } from 'towify-editor-common-values';
+import {GridArea, Mark, SpacingPadding, UISize} from 'towify-editor-common-values';
 import { PaddingInfo, RectInfo } from '../../type/common.type';
 import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';
-import { WindowUtils } from '../window.utils/window.utils';
-import {UISizeUtils} from "../ui.size.utils/ui.size.utils";
+import { UISizeUtils } from '../ui.size.utils/ui.size.utils';
 
 export class GridUtils {
 
@@ -19,69 +18,6 @@ export class GridUtils {
     const checkYIn = point.y >= rect.y && point.y <= rect.y + rect.height;
     return checkXIn && checkYIn;
   }
-
-  // static convertNumberToSizeInfo(params: {
-  //   valueNumber: number;
-  //   unit: SizeUnit;
-  //   windowSize?: { width: number; height: number };
-  //   maxValue?: number;
-  // }): UISize {
-  //   let value = params.valueNumber;
-  //   if (params.unit === SizeUnit.VW) {
-  //     value = (params.valueNumber / (params.windowSize?.width ?? 1)) * 100;
-  //     if (!params.windowSize?.width) {
-  //       ErrorUtils.GridError('Window size is undefined');
-  //     }
-  //   }
-  //   if (params.unit === SizeUnit.VH) {
-  //     value = (params.valueNumber / (params.windowSize?.height ?? 1)) * 100;
-  //     if (!params.windowSize?.height) {
-  //       ErrorUtils.GridError('Window size is undefined');
-  //     }
-  //   }
-  //   if (params.unit === SizeUnit.Percent) {
-  //     value = (params.valueNumber / (params.maxValue ?? 1)) * 100;
-  //   }
-  //   if (params.unit === SizeUnit.PX) {
-  //     return {
-  //       value: NumberUtils.parseViewNumber(value),
-  //       unit: params.unit
-  //     };
-  //   }
-  //   return {
-  //     value: parseFloat(value.toFixed(1)),
-  //     unit: params.unit
-  //   };
-  // }
-
-  // static convertSizeInfoToNumber(params: {
-  //   sizeInfo: UISize;
-  //   maxValue?: number;
-  // }): number {
-  //   let valueNumber = params.sizeInfo.value;
-  //   if (valueNumber === GridUtils.AutoNumber) {
-  //     return 0;
-  //   }
-  //   if (valueNumber === GridUtils.NotSetNumber) {
-  //     return 0;
-  //   }
-  //   if (params.sizeInfo.unit === 'vw') {
-  //     valueNumber = ((WindowUtils.WindowSize?.width ?? 0) * valueNumber) / 100;
-  //     if (!WindowUtils.WindowSize?.width) {
-  //       ErrorUtils.GridError('Window size is undefined');
-  //     }
-  //   }
-  //   if (params.sizeInfo.unit === 'vh') {
-  //     valueNumber = ((WindowUtils.WindowSize?.height ?? 0) * valueNumber) / 100;
-  //     if (!WindowUtils.WindowSize?.height) {
-  //       ErrorUtils.GridError('Window size is undefined');
-  //     }
-  //   }
-  //   if (params.sizeInfo.unit === '%') {
-  //     valueNumber = ((params.maxValue ?? 0) * valueNumber) / 100;
-  //   }
-  //   return valueNumber;
-  // }
 
   static getGridRowOrColumnItemValues(params: {
     sizeInfoList: UISize[];
@@ -245,8 +181,13 @@ export class GridUtils {
       childGridRect.height =
         maxRowItem[0].y + maxRowItem[0].height - childGridRect.y;
     } else if (rowEnd < params.gridItemRectList.length) {
-      childGridRect.height =
-        params.gridItemRectList[rowEnd][0].y - childGridRect.y;
+      if (rowEnd < 0) {
+        childGridRect.height =
+          params.gridItemRectList[0][0].y - childGridRect.y;
+      } else {
+        childGridRect.height =
+          params.gridItemRectList[rowEnd][0].y - childGridRect.y;
+      }
     } else {
       childGridRect.height =
         params.gridRect.y + params.gridRect.height - childGridRect.y;
@@ -257,8 +198,13 @@ export class GridUtils {
       childGridRect.width =
         maxColumnItem.x + maxColumnItem.width - childGridRect.x;
     } else if (columnEnd < params.gridItemRectList[0].length) {
-      childGridRect.width =
-        params.gridItemRectList[0][columnEnd].x - childGridRect.x;
+      if (columnEnd < 0) {
+        childGridRect.width =
+          params.gridItemRectList[0][0].x - childGridRect.x;
+      } else {
+        childGridRect.width =
+          params.gridItemRectList[0][columnEnd].x - childGridRect.x;
+      }
     } else {
       childGridRect.width =
         params.gridRect.x + params.gridRect.width - childGridRect.x;
@@ -278,10 +224,10 @@ export class GridUtils {
     rowGap: number;
     columnGap: number;
   }): {
-    gridArea: GridArea;
-    marginLeft: number;
-    marginTop: number;
-  } {
+      gridArea: GridArea;
+      marginLeft: number;
+      marginTop: number;
+    } {
     const maxWidth = params.rect.x + params.rect.width;
     const maxHeight = params.rect.y + params.rect.height;
     const rowLength = params.gridItemRectList.length;
@@ -423,9 +369,9 @@ export class GridUtils {
     rowGap: number;
     columnGap: number;
   }): {
-    marginLeft: number;
-    marginTop: number;
-  } {
+      marginLeft: number;
+      marginTop: number;
+    } {
     const rowStart = params.gridArea.rowStart - 1;
     const columnStart = params.gridArea.columnStart - 1;
     let marginLeft = params.rect.x;
@@ -462,6 +408,39 @@ export class GridUtils {
         params.padding.bottom -
         params.border.top -
         params.border.bottom
+    };
+  }
+
+  static convertOffsetValue(
+    offset: SpacingPadding,
+    gridRect?: RectInfo
+  ): {
+      left: number;
+      right: number;
+      top: number;
+      bottom: number;
+    } {
+    const left = UISizeUtils.convertSizeInfoToNumber(
+      offset.left,
+      gridRect?.width
+    );
+    const right = UISizeUtils.convertSizeInfoToNumber(
+      offset.right,
+      gridRect?.width
+    );
+    const top = UISizeUtils.convertSizeInfoToNumber(
+      offset.top,
+      gridRect?.height
+    );
+    const bottom = UISizeUtils.convertSizeInfoToNumber(
+      offset.bottom,
+      gridRect?.height
+    );
+    return {
+      left,
+      right,
+      top,
+      bottom
     };
   }
 }

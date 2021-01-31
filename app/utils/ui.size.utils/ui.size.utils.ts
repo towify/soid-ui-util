@@ -90,4 +90,19 @@ export class UISizeUtils {
     };
   }
 
+  static convertSizeToParent(params: {
+    sizeInfo: UISize,
+    oldParentValue: number,
+    newParentValue: number
+  }): UISize {
+    let value = params.sizeInfo.value;
+    if (params.sizeInfo.unit === SizeUnit.Percent) {
+      value = parseFloat((params.oldParentValue * params.sizeInfo.value / params.newParentValue).toFixed(1));
+    }
+    return {
+      value,
+      unit: params.sizeInfo.unit
+    };
+  }
+
 }

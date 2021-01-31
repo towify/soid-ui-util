@@ -4,12 +4,13 @@
  */
 import { GridArea, SizeUnit } from 'towify-editor-common-values';
 import {
-  DefaultGridArea,
-  GridChildInfo,
+  DefaultGridArea, DefaultSizeInfo,
+  GridChildInfo, RectInfo,
   SizeInfo
 } from '../../type/common.type';
 import { GridManager } from '../../manager/gird.manager/grid.manager';
 import { ErrorUtils } from '../error.utils/error.utils';
+import {UISizeUtils} from '../ui.size.utils/ui.size.utils';
 
 export class GridChildUtils {
   static adjustChildGridInfo(params: {
@@ -18,10 +19,7 @@ export class GridChildUtils {
       marginLeft: number;
       marginTop: number;
     };
-    childGridRect: {
-      width: number;
-      height: number;
-    };
+    childGridRect: RectInfo;
     gridArea: GridArea;
     rightOffset: number;
     bottomOffset: number;
@@ -36,16 +34,6 @@ export class GridChildUtils {
     const marginTop = params.gridManager.convertNumberToSizeInfo({
       valueNumber: params.margin.marginTop,
       unit: params.childInfo.margin.top.unit,
-      maxValue: params.childGridRect.height
-    });
-    const width = params.gridManager.convertNumberToSizeInfo({
-      valueNumber: params.childInfo.rect.width,
-      unit: params.childInfo.size.width.unit,
-      maxValue: params.childGridRect.width
-    });
-    const height = params.gridManager.convertNumberToSizeInfo({
-      valueNumber: params.childInfo.rect.height,
-      unit: params.childInfo.size.height.unit,
       maxValue: params.childGridRect.height
     });
     const rowAutoNumber = params.gridManager.getGridAreaAutoNumber({
@@ -92,13 +80,52 @@ export class GridChildUtils {
         unit: params.childInfo.margin.right.unit
       };
     }
+    // const width = params.gridManager.convertNumberToSizeInfo({
+    //   valueNumber: params.childInfo.rect.width,
+    //   unit: params.childInfo.size.width.unit,
+    //   maxValue: params.childGridRect.width
+    // });
+    // const height = params.gridManager.convertNumberToSizeInfo({
+    //   valueNumber: params.childInfo.rect.height,
+    //   unit: params.childInfo.size.height.unit,
+    //   maxValue: params.childGridRect.height
+    // });
     params.childInfo.gridArea = params.gridArea;
     params.childInfo.margin.left = marginLeft;
     params.childInfo.margin.right = marginRight;
     params.childInfo.margin.top = marginTop;
     params.childInfo.margin.bottom = marginBottom;
-    params.childInfo.size.width = width;
-    params.childInfo.size.height = height;
+    params.childInfo.size.width = UISizeUtils.convertSizeToParent({
+      sizeInfo: params.childInfo.size.width,
+      oldParentValue: params.childInfo.parentRect?.width ?? 0,
+      newParentValue: params.childGridRect.width
+    });
+    params.childInfo.size.minWidth = UISizeUtils.convertSizeToParent({
+      sizeInfo: params.childInfo.size.minWidth,
+      oldParentValue: params.childInfo.parentRect?.width ?? 0,
+      newParentValue: params.childGridRect.width
+    });
+    params.childInfo.size.maxWidth = UISizeUtils.convertSizeToParent({
+      sizeInfo: params.childInfo.size.maxWidth,
+      oldParentValue: params.childInfo.parentRect?.width ?? 0,
+      newParentValue: params.childGridRect.width
+    });
+    params.childInfo.size.height = UISizeUtils.convertSizeToParent({
+      sizeInfo: params.childInfo.size.height,
+      oldParentValue: params.childInfo.parentRect?.height ?? 0,
+      newParentValue: params.childGridRect.height
+    });
+    params.childInfo.size.minHeight = UISizeUtils.convertSizeToParent({
+      sizeInfo: params.childInfo.size.minHeight,
+      oldParentValue: params.childInfo.parentRect?.height ?? 0,
+      newParentValue: params.childGridRect.height
+    });
+    params.childInfo.size.maxHeight = UISizeUtils.convertSizeToParent({
+      sizeInfo: params.childInfo.size.maxHeight,
+      oldParentValue: params.childInfo.parentRect?.height ?? 0,
+      newParentValue: params.childGridRect.height
+    });
+    params.childInfo.parentRect = params.childGridRect;
     return params.childInfo;
   }
 
@@ -128,21 +155,21 @@ export class GridChildUtils {
         gridItemRectList
       });
       const bottomOffset =
-        gridManager.convertSizeInfoToNumber(
+        UISizeUtils.convertSizeInfoToNumber(
           childInfo.margin.top,
           childGridRect.height
         ) +
-        gridManager.convertSizeInfoToNumber(
+        UISizeUtils.convertSizeInfoToNumber(
           childInfo.margin.bottom,
           childGridRect.height
         ) +
         childInfo.rect.height;
       const rightOffset =
-        gridManager.convertSizeInfoToNumber(
+        UISizeUtils.convertSizeInfoToNumber(
           childInfo.margin.left,
           childGridRect.width
         ) +
-        gridManager.convertSizeInfoToNumber(
+        UISizeUtils.convertSizeInfoToNumber(
           childInfo.margin.right,
           childGridRect.width
         ) +
@@ -206,19 +233,16 @@ export class GridChildUtils {
     },
     gridManager: GridManager
   ): {
-    info: GridChildInfo;
-    needUpdateGridChildren: boolean;
-  } {
+      info: GridChildInfo;
+      needUpdateGridChildren: boolean;
+    } {
     if (!gridManager.activeStatus) {
       ErrorUtils.GridError('GridSize is undefined');
       return {
         info: {
           id: dropped.id,
           gridArea: DefaultGridArea,
-          size: {
-            width: { value: 0, unit: SizeUnit.PX },
-            height: { value: 0, unit: SizeUnit.PX }
-          },
+          size: DefaultSizeInfo,
           margin: {
             left: { value: 0, unit: SizeUnit.PX },
             right: { value: 0, unit: SizeUnit.PX },
@@ -236,33 +260,31 @@ export class GridChildUtils {
       gridManager.childInfoList.splice(childIndex, 1);
     }
     const gridItemRectList = gridManager.getGridItemRectList();
-    const droppedRect = {
-      x: dropped.x,
-      y: dropped.y,
-      width: 0,
-      height: 0
-    };
+    let droppedOldParentRect: RectInfo | undefined;
     if (dropped.gridArea) {
-      const droppedParentRect = gridManager.convertChildSizeInfoToNumber({
+      droppedOldParentRect = gridManager.convertChildSizeInfoToNumber({
         gridArea: dropped.gridArea,
         gridItemRectList
       });
-      droppedRect.width = gridManager.convertSizeInfoToNumber(
-        dropped.size.width,
-        droppedParentRect.width
-      );
-      droppedRect.height = gridManager.convertSizeInfoToNumber(
-        dropped.size.height,
-        droppedParentRect.height
-      );
-    } else {
-      droppedRect.width = gridManager.convertSizeInfoToNumber(
-        dropped.size.width
-      );
-      droppedRect.height = gridManager.convertSizeInfoToNumber(
-        dropped.size.height
-      );
     }
+    const rectWidth = gridManager.convertSizeInfoToNumber({
+      value: dropped.size.width,
+      max: dropped.size.maxWidth,
+      min: dropped.size.minWidth,
+      maxValue: droppedOldParentRect?.width
+    });
+    const rectHeight = gridManager.convertSizeInfoToNumber({
+      value: dropped.size.height,
+      max: dropped.size.maxHeight,
+      min: dropped.size.minHeight,
+      maxValue: droppedOldParentRect?.height
+    });
+    const droppedRect = {
+      x: dropped.x,
+      y: dropped.y,
+      width: rectWidth,
+      height: rectHeight
+    };
     const gridInfo = gridManager.getChildGridAreaInfoByRect({
       rect: droppedRect,
       gridItemRectList
@@ -271,16 +293,16 @@ export class GridChildUtils {
       gridArea: gridInfo.gridArea,
       gridItemRectList
     });
-    const width = gridManager.convertNumberToSizeInfo({
-      valueNumber: droppedRect.width,
-      unit: dropped.size.width.unit,
-      maxValue: droppedParentRect.width
-    });
-    const height = gridManager.convertNumberToSizeInfo({
-      valueNumber: droppedRect.height,
-      unit: dropped.size.height.unit,
-      maxValue: droppedParentRect.height
-    });
+    // const width = gridManager.convertNumberToSizeInfo({
+    //   valueNumber: droppedRect.width,
+    //   unit: dropped.size.width.unit,
+    //   maxValue: droppedParentRect.width
+    // });
+    // const height = gridManager.convertNumberToSizeInfo({
+    //   valueNumber: droppedRect.height,
+    //   unit: dropped.size.height.unit,
+    //   maxValue: droppedParentRect.height
+    // });
     const rowAutoNumber = gridManager.getGridAreaAutoNumber({
       start: gridInfo.gridArea.rowStart - 1,
       end: gridInfo.gridArea.rowEnd - 1,
@@ -309,8 +331,36 @@ export class GridChildUtils {
         bottom: { value: marginBottom, unit: SizeUnit.PX }
       },
       size: {
-        width,
-        height
+        width: UISizeUtils.convertSizeToParent({
+          sizeInfo: dropped.size.width,
+          oldParentValue: droppedOldParentRect?.width ?? 0,
+          newParentValue: droppedParentRect.width
+        }),
+        maxWidth: UISizeUtils.convertSizeToParent({
+          sizeInfo: dropped.size.maxWidth,
+          oldParentValue: droppedOldParentRect?.width ?? 0,
+          newParentValue: droppedParentRect.width
+        }),
+        minWidth: UISizeUtils.convertSizeToParent({
+          sizeInfo: dropped.size.minWidth,
+          oldParentValue: droppedOldParentRect?.width ?? 0,
+          newParentValue: droppedParentRect.width
+        }),
+        height: UISizeUtils.convertSizeToParent({
+          sizeInfo: dropped.size.height,
+          oldParentValue: droppedOldParentRect?.height ?? 0,
+          newParentValue: droppedParentRect.height
+        }),
+        maxHeight: UISizeUtils.convertSizeToParent({
+          sizeInfo: dropped.size.maxHeight,
+          oldParentValue: droppedOldParentRect?.height ?? 0,
+          newParentValue: droppedParentRect.height
+        }),
+        minHeight: UISizeUtils.convertSizeToParent({
+          sizeInfo: dropped.size.minHeight,
+          oldParentValue: droppedOldParentRect?.height ?? 0,
+          newParentValue: droppedParentRect.height
+        })
       }
     };
     gridManager.childInfoList.push(
