@@ -377,10 +377,10 @@ export class GridUtils {
     let marginLeft = params.rect.x;
     let marginTop = params.rect.y;
     if (rowStart < params.gridItemRectList.length) {
-      marginTop = params.rect.y - params.gridItemRectList[rowStart][0].y;
+      marginTop = params.rect.y - params.gridItemRectList[rowStart > 0 ? rowStart : 0][0].y;
     }
     if (columnStart < params.gridItemRectList[0].length) {
-      marginLeft = params.rect.x - params.gridItemRectList[0][columnStart].x;
+      marginLeft = params.rect.x - params.gridItemRectList[0][columnStart > 0 ? columnStart : 0].x;
     }
     return {
       marginLeft: NumberUtils.parseViewNumber(marginLeft),

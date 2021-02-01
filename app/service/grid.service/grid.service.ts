@@ -167,6 +167,7 @@ export class GridService implements GridServiceInterface {
       updateChildInfo.gridArea = child.gridArea;
       updateChildInfo.margin = child.margin;
       updateChildInfo.size = child.size;
+      updateChildInfo.placeSelf = child.placeSelf;
       const gridItemRectList = this.gridManager.getGridItemRectList();
       this.gridManager.updateChildRect(updateChildInfo, gridItemRectList);
     }

@@ -314,12 +314,48 @@ export class GridManager {
       min: child.size.minHeight,
       maxValue: childGridRect.height
     });
-    const childX =
-      childGridRect.x +
+    let childX = childGridRect.x +
       UISizeUtils.convertSizeInfoToNumber(child.margin.left, childGridRect.width);
-    const childY =
-      childGridRect.y +
+    let childY = childGridRect.y +
       UISizeUtils.convertSizeInfoToNumber(child.margin.top, childGridRect.height);
+    if (child.placeSelf.justifySelf) {
+      switch (child.placeSelf.justifySelf) {
+        case 'start': {
+          childX = childGridRect.x;
+          break;
+        }
+        case 'center': {
+          childX = childGridRect.x + (childGridRect.width - childWidth) / 2;
+          break;
+        }
+        case 'end': {
+          childX = childGridRect.x + (childGridRect.width - childWidth);
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+    if (child.placeSelf.alignSelf) {
+      switch (child.placeSelf.alignSelf) {
+        case 'start': {
+          childY = childGridRect.y;
+          break;
+        }
+        case 'center': {
+          childY = childGridRect.y + (childGridRect.height - childHeight) / 2;
+          break;
+        }
+        case 'end': {
+          childY = childGridRect.y + (childGridRect.height - childHeight);
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
     child.rect = {
       x: childX,
       y: childY,

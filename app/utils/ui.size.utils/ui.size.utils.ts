@@ -15,16 +15,29 @@ export class UISizeUtils {
     origin: UISize,
     parentSizeValue?: number
   }): UISize {
-    const minValue = UISizeUtils.convertSizeInfoToNumber(params.min, params.parentSizeValue);
-    const maxValue = UISizeUtils.convertSizeInfoToNumber(params.max, params.parentSizeValue);
     const originValue = UISizeUtils.convertSizeInfoToNumber(params.origin, params.parentSizeValue);
-    if (originValue > minValue) {
-      if (maxValue < minValue || originValue < maxValue) {
+    if (params.min.value !== Mark.Auto && params.min.value !== Mark.Unset) {
+      const minValue = UISizeUtils.convertSizeInfoToNumber(params.min, params.parentSizeValue);
+      if (originValue > minValue) {
+        if (params.max.value !== Mark.Unset && params.max.value !== Mark.Auto) {
+          const maxValue = UISizeUtils.convertSizeInfoToNumber(params.max, params.parentSizeValue);
+          if (maxValue < minValue || originValue < maxValue) {
+            return params.origin;
+          }
+          return params.max;
+        }
+        return params.origin;
+      }
+      return params.min;
+    }
+    if (params.max.value !== Mark.Unset && params.max.value !== Mark.Auto) {
+      const maxValue = UISizeUtils.convertSizeInfoToNumber(params.max, params.parentSizeValue);
+      if (originValue < maxValue) {
         return params.origin;
       }
       return params.max;
     }
-    return params.min;
+    return params.origin;
   }
 
   static convertSizeInfoToNumber(sizeInfo: UISize, maxValue?: number): number {
@@ -95,6 +108,9 @@ export class UISizeUtils {
     oldParentValue: number,
     newParentValue: number
   }): UISize {
+    if (params.sizeInfo.value === Mark.Unset || params.sizeInfo.value === Mark.Auto) {
+      return params.sizeInfo;
+    }
     let value = params.sizeInfo.value;
     if (params.sizeInfo.unit === SizeUnit.Percent) {
       value = parseFloat((params.oldParentValue * params.sizeInfo.value / params.newParentValue).toFixed(1));

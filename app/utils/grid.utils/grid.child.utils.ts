@@ -26,75 +26,69 @@ export class GridChildUtils {
     gridManager: GridManager;
   }): GridChildInfo {
     if (!params.childInfo.rect) return params.childInfo;
-    const marginLeft = params.gridManager.convertNumberToSizeInfo({
-      valueNumber: params.margin.marginLeft,
-      unit: params.childInfo.margin.left.unit,
-      maxValue: params.childGridRect.width
-    });
-    const marginTop = params.gridManager.convertNumberToSizeInfo({
-      valueNumber: params.margin.marginTop,
-      unit: params.childInfo.margin.top.unit,
-      maxValue: params.childGridRect.height
-    });
-    const rowAutoNumber = params.gridManager.getGridAreaAutoNumber({
-      start: params.gridArea.rowStart - 1,
-      end: params.gridArea.rowEnd - 1,
-      sizeInfoList: params.gridManager.gridRowInfo
-    });
-    const columnAutoNumber = params.gridManager.getGridAreaAutoNumber({
-      start: params.gridArea.columnStart - 1,
-      end: params.gridArea.columnEnd - 1,
-      sizeInfoList: params.gridManager.gridColumnInfo
-    });
-    let marginBottom;
-    let marginRight;
-    if (rowAutoNumber) {
-      const bottomValueNumber =
-        params.bottomOffset -
-        params.margin.marginTop -
-        params.childInfo.rect.height;
-      marginBottom = params.gridManager.convertNumberToSizeInfo({
-        valueNumber: bottomValueNumber,
-        unit: params.childInfo.margin.bottom.unit,
-        maxValue: params.childGridRect.height
-      });
-    } else {
-      marginBottom = {
-        value: 0,
-        unit: params.childInfo.margin.bottom.unit
-      };
-    }
-    if (columnAutoNumber) {
-      const rightValueNumber =
-        params.rightOffset -
-        params.margin.marginLeft -
-        params.childInfo.rect.width;
-      marginRight = params.gridManager.convertNumberToSizeInfo({
-        valueNumber: rightValueNumber,
-        unit: params.childInfo.margin.right.unit,
+    if (!params.childInfo.placeSelf.justifySelf) {
+      const marginLeft = params.gridManager.convertNumberToSizeInfo({
+        valueNumber: params.margin.marginLeft,
+        unit: params.childInfo.margin.left.unit,
         maxValue: params.childGridRect.width
       });
-    } else {
-      marginRight = {
-        value: 0,
-        unit: params.childInfo.margin.right.unit
-      };
+      const columnAutoNumber = params.gridManager.getGridAreaAutoNumber({
+        start: params.gridArea.columnStart - 1,
+        end: params.gridArea.columnEnd - 1,
+        sizeInfoList: params.gridManager.gridColumnInfo
+      });
+      let marginRight;
+      if (columnAutoNumber) {
+        const rightValueNumber =
+          params.rightOffset -
+          params.margin.marginLeft -
+          params.childInfo.rect.width;
+        marginRight = params.gridManager.convertNumberToSizeInfo({
+          valueNumber: rightValueNumber,
+          unit: params.childInfo.margin.right.unit,
+          maxValue: params.childGridRect.width
+        });
+      } else {
+        marginRight = {
+          value: 0,
+          unit: params.childInfo.margin.right.unit
+        };
+      }
+      params.childInfo.margin.left = marginLeft;
+      params.childInfo.margin.right = marginRight;
     }
-    // const width = params.gridManager.convertNumberToSizeInfo({
-    //   valueNumber: params.childInfo.rect.width,
-    //   unit: params.childInfo.size.width.unit,
-    //   maxValue: params.childGridRect.width
-    // });
-    // const height = params.gridManager.convertNumberToSizeInfo({
-    //   valueNumber: params.childInfo.rect.height,
-    //   unit: params.childInfo.size.height.unit,
-    //   maxValue: params.childGridRect.height
-    // });
+    if (!params.childInfo.placeSelf.justifySelf) {
+      const marginTop = params.gridManager.convertNumberToSizeInfo({
+        valueNumber: params.margin.marginTop,
+        unit: params.childInfo.margin.top.unit,
+        maxValue: params.childGridRect.height
+      });
+      const rowAutoNumber = params.gridManager.getGridAreaAutoNumber({
+        start: params.gridArea.rowStart - 1,
+        end: params.gridArea.rowEnd - 1,
+        sizeInfoList: params.gridManager.gridRowInfo
+      });
+      let marginBottom;
+      if (rowAutoNumber) {
+        const bottomValueNumber =
+          params.bottomOffset -
+          params.margin.marginTop -
+          params.childInfo.rect.height;
+        marginBottom = params.gridManager.convertNumberToSizeInfo({
+          valueNumber: bottomValueNumber,
+          unit: params.childInfo.margin.bottom.unit,
+          maxValue: params.childGridRect.height
+        });
+      } else {
+        marginBottom = {
+          value: 0,
+          unit: params.childInfo.margin.bottom.unit
+        };
+      }
+      params.childInfo.margin.top = marginTop;
+      params.childInfo.margin.bottom = marginBottom;
+    }
     params.childInfo.gridArea = params.gridArea;
-    params.childInfo.margin.left = marginLeft;
-    params.childInfo.margin.right = marginRight;
-    params.childInfo.margin.top = marginTop;
-    params.childInfo.margin.bottom = marginBottom;
     params.childInfo.size.width = UISizeUtils.convertSizeToParent({
       sizeInfo: params.childInfo.size.width,
       oldParentValue: params.childInfo.parentRect?.width ?? 0,
@@ -203,6 +197,8 @@ export class GridChildUtils {
     };
     return gridManager.childInfoList.map(childInfo => {
       if (!childInfo.rect) return childInfo;
+      childInfo.placeSelf.justifySelf = '';
+      childInfo.placeSelf.alignSelf = '';
       areaInfo = gridManager.getChildGridAreaInfoByRect({
         rect: childInfo.rect,
         gridItemRectList
@@ -243,6 +239,10 @@ export class GridChildUtils {
           id: dropped.id,
           gridArea: DefaultGridArea,
           size: DefaultSizeInfo,
+          placeSelf: {
+            justifySelf: '',
+            alignSelf: ''
+          },
           margin: {
             left: { value: 0, unit: SizeUnit.PX },
             right: { value: 0, unit: SizeUnit.PX },
@@ -293,16 +293,6 @@ export class GridChildUtils {
       gridArea: gridInfo.gridArea,
       gridItemRectList
     });
-    // const width = gridManager.convertNumberToSizeInfo({
-    //   valueNumber: droppedRect.width,
-    //   unit: dropped.size.width.unit,
-    //   maxValue: droppedParentRect.width
-    // });
-    // const height = gridManager.convertNumberToSizeInfo({
-    //   valueNumber: droppedRect.height,
-    //   unit: dropped.size.height.unit,
-    //   maxValue: droppedParentRect.height
-    // });
     const rowAutoNumber = gridManager.getGridAreaAutoNumber({
       start: gridInfo.gridArea.rowStart - 1,
       end: gridInfo.gridArea.rowEnd - 1,
@@ -329,6 +319,10 @@ export class GridChildUtils {
         left: { value: gridInfo.marginLeft, unit: SizeUnit.PX },
         right: { value: marginRight, unit: SizeUnit.PX },
         bottom: { value: marginBottom, unit: SizeUnit.PX }
+      },
+      placeSelf: {
+        justifySelf: '',
+        alignSelf: ''
       },
       size: {
         width: UISizeUtils.convertSizeToParent({

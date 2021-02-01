@@ -21,10 +21,18 @@ type SizeInfo = {
   maxHeight: UISize;
 };
 
+type PlaceSelfInfo = {
+  // 水平
+  justifySelf: string;
+  // 垂直
+  alignSelf: string
+};
+
 type GridChildInfo = {
   id: string;
   gridArea: GridArea;
   margin: SpacingMargin;
+  placeSelf: PlaceSelfInfo;
   size: SizeInfo;
   rect?: RectInfo;
   parentRect?: RectInfo;
@@ -61,6 +69,7 @@ export {
   RectInfo,
   GridChildInfo,
   SizeInfo,
+  PlaceSelfInfo,
   RegionInfo,
   LineInfo,
   PaddingInfo
