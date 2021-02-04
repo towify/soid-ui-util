@@ -166,8 +166,8 @@ export class GridManager {
     let columnAutoOffsetList;
     let rowAutoOffsetList;
     if (autoActive) {
-      columnAutoOffsetList = this.getAutoOffsetList(gridColumnInfo);
-      rowAutoOffsetList = this.getAutoOffsetList(gridRowInfo);
+      columnAutoOffsetList = this.getAutoOffsetList(gridColumnInfo, false);
+      rowAutoOffsetList = this.getAutoOffsetList(gridRowInfo, true);
     }
     const gridWidth =
       this.gridActiveRect.width - (gridColumnInfo.length - 1) * this.#columnGap;
@@ -395,7 +395,8 @@ export class GridManager {
   }
 
   private getAutoOffsetList(
-    list: UISize[]
+    list: UISize[],
+    isRow: boolean
   ): {
       minusOffsetId: string;
       minusOffset: number;
@@ -406,7 +407,7 @@ export class GridManager {
         return this.getGridAutoOffsetValueByIndex({
           index,
           sizeInfoList: list,
-          isRow: false
+          isRow
         });
       }
       return {
