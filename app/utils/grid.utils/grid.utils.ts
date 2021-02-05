@@ -182,8 +182,8 @@ export class GridUtils {
         maxRowItem[0].y + maxRowItem[0].height - childGridRect.y;
     } else if (rowEnd < params.gridItemRectList.length) {
       if (rowEnd < 0) {
-        childGridRect.height =
-          params.gridItemRectList[0][0].y - childGridRect.y;
+        childGridRect.height = params.gridItemRectList[0][0].y +
+          params.gridItemRectList[0][0].height - childGridRect.y;
       } else {
         childGridRect.height =
           params.gridItemRectList[rowEnd][0].y - childGridRect.y;
@@ -199,8 +199,8 @@ export class GridUtils {
         maxColumnItem.x + maxColumnItem.width - childGridRect.x;
     } else if (columnEnd < params.gridItemRectList[0].length) {
       if (columnEnd < 0) {
-        childGridRect.width =
-          params.gridItemRectList[0][0].x - childGridRect.x;
+        childGridRect.width = params.gridItemRectList[0][0].x +
+          params.gridItemRectList[0][0].width - childGridRect.x;
       } else {
         childGridRect.width =
           params.gridItemRectList[0][columnEnd].x - childGridRect.x;
