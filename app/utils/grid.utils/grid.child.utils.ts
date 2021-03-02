@@ -2,11 +2,11 @@
  * @author allen
  * @data 2020/12/14 16:43
  */
-import { GridArea, SizeUnit } from 'towify-editor-common-values';
+import {GridArea, Mark, SizeUnit} from 'towify-editor-common-values';
 import {
   DefaultGridArea, DefaultSizeInfo,
   GridChildInfo, RectInfo,
-  SizeInfo
+  SizeInfo, UnsetUnit
 } from '../../type/common.type';
 import { GridManager } from '../../manager/gird.manager/grid.manager';
 import { ErrorUtils } from '../error.utils/error.utils';
@@ -26,7 +26,10 @@ export class GridChildUtils {
     gridManager: GridManager;
   }): GridChildInfo {
     if (!params.childInfo.rect) return params.childInfo;
-    if (!params.childInfo.placeSelf.justifySelf) {
+    if (params.childInfo.placeSelf.justifySelf) {
+      params.childInfo.margin.left = UnsetUnit;
+      params.childInfo.margin.right = UnsetUnit;
+    } else {
       const marginLeft = params.gridManager.convertNumberToSizeInfo({
         valueNumber: params.margin.marginLeft,
         unit: params.childInfo.margin.left.unit,
@@ -57,7 +60,10 @@ export class GridChildUtils {
       params.childInfo.margin.left = marginLeft;
       params.childInfo.margin.right = marginRight;
     }
-    if (!params.childInfo.placeSelf.justifySelf) {
+    if (params.childInfo.placeSelf.alignSelf){
+      params.childInfo.margin.top = UnsetUnit;
+      params.childInfo.margin.top = UnsetUnit;
+    } else {
       const marginTop = params.gridManager.convertNumberToSizeInfo({
         valueNumber: params.margin.marginTop,
         unit: params.childInfo.margin.top.unit,

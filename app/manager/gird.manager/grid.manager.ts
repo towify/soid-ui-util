@@ -2,22 +2,11 @@
  * @author allen
  * @data 2020/11/12 15:56
  */
-import {
-  GridArea,
-  GridGap, Mark,
-  SizeUnit,
-  SpacingPadding,
-  UISize
-} from 'towify-editor-common-values';
-import {
-  DefaultOffset,
-  DefaultRect,
-  GridChildInfo,
-  RectInfo
-} from '../../type/common.type';
-import { GridUtils } from '../../utils/grid.utils/grid.utils';
-import { ErrorUtils } from '../../utils/error.utils/error.utils';
-import { UISizeUtils } from '../../utils/ui.size.utils/ui.size.utils';
+import {GridArea, GridGap, Mark, SizeUnit, SpacingPadding, UISize} from 'towify-editor-common-values';
+import {DefaultOffset, DefaultRect, GridChildInfo, RectInfo, UnsetUnit} from '../../type/common.type';
+import {GridUtils} from '../../utils/grid.utils/grid.utils';
+import {ErrorUtils} from '../../utils/error.utils/error.utils';
+import {UISizeUtils} from '../../utils/ui.size.utils/ui.size.utils';
 
 export class GridManager {
   #gridRect?: RectInfo;
@@ -443,14 +432,24 @@ export class GridManager {
         start = child.gridArea.rowStart - 1;
         end = child.gridArea.rowEnd - 1;
         sizeValue = child.size.height;
-        marginMax = child.margin.top;
-        marginMin = child.margin.bottom;
+        if (child.placeSelf.alignSelf) {
+          marginMax = UnsetUnit;
+          marginMin = UnsetUnit;
+        } else {
+          marginMax = child.margin.top;
+          marginMin = child.margin.bottom;
+        }
       } else {
         start = child.gridArea.columnStart - 1;
         end = child.gridArea.columnEnd - 1;
         sizeValue = child.size.width;
-        marginMax = child.margin.left;
-        marginMin = child.margin.right;
+        if (child.placeSelf.justifySelf) {
+          marginMax = UnsetUnit;
+          marginMin = UnsetUnit;
+        } else {
+          marginMax = child.margin.left;
+          marginMin = child.margin.right;
+        }
       }
       rowDValue = end - start;
       if (params.index >= start && params.index < end) {

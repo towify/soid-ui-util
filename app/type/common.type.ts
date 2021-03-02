@@ -2,7 +2,7 @@
  *  @Author KaySaith
  *  @Date 10/31/20
  */
-import {GridArea, SizeUnit, SpacingMargin, UISize} from 'towify-editor-common-values';
+import {GridArea, Mark, SizeUnit, SpacingMargin, UISize} from 'towify-editor-common-values';
 
 type Rgba = {
   red: number;
@@ -103,5 +103,10 @@ export const DefaultSizeInfo = {
   height: { value: 0, unit: SizeUnit.PX },
   minHeight: { value: 0, unit: SizeUnit.PX },
   maxHeight: { value: 0, unit: SizeUnit.PX }
+};
+
+export const UnsetUnit = {
+  value: Mark.Unset,
+  unit: SizeUnit.PX
 };
 
