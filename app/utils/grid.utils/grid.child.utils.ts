@@ -2,15 +2,19 @@
  * @author allen
  * @data 2020/12/14 16:43
  */
-import {GridArea, Mark, SizeUnit} from 'towify-editor-common-values';
+import { GridArea, SizeUnit } from 'towify-editor-common-values';
 import {
-  DefaultGridArea, DefaultSizeInfo,
-  GridChildInfo, RectInfo,
-  SizeInfo, UnsetUnit
+  DefaultGridArea,
+  DefaultSizeInfo,
+  GridChildInfo,
+  RectInfo,
+  SizeInfo,
+  UnsetUnit
 } from '../../type/common.type';
 import { GridManager } from '../../manager/gird.manager/grid.manager';
 import { ErrorUtils } from '../error.utils/error.utils';
-import {UISizeUtils} from '../ui.size.utils/ui.size.utils';
+import { UISizeUtils } from '../ui.size.utils/ui.size.utils';
+import { GridUtils } from './grid.utils';
 
 export class GridChildUtils {
   static adjustChildGridInfo(params: {
@@ -30,12 +34,12 @@ export class GridChildUtils {
       params.childInfo.margin.left = UnsetUnit;
       params.childInfo.margin.right = UnsetUnit;
     } else {
-      const marginLeft = params.gridManager.convertNumberToSizeInfo({
+      const marginLeft = UISizeUtils.convertNumberToUISize({
         valueNumber: params.margin.marginLeft,
         unit: params.childInfo.margin.left.unit,
         maxValue: params.childGridRect.width
       });
-      const columnAutoNumber = params.gridManager.getGridAreaAutoNumber({
+      const columnAutoNumber = GridUtils.getGridAreaAutoNumber({
         start: params.gridArea.columnStart - 1,
         end: params.gridArea.columnEnd - 1,
         sizeInfoList: params.gridManager.gridColumnInfo
@@ -46,7 +50,7 @@ export class GridChildUtils {
           params.rightOffset -
           params.margin.marginLeft -
           params.childInfo.rect.width;
-        marginRight = params.gridManager.convertNumberToSizeInfo({
+        marginRight = UISizeUtils.convertNumberToUISize({
           valueNumber: rightValueNumber,
           unit: params.childInfo.margin.right.unit,
           maxValue: params.childGridRect.width
@@ -60,16 +64,16 @@ export class GridChildUtils {
       params.childInfo.margin.left = marginLeft;
       params.childInfo.margin.right = marginRight;
     }
-    if (params.childInfo.placeSelf.alignSelf){
+    if (params.childInfo.placeSelf.alignSelf) {
       params.childInfo.margin.top = UnsetUnit;
       params.childInfo.margin.top = UnsetUnit;
     } else {
-      const marginTop = params.gridManager.convertNumberToSizeInfo({
+      const marginTop = UISizeUtils.convertNumberToUISize({
         valueNumber: params.margin.marginTop,
         unit: params.childInfo.margin.top.unit,
         maxValue: params.childGridRect.height
       });
-      const rowAutoNumber = params.gridManager.getGridAreaAutoNumber({
+      const rowAutoNumber = GridUtils.getGridAreaAutoNumber({
         start: params.gridArea.rowStart - 1,
         end: params.gridArea.rowEnd - 1,
         sizeInfoList: params.gridManager.gridRowInfo
@@ -80,7 +84,7 @@ export class GridChildUtils {
           params.bottomOffset -
           params.margin.marginTop -
           params.childInfo.rect.height;
-        marginBottom = params.gridManager.convertNumberToSizeInfo({
+        marginBottom = UISizeUtils.convertNumberToUISize({
           valueNumber: bottomValueNumber,
           unit: params.childInfo.margin.bottom.unit,
           maxValue: params.childGridRect.height
@@ -95,32 +99,32 @@ export class GridChildUtils {
       params.childInfo.margin.bottom = marginBottom;
     }
     params.childInfo.gridArea = params.gridArea;
-    params.childInfo.size.width = UISizeUtils.convertSizeToParent({
+    params.childInfo.size.width = UISizeUtils.convertUISizeWithParentValue({
       sizeInfo: params.childInfo.size.width,
       oldParentValue: params.childInfo.parentRect?.width ?? 0,
       newParentValue: params.childGridRect.width
     });
-    params.childInfo.size.minWidth = UISizeUtils.convertSizeToParent({
+    params.childInfo.size.minWidth = UISizeUtils.convertUISizeWithParentValue({
       sizeInfo: params.childInfo.size.minWidth,
       oldParentValue: params.childInfo.parentRect?.width ?? 0,
       newParentValue: params.childGridRect.width
     });
-    params.childInfo.size.maxWidth = UISizeUtils.convertSizeToParent({
+    params.childInfo.size.maxWidth = UISizeUtils.convertUISizeWithParentValue({
       sizeInfo: params.childInfo.size.maxWidth,
       oldParentValue: params.childInfo.parentRect?.width ?? 0,
       newParentValue: params.childGridRect.width
     });
-    params.childInfo.size.height = UISizeUtils.convertSizeToParent({
+    params.childInfo.size.height = UISizeUtils.convertUISizeWithParentValue({
       sizeInfo: params.childInfo.size.height,
       oldParentValue: params.childInfo.parentRect?.height ?? 0,
       newParentValue: params.childGridRect.height
     });
-    params.childInfo.size.minHeight = UISizeUtils.convertSizeToParent({
+    params.childInfo.size.minHeight = UISizeUtils.convertUISizeWithParentValue({
       sizeInfo: params.childInfo.size.minHeight,
       oldParentValue: params.childInfo.parentRect?.height ?? 0,
       newParentValue: params.childGridRect.height
     });
-    params.childInfo.size.maxHeight = UISizeUtils.convertSizeToParent({
+    params.childInfo.size.maxHeight = UISizeUtils.convertUISizeWithParentValue({
       sizeInfo: params.childInfo.size.maxHeight,
       oldParentValue: params.childInfo.parentRect?.height ?? 0,
       newParentValue: params.childGridRect.height
@@ -145,31 +149,32 @@ export class GridChildUtils {
     };
     return gridManager.childInfoList.map(childInfo => {
       if (!childInfo.rect) return childInfo;
-      margin = gridManager.getGridMarginInfoByRect({
+      margin = gridManager.getChildGridMarginInfoByRect({
         rect: childInfo.rect,
         gridArea: childInfo.gridArea,
         gridItemRectList
       });
-      childGridRect = gridManager.convertChildSizeInfoToNumber({
+      childGridRect = GridUtils.convertChildSizeInfoToNumber({
         gridArea: childInfo.gridArea,
+        gridRect: gridManager.gridActiveRect,
         gridItemRectList
       });
       const bottomOffset =
-        UISizeUtils.convertSizeInfoToNumber(
+        UISizeUtils.convertUISizeToNumber(
           childInfo.margin.top,
           childGridRect.height
         ) +
-        UISizeUtils.convertSizeInfoToNumber(
+        UISizeUtils.convertUISizeToNumber(
           childInfo.margin.bottom,
           childGridRect.height
         ) +
         childInfo.rect.height;
       const rightOffset =
-        UISizeUtils.convertSizeInfoToNumber(
+        UISizeUtils.convertUISizeToNumber(
           childInfo.margin.left,
           childGridRect.width
         ) +
-        UISizeUtils.convertSizeInfoToNumber(
+        UISizeUtils.convertUISizeToNumber(
           childInfo.margin.right,
           childGridRect.width
         ) +
@@ -209,8 +214,9 @@ export class GridChildUtils {
         rect: childInfo.rect,
         gridItemRectList
       });
-      childGridRect = gridManager.convertChildSizeInfoToNumber({
+      childGridRect = GridUtils.convertChildSizeInfoToNumber({
         gridArea: areaInfo.gridArea,
+        gridRect: gridManager.gridActiveRect,
         gridItemRectList
       });
       return GridChildUtils.adjustChildGridInfo({
@@ -235,9 +241,9 @@ export class GridChildUtils {
     },
     gridManager: GridManager
   ): {
-      info: GridChildInfo;
-      needUpdateGridChildren: boolean;
-    } {
+    info: GridChildInfo;
+    needUpdateGridChildren: boolean;
+  } {
     if (!gridManager.activeStatus) {
       ErrorUtils.GridError('GridSize is undefined');
       return {
@@ -268,8 +274,9 @@ export class GridChildUtils {
     const gridItemRectList = gridManager.getGridItemRectList();
     let droppedOldParentRect: RectInfo | undefined;
     if (dropped.gridArea) {
-      droppedOldParentRect = gridManager.convertChildSizeInfoToNumber({
+      droppedOldParentRect = GridUtils.convertChildSizeInfoToNumber({
         gridArea: dropped.gridArea,
+        gridRect: gridManager.gridActiveRect,
         gridItemRectList
       });
     }
@@ -295,16 +302,17 @@ export class GridChildUtils {
       rect: droppedRect,
       gridItemRectList
     });
-    const droppedParentRect = gridManager.convertChildSizeInfoToNumber({
+    const droppedParentRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: gridInfo.gridArea,
+      gridRect: gridManager.gridActiveRect,
       gridItemRectList
     });
-    const rowAutoNumber = gridManager.getGridAreaAutoNumber({
+    const rowAutoNumber = GridUtils.getGridAreaAutoNumber({
       start: gridInfo.gridArea.rowStart - 1,
       end: gridInfo.gridArea.rowEnd - 1,
       sizeInfoList: gridManager.gridRowInfo
     });
-    const columnAutoNumber = gridManager.getGridAreaAutoNumber({
+    const columnAutoNumber = GridUtils.getGridAreaAutoNumber({
       start: gridInfo.gridArea.columnStart - 1,
       end: gridInfo.gridArea.columnEnd - 1,
       sizeInfoList: gridManager.gridColumnInfo
@@ -331,32 +339,32 @@ export class GridChildUtils {
         alignSelf: ''
       },
       size: {
-        width: UISizeUtils.convertSizeToParent({
+        width: UISizeUtils.convertUISizeWithParentValue({
           sizeInfo: dropped.size.width,
           oldParentValue: droppedOldParentRect?.width ?? 0,
           newParentValue: droppedParentRect.width
         }),
-        maxWidth: UISizeUtils.convertSizeToParent({
+        maxWidth: UISizeUtils.convertUISizeWithParentValue({
           sizeInfo: dropped.size.maxWidth,
           oldParentValue: droppedOldParentRect?.width ?? 0,
           newParentValue: droppedParentRect.width
         }),
-        minWidth: UISizeUtils.convertSizeToParent({
+        minWidth: UISizeUtils.convertUISizeWithParentValue({
           sizeInfo: dropped.size.minWidth,
           oldParentValue: droppedOldParentRect?.width ?? 0,
           newParentValue: droppedParentRect.width
         }),
-        height: UISizeUtils.convertSizeToParent({
+        height: UISizeUtils.convertUISizeWithParentValue({
           sizeInfo: dropped.size.height,
           oldParentValue: droppedOldParentRect?.height ?? 0,
           newParentValue: droppedParentRect.height
         }),
-        maxHeight: UISizeUtils.convertSizeToParent({
+        maxHeight: UISizeUtils.convertUISizeWithParentValue({
           sizeInfo: dropped.size.maxHeight,
           oldParentValue: droppedOldParentRect?.height ?? 0,
           newParentValue: droppedParentRect.height
         }),
-        minHeight: UISizeUtils.convertSizeToParent({
+        minHeight: UISizeUtils.convertUISizeWithParentValue({
           sizeInfo: dropped.size.minHeight,
           oldParentValue: droppedOldParentRect?.height ?? 0,
           newParentValue: droppedParentRect.height

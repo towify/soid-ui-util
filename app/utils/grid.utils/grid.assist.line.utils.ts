@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/12/14 17:04
  */
-import { Mark, SizeUnit } from 'towify-editor-common-values';
+import { SizeUnit } from 'towify-editor-common-values';
 import { LineInfo, RectInfo } from '../../type/common.type';
 import { SignInfo } from '../../type/interact.type';
 import { NumberUtils } from '../number.utils/number.utils';
@@ -24,7 +24,7 @@ export class GridAssistLineUtils {
   } {
     const lines: LineInfo[] = [];
     const signs: SignInfo[] = [];
-    if (activeBorder.left !== Mark.Unset) {
+    if (activeBorder.left !== Number.MIN_VALUE) {
       const offLeft = NumberUtils.parseViewNumber(rect.x - activeBorder.left);
       const leftY = rect.y + rect.height / 2;
       if (
@@ -45,7 +45,7 @@ export class GridAssistLineUtils {
         });
       }
     }
-    if (activeBorder.right !== Mark.Unset) {
+    if (activeBorder.right !== Number.MIN_VALUE) {
       const offRight = NumberUtils.parseViewNumber(
         activeBorder.right - (rect.x + rect.width)
       );
@@ -68,7 +68,7 @@ export class GridAssistLineUtils {
         });
       }
     }
-    if (activeBorder.top !== Mark.Unset) {
+    if (activeBorder.top !== Number.MIN_VALUE) {
       const offTop = NumberUtils.parseViewNumber(rect.y - activeBorder.top);
       const topX = rect.x + rect.width / 2;
       if (
@@ -89,7 +89,7 @@ export class GridAssistLineUtils {
         });
       }
     }
-    if (activeBorder.bottom !== Mark.Unset) {
+    if (activeBorder.bottom !== Number.MIN_VALUE) {
       const offBottom = NumberUtils.parseViewNumber(
         activeBorder.bottom - (rect.y + rect.height)
       );
@@ -168,8 +168,8 @@ export class GridAssistLineUtils {
     return GridAssistLineUtils.getAssistLinesAndSignsByActivePoint(movingRect, {
       left: 0,
       top: 0,
-      right: Mark.Unset,
-      bottom: Mark.Unset
+      right: Number.MIN_VALUE,
+      bottom: Number.MIN_VALUE
     });
   }
 }

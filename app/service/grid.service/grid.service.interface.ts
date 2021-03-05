@@ -19,13 +19,6 @@ import { AlignOffsetInfo, SignInfo } from '../../type/interact.type';
 
 export interface GridServiceInterface {
   /**
-   * @param width Window width
-   * @param height Window height
-   * 设置窗口 高宽
-   */
-  setWindowSize(width: number, height: number): GridServiceInterface;
-
-  /**
    * @param rect: grid rect
    * @param scale: grid scale
    * 设置 parent grid size

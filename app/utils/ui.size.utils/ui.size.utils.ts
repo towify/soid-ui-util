@@ -2,25 +2,38 @@
  * @author allen
  * @data 2021/1/22 11:37
  */
-import { Mark, SizeUnit, UISize } from 'towify-editor-common-values';
+import { SizeUnit, UISize } from 'towify-editor-common-values';
 import { ErrorUtils } from '../error.utils/error.utils';
-import { WindowUtils } from '../window.utils/window.utils';
 import { NumberUtils } from '../number.utils/number.utils';
 
 export class UISizeUtils {
-
   static getValidRenderSizeByComparing(params: {
-    min: UISize,
-    max: UISize,
-    origin: UISize,
-    parentSizeValue?: number
+    min: UISize;
+    max: UISize;
+    origin: UISize;
+    parentSizeValue?: number;
   }): UISize {
-    const originValue = UISizeUtils.convertSizeInfoToNumber(params.origin, params.parentSizeValue);
-    if (params.min.value !== Mark.Auto && params.min.value !== Mark.Unset) {
-      const minValue = UISizeUtils.convertSizeInfoToNumber(params.min, params.parentSizeValue);
+    const originValue = UISizeUtils.convertUISizeToNumber(
+      params.origin,
+      params.parentSizeValue
+    );
+    if (
+      params.min.unit !== SizeUnit.Auto &&
+      params.min.unit !== SizeUnit.Unset
+    ) {
+      const minValue = UISizeUtils.convertUISizeToNumber(
+        params.min,
+        params.parentSizeValue
+      );
       if (originValue > minValue) {
-        if (params.max.value !== Mark.Unset && params.max.value !== Mark.Auto) {
-          const maxValue = UISizeUtils.convertSizeInfoToNumber(params.max, params.parentSizeValue);
+        if (
+          params.max.unit !== SizeUnit.Unset &&
+          params.max.unit !== SizeUnit.Auto
+        ) {
+          const maxValue = UISizeUtils.convertUISizeToNumber(
+            params.max,
+            params.parentSizeValue
+          );
           if (maxValue < minValue || originValue < maxValue) {
             return params.origin;
           }
@@ -30,8 +43,14 @@ export class UISizeUtils {
       }
       return params.min;
     }
-    if (params.max.value !== Mark.Unset && params.max.value !== Mark.Auto) {
-      const maxValue = UISizeUtils.convertSizeInfoToNumber(params.max, params.parentSizeValue);
+    if (
+      params.max.unit !== SizeUnit.Unset &&
+      params.max.unit !== SizeUnit.Auto
+    ) {
+      const maxValue = UISizeUtils.convertUISizeToNumber(
+        params.max,
+        params.parentSizeValue
+      );
       if (originValue < maxValue) {
         return params.origin;
       }
@@ -40,27 +59,15 @@ export class UISizeUtils {
     return params.origin;
   }
 
-  static convertSizeInfoToNumber(sizeInfo: UISize, maxValue?: number): number {
+  static convertUISizeToNumber(sizeInfo: UISize, maxValue?: number): number {
     let valueNumber = sizeInfo.value;
-    if (valueNumber === Mark.Auto) {
+    if (sizeInfo.unit === SizeUnit.Auto) {
       return 0;
     }
-    if (valueNumber === Mark.Unset) {
+    if (sizeInfo.unit === SizeUnit.Unset) {
       return 0;
     }
-    if (sizeInfo.unit === SizeUnit.VW) {
-      valueNumber = ((WindowUtils.WindowSize?.width ?? 0) * valueNumber) / 100;
-      if (!WindowUtils.WindowSize?.width) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
-    if (sizeInfo.unit === SizeUnit.VH) {
-      valueNumber = ((WindowUtils.WindowSize?.height ?? 0) * valueNumber) / 100;
-      if (!WindowUtils.WindowSize?.height) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
-    if (sizeInfo.unit === '%') {
+    if (sizeInfo.unit === SizeUnit.Percent) {
       valueNumber = ((maxValue ?? 0) * valueNumber) / 100;
       if (!maxValue) {
         ErrorUtils.GridError('Parent size is undefined');
@@ -69,56 +76,56 @@ export class UISizeUtils {
     return valueNumber;
   }
 
-  static convertNumberToSizeInfo(params: {
+  static convertNumberToUISize(params: {
     valueNumber: number;
     unit: SizeUnit;
-    windowSize?: { width: number; height: number };
     maxValue?: number;
   }): UISize {
     let value = params.valueNumber;
-    if (params.unit === SizeUnit.VW) {
-      value = (params.valueNumber / (params.windowSize?.width ?? 1)) * 100;
-      if (!params.windowSize?.width) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
-    if (params.unit === SizeUnit.VH) {
-      value = (params.valueNumber / (params.windowSize?.height ?? 1)) * 100;
-      if (!params.windowSize?.height) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
+    let unit = params.unit;
     if (params.unit === SizeUnit.Percent) {
-      value = (params.valueNumber / (params.maxValue ?? 1)) * 100;
+      value = parseFloat(
+        ((params.valueNumber / (params.maxValue ?? 1)) * 100).toFixed(1)
+      );
+      unit = SizeUnit.Percent;
     }
     if (params.unit === SizeUnit.PX) {
-      return {
-        value: NumberUtils.parseViewNumber(value),
-        unit: params.unit
-      };
+      value = NumberUtils.parseViewNumber(value);
+      unit = SizeUnit.PX;
+    }
+    if (params.unit === SizeUnit.Fit) {
+      value = NumberUtils.parseViewNumber(value);
+      unit = SizeUnit.Fit;
     }
     return {
-      value: parseFloat(value.toFixed(1)),
-      unit: params.unit
+      value,
+      unit
     };
   }
 
-  static convertSizeToParent(params: {
-    sizeInfo: UISize,
-    oldParentValue: number,
-    newParentValue: number
+  static convertUISizeWithParentValue(params: {
+    sizeInfo: UISize;
+    oldParentValue: number;
+    newParentValue: number;
   }): UISize {
-    if (params.sizeInfo.value === Mark.Unset || params.sizeInfo.value === Mark.Auto) {
+    if (
+      params.sizeInfo.unit === SizeUnit.Unset ||
+      params.sizeInfo.unit === SizeUnit.Auto
+    ) {
       return params.sizeInfo;
     }
     let value = params.sizeInfo.value;
     if (params.sizeInfo.unit === SizeUnit.Percent) {
-      value = parseFloat((params.oldParentValue * params.sizeInfo.value / params.newParentValue).toFixed(1));
+      value = parseFloat(
+        (
+          (params.oldParentValue * params.sizeInfo.value) /
+          params.newParentValue
+        ).toFixed(1)
+      );
     }
     return {
       value,
       unit: params.sizeInfo.unit
     };
   }
-
 }

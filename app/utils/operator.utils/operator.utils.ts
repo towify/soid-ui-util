@@ -2,8 +2,6 @@
  * @author allen
  * @data 2020/12/7 17:58
  */
-
-import { Mark } from 'towify-editor-common-values';
 import { RectInfo, RegionInfo } from '../../type/common.type';
 
 export class OperatorUtils {
@@ -42,8 +40,8 @@ export class OperatorUtils {
   }
 
   static getXRangeInRectList(rectList: RectInfo[]): RegionInfo {
-    let from: number = Mark.Unset;
-    let to: number = Mark.Unset;
+    let from = Number.MIN_VALUE;
+    let to = Number.MIN_VALUE;
     rectList.forEach((rect, index) => {
       if (index === 0) {
         from = rect.x;
@@ -58,14 +56,14 @@ export class OperatorUtils {
       }
     });
     return {
-      from: from - OperatorUtils.Gap,
-      to: to + OperatorUtils.Gap
+      from: from !== Number.MIN_VALUE ? from - OperatorUtils.Gap : from,
+      to: to !== Number.MIN_VALUE ? to + OperatorUtils.Gap : to
     };
   }
 
   static getYRangeInRectList(rectList: RectInfo[]): RegionInfo {
-    let from: number = Mark.Unset;
-    let to: number = Mark.Unset;
+    let from = Number.MIN_VALUE;
+    let to = Number.MIN_VALUE;
     rectList.forEach((rect, index) => {
       if (index === 0) {
         from = rect.y;

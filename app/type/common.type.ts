@@ -2,7 +2,12 @@
  *  @Author KaySaith
  *  @Date 10/31/20
  */
-import {GridArea, Mark, SizeUnit, SpacingMargin, UISize} from 'towify-editor-common-values';
+import {
+  GridArea,
+  SizeUnit,
+  SpacingMargin,
+  UISize
+} from 'towify-editor-common-values';
 
 type Rgba = {
   red: number;
@@ -25,7 +30,7 @@ type PlaceSelfInfo = {
   // 水平
   justifySelf: string;
   // 垂直
-  alignSelf: string
+  alignSelf: string;
 };
 
 type GridChildInfo = {
@@ -106,7 +111,6 @@ export const DefaultSizeInfo = {
 };
 
 export const UnsetUnit = {
-  value: Mark.Unset,
-  unit: SizeUnit.PX
+  value: 0,
+  unit: SizeUnit.Unset
 };
-

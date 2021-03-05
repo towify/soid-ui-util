@@ -2,7 +2,6 @@
  * @author allen
  * @data 2020/12/6 16:07
  */
-import { Mark } from 'towify-editor-common-values';
 import { OperatorServiceInterface } from './operator.service.interface';
 import { DefaultRect, RectInfo } from '../../type/common.type';
 import { OperatorUtils } from '../../utils/operator.utils/operator.utils';
@@ -119,7 +118,7 @@ export class OperatorService implements OperatorServiceInterface {
             return previous;
           }, [])
         );
-        if (range.from !== Mark.Unset) {
+        if (range.from !== Number.MIN_VALUE) {
           start = range.to;
         } else {
           rect = DefaultRect;
@@ -179,7 +178,7 @@ export class OperatorService implements OperatorServiceInterface {
             return previous;
           }, [])
         );
-        if (range.from !== Mark.Unset) {
+        if (range.from !== Number.MIN_VALUE) {
           start = range.from;
         } else {
           rect = DefaultRect;
@@ -235,7 +234,7 @@ export class OperatorService implements OperatorServiceInterface {
             return previous;
           }, [])
         );
-        if (range.from !== Mark.Unset) {
+        if (range.from !== Number.MIN_VALUE) {
           start = range.from;
         } else {
           rect = DefaultRect;
@@ -292,7 +291,7 @@ export class OperatorService implements OperatorServiceInterface {
             return previous;
           }, [])
         );
-        if (range.to !== Mark.Unset) {
+        if (range.to !== Number.MIN_VALUE) {
           start = range.to;
         } else {
           rect = DefaultRect;

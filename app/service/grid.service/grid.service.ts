@@ -19,7 +19,6 @@ import {
 import { GridManager } from '../../manager/gird.manager/grid.manager';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
 import { ErrorUtils } from '../../utils/error.utils/error.utils';
-import { WindowUtils } from '../../utils/window.utils/window.utils';
 import { GridChildUtils } from '../../utils/grid.utils/grid.child.utils';
 import {
   AlignDefaultOffset,
@@ -58,14 +57,6 @@ export class GridService implements GridServiceInterface {
   get gridManager(): GridManager {
     this.#gridManager ??= new GridManager();
     return this.#gridManager;
-  }
-
-  setWindowSize(width: number, height: number): GridServiceInterface {
-    WindowUtils.WindowSize = {
-      width,
-      height
-    };
-    return this;
   }
 
   setGridRect(rect: RectInfo, scale: number = 1): GridServiceInterface {
