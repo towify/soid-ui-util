@@ -70,7 +70,9 @@ export class UISizeUtils {
     if (sizeInfo.unit === SizeUnit.Percent) {
       valueNumber = ((maxValue ?? 0) * valueNumber) / 100;
       if (!maxValue) {
-        ErrorUtils.GridError('Parent size is undefined');
+        ErrorUtils.GridError(
+          'Value unit is percent and parent value is undefined'
+        );
       }
     }
     return valueNumber;
