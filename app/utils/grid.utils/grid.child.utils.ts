@@ -98,38 +98,56 @@ export class GridChildUtils {
       params.childInfo.margin.top = marginTop;
       params.childInfo.margin.bottom = marginBottom;
     }
-    params.childInfo.gridArea = params.gridArea;
-    params.childInfo.size.width = UISizeUtils.convertUISizeWithParentValue({
-      sizeInfo: params.childInfo.size.width,
-      oldParentValue: params.childInfo.parentRect?.width ?? 0,
-      newParentValue: params.childGridRect.width
-    });
-    params.childInfo.size.minWidth = UISizeUtils.convertUISizeWithParentValue({
-      sizeInfo: params.childInfo.size.minWidth,
-      oldParentValue: params.childInfo.parentRect?.width ?? 0,
-      newParentValue: params.childGridRect.width
-    });
-    params.childInfo.size.maxWidth = UISizeUtils.convertUISizeWithParentValue({
-      sizeInfo: params.childInfo.size.maxWidth,
-      oldParentValue: params.childInfo.parentRect?.width ?? 0,
-      newParentValue: params.childGridRect.width
-    });
-    params.childInfo.size.height = UISizeUtils.convertUISizeWithParentValue({
-      sizeInfo: params.childInfo.size.height,
-      oldParentValue: params.childInfo.parentRect?.height ?? 0,
-      newParentValue: params.childGridRect.height
-    });
-    params.childInfo.size.minHeight = UISizeUtils.convertUISizeWithParentValue({
-      sizeInfo: params.childInfo.size.minHeight,
-      oldParentValue: params.childInfo.parentRect?.height ?? 0,
-      newParentValue: params.childGridRect.height
-    });
-    params.childInfo.size.maxHeight = UISizeUtils.convertUISizeWithParentValue({
-      sizeInfo: params.childInfo.size.maxHeight,
-      oldParentValue: params.childInfo.parentRect?.height ?? 0,
-      newParentValue: params.childGridRect.height
-    });
+    if (
+      params.gridArea.columnStart !== params.childInfo.gridArea.columnStart ||
+      params.gridArea.columnEnd !== params.childInfo.gridArea.columnEnd
+    ) {
+      params.childInfo.size.width = UISizeUtils.convertUISizeWithParentValue({
+        sizeInfo: params.childInfo.size.width,
+        oldParentValue: params.childInfo.parentRect?.width ?? 0,
+        newParentValue: params.childGridRect.width
+      });
+      params.childInfo.size.minWidth = UISizeUtils.convertUISizeWithParentValue(
+        {
+          sizeInfo: params.childInfo.size.minWidth,
+          oldParentValue: params.childInfo.parentRect?.width ?? 0,
+          newParentValue: params.childGridRect.width
+        }
+      );
+      params.childInfo.size.maxWidth = UISizeUtils.convertUISizeWithParentValue(
+        {
+          sizeInfo: params.childInfo.size.maxWidth,
+          oldParentValue: params.childInfo.parentRect?.width ?? 0,
+          newParentValue: params.childGridRect.width
+        }
+      );
+    }
+    if (
+      params.gridArea.rowStart !== params.childInfo.gridArea.rowStart ||
+      params.gridArea.rowEnd !== params.childInfo.gridArea.rowEnd
+    ) {
+      params.childInfo.size.height = UISizeUtils.convertUISizeWithParentValue({
+        sizeInfo: params.childInfo.size.height,
+        oldParentValue: params.childInfo.parentRect?.height ?? 0,
+        newParentValue: params.childGridRect.height
+      });
+      params.childInfo.size.minHeight = UISizeUtils.convertUISizeWithParentValue(
+        {
+          sizeInfo: params.childInfo.size.minHeight,
+          oldParentValue: params.childInfo.parentRect?.height ?? 0,
+          newParentValue: params.childGridRect.height
+        }
+      );
+      params.childInfo.size.maxHeight = UISizeUtils.convertUISizeWithParentValue(
+        {
+          sizeInfo: params.childInfo.size.maxHeight,
+          oldParentValue: params.childInfo.parentRect?.height ?? 0,
+          newParentValue: params.childGridRect.height
+        }
+      );
+    }
     params.childInfo.parentRect = params.childGridRect;
+    params.childInfo.gridArea = params.gridArea;
     return params.childInfo;
   }
 

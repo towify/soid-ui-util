@@ -237,15 +237,14 @@ export class GridUtils {
       childGridRect.height =
         maxRowItem[0].y + maxRowItem[0].height - childGridRect.y;
     } else if (rowEnd < params.gridItemRectList.length) {
-      if (rowEnd < 0) {
-        childGridRect.height =
-          params.gridItemRectList[0][0].y +
-          params.gridItemRectList[0][0].height -
-          childGridRect.y;
-      } else {
-        childGridRect.height =
-          params.gridItemRectList[rowEnd][0].y - childGridRect.y;
+      let rowIndex = rowEnd - 1;
+      if (rowIndex < 0) {
+        rowIndex = 0;
       }
+      childGridRect.height =
+        params.gridItemRectList[rowIndex][0].y +
+        params.gridItemRectList[rowIndex][0].height -
+        childGridRect.y;
     } else {
       childGridRect.height =
         params.gridRect.y + params.gridRect.height - childGridRect.y;
@@ -256,15 +255,14 @@ export class GridUtils {
       childGridRect.width =
         maxColumnItem.x + maxColumnItem.width - childGridRect.x;
     } else if (columnEnd < params.gridItemRectList[0].length) {
-      if (columnEnd < 0) {
-        childGridRect.width =
-          params.gridItemRectList[0][0].x +
-          params.gridItemRectList[0][0].width -
-          childGridRect.x;
-      } else {
-        childGridRect.width =
-          params.gridItemRectList[0][columnEnd].x - childGridRect.x;
+      let columnIndex = columnEnd - 1;
+      if (columnEnd <= 0) {
+        columnIndex = 0;
       }
+      childGridRect.width =
+        params.gridItemRectList[0][columnIndex].x +
+        params.gridItemRectList[0][columnIndex].width -
+        childGridRect.x;
     } else {
       childGridRect.width =
         params.gridRect.x + params.gridRect.width - childGridRect.x;
@@ -367,12 +365,7 @@ export class GridUtils {
     }
     params.gridItemRectList.forEach((rowItem, rowIndex) => {
       rowItem.forEach((gridItemRect, columnIndex) => {
-        const activeRect = {
-          x: gridItemRect.x,
-          y: gridItemRect.y,
-          width: gridItemRect.width,
-          height: gridItemRect.height
-        };
+        const activeRect = { ...gridItemRect };
         if (columnIndex < columnLength - 1) {
           activeRect.width += params.columnGap;
         }
@@ -401,7 +394,8 @@ export class GridUtils {
           GridUtils.checkPointIsInRect(
             { x: activeRect.x, y: maxHeight },
             activeRect
-          )
+          ) &&
+          maxHeight !== activeRect.y
         ) {
           rowEnd = rowIndex + 2;
         }
@@ -409,7 +403,8 @@ export class GridUtils {
           GridUtils.checkPointIsInRect(
             { x: maxWidth, y: activeRect.y },
             activeRect
-          )
+          ) &&
+          maxWidth !== activeRect.x
         ) {
           columnEnd = columnIndex + 2;
         }

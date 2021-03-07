@@ -89,6 +89,9 @@ export class UISizeUtils {
       value = parseFloat(
         ((params.valueNumber / (params.maxValue ?? 1)) * 100).toFixed(1)
       );
+      if (value > 99.85 && value < 100.15) {
+        value = 100;
+      }
       unit = SizeUnit.Percent;
     }
     if (params.unit === SizeUnit.PX) {
@@ -124,6 +127,9 @@ export class UISizeUtils {
           params.newParentValue
         ).toFixed(1)
       );
+      if (value > 99.85 && value < 100.15) {
+        value = 100;
+      }
     }
     return {
       value,
