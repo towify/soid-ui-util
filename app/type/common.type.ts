@@ -87,29 +87,6 @@ export const DefaultRect = {
   height: 0
 };
 
-export const DefaultOffset = {
-  left: 0,
-  top: 0,
-  right: 0,
-  bottom: 0
-};
-
-export const DefaultGridArea = {
-  rowStart: 1,
-  columnStart: 1,
-  rowEnd: 2,
-  columnEnd: 2
-};
-
-export const DefaultSizeInfo = {
-  width: { value: 0, unit: SizeUnit.PX },
-  minWidth: { value: 0, unit: SizeUnit.PX },
-  maxWidth: { value: 0, unit: SizeUnit.PX },
-  height: { value: 0, unit: SizeUnit.PX },
-  minHeight: { value: 0, unit: SizeUnit.PX },
-  maxHeight: { value: 0, unit: SizeUnit.PX }
-};
-
 export const UnsetUnit = {
   value: 0,
   unit: SizeUnit.Unset

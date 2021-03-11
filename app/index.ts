@@ -5,8 +5,7 @@
 
 export * from './type/common.type';
 export * from './type/interact.type';
-export * from './service/grid.service/grid.service';
-export * from './service/grid.service/grid.service.interface';
+export * from './manager/gird.manager/component.grid.manager';
 export * from './service/operator.service/operator.service';
 export * from './service/operator.service/operator.service.interface';
 export * from './utils/number.utils/number.utils';

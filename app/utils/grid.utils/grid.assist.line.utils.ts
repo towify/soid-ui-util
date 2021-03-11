@@ -7,7 +7,7 @@ import { LineInfo, RectInfo } from '../../type/common.type';
 import { SignInfo } from '../../type/interact.type';
 import { NumberUtils } from '../number.utils/number.utils';
 import { ErrorUtils } from '../error.utils/error.utils';
-import { GridManager } from '../../manager/gird.manager/grid.manager';
+import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 
 export class GridAssistLineUtils {
   static getAssistLinesAndSignsByActivePoint(
@@ -124,7 +124,7 @@ export class GridAssistLineUtils {
       movingOffsetX: number;
       movingOffsetY: number;
     },
-    gridManager: GridManager
+    gridManager: GridMapping
   ): {
     lines: LineInfo[];
     signs: SignInfo[];
@@ -132,18 +132,19 @@ export class GridAssistLineUtils {
     const moveChild = gridManager.childInfoList.find(child => {
       return child.id === movingInfo.movingId;
     });
-    if (!moveChild || !moveChild.rect) {
+    if (!moveChild) {
       ErrorUtils.GridError('Moving layer is not find');
       return {
         lines: [],
         signs: []
       };
     }
+    const childRect = gridManager.getGridChildRect(moveChild);
     const movingRect = {
-      x: moveChild.rect.x + movingInfo.movingOffsetX,
-      y: moveChild.rect.y + movingInfo.movingOffsetY,
-      width: moveChild.rect.width,
-      height: moveChild.rect.height
+      x: childRect.x + movingInfo.movingOffsetX,
+      y: childRect.y + movingInfo.movingOffsetY,
+      width: childRect.width,
+      height: childRect.height
     };
     const gridItemRectList = gridManager.getGridItemRectList();
     const activeAreaInfo = gridManager.getChildGridAreaInfoByRect({

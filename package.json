@@ -40,7 +40,7 @@
     "npm": "^6.14.8",
     "prettier": "^2.1.2",
     "soid-data": "^0.0.28",
-    "towify-editor-common-values": "^0.0.9"
+    "towify-editor-common-values": "^0.0.10"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",

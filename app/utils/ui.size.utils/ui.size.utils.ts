@@ -19,7 +19,8 @@ export class UISizeUtils {
     );
     if (
       params.min.unit !== SizeUnit.Auto &&
-      params.min.unit !== SizeUnit.Unset
+      params.min.unit !== SizeUnit.Unset &&
+      params.min.unit !== SizeUnit.Fit
     ) {
       const minValue = UISizeUtils.convertUISizeToNumber(
         params.min,
@@ -28,7 +29,8 @@ export class UISizeUtils {
       if (originValue > minValue) {
         if (
           params.max.unit !== SizeUnit.Unset &&
-          params.max.unit !== SizeUnit.Auto
+          params.max.unit !== SizeUnit.Auto &&
+          params.max.unit !== SizeUnit.Fit
         ) {
           const maxValue = UISizeUtils.convertUISizeToNumber(
             params.max,
@@ -45,7 +47,8 @@ export class UISizeUtils {
     }
     if (
       params.max.unit !== SizeUnit.Unset &&
-      params.max.unit !== SizeUnit.Auto
+      params.max.unit !== SizeUnit.Auto &&
+      params.max.unit !== SizeUnit.Fit
     ) {
       const maxValue = UISizeUtils.convertUISizeToNumber(
         params.max,
@@ -65,6 +68,9 @@ export class UISizeUtils {
       return 0;
     }
     if (sizeInfo.unit === SizeUnit.Unset) {
+      return 0;
+    }
+    if (sizeInfo.unit === SizeUnit.Fit) {
       return 0;
     }
     if (sizeInfo.unit === SizeUnit.Percent) {
@@ -94,7 +100,11 @@ export class UISizeUtils {
       }
       unit = SizeUnit.Percent;
     }
-    if (params.unit === SizeUnit.PX) {
+    if (
+      params.unit === SizeUnit.PX ||
+      params.unit === SizeUnit.Auto ||
+      params.unit === SizeUnit.Unset
+    ) {
       value = NumberUtils.parseViewNumber(value);
       unit = SizeUnit.PX;
     }
@@ -115,7 +125,8 @@ export class UISizeUtils {
   }): UISize {
     if (
       params.sizeInfo.unit === SizeUnit.Unset ||
-      params.sizeInfo.unit === SizeUnit.Auto
+      params.sizeInfo.unit === SizeUnit.Auto ||
+      params.sizeInfo.unit === SizeUnit.Fit
     ) {
       return params.sizeInfo;
     }

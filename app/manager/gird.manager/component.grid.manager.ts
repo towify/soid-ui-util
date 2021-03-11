@@ -6,17 +6,15 @@ import {
   CustomGrid,
   GridArea,
   GridGap,
-  SpacingPadding,
-  UISize
+  SpacingPadding
 } from 'towify-editor-common-values';
-import { GridServiceInterface } from './grid.service.interface';
 import {
   GridChildInfo,
   LineInfo,
   RectInfo,
   SizeInfo
 } from '../../type/common.type';
-import { GridManager } from '../../manager/gird.manager/grid.manager';
+import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
 import { ErrorUtils } from '../../utils/error.utils/error.utils';
 import { GridChildUtils } from '../../utils/grid.utils/grid.child.utils';
@@ -28,7 +26,7 @@ import {
 import { GridAssistLineUtils } from '../../utils/grid.utils/grid.assist.line.utils';
 import { GridAlignLineUtils } from '../../utils/grid.utils/grid.align.line.utils';
 
-export class GridService implements GridServiceInterface {
+export class ComponentGridManager {
   #movingLayerId = '';
 
   #movingOffsetX = 0;
@@ -43,83 +41,42 @@ export class GridService implements GridServiceInterface {
 
   #layerMiddleList: number[] = [];
 
-  private static instance?: GridServiceInterface;
-
-  #gridManager?: GridManager;
-
   #scale = 1;
 
-  static getInstance(): GridServiceInterface {
-    GridService.instance ??= new GridService();
-    return GridService.instance;
+  gridMapping: GridMapping;
+
+  constructor(
+    public readonly gap: GridGap,
+    public readonly padding: SpacingPadding,
+    public readonly border: SpacingPadding
+  ) {
+    this.gridMapping = new GridMapping(gap, padding, border, 1, 1);
   }
 
-  get gridManager(): GridManager {
-    this.#gridManager ??= new GridManager();
-    return this.#gridManager;
+  setGridCount(params: { row: number; column: number }): ComponentGridManager {
+    this.gridMapping.rowCount = params.row;
+    this.gridMapping.columnCount = params.column;
+    return this;
   }
 
-  setGridRect(rect: RectInfo, scale: number = 1): GridServiceInterface {
+  setGridInfo(value: CustomGrid | undefined): ComponentGridManager {
+    this.gridMapping.customGrid = value;
+    return this;
+  }
+
+  setGridRect(rect: RectInfo, scale: number = 1): ComponentGridManager {
     this.#scale = scale;
-    this.gridManager.setGridRect({
+    this.gridMapping.gridRect = {
       x: rect.x,
       y: rect.y,
       width: parseFloat((rect.width / scale).toFixed(1)),
       height: parseFloat((rect.height / scale).toFixed(1))
-    });
+    };
     return this;
   }
 
-  setGridColumnInfo(info: UISize[]): GridServiceInterface {
-    this.gridManager.setGridColumnInfo(info);
-    return this;
-  }
-
-  setGridRowInfo(info: UISize[]): GridServiceInterface {
-    this.gridManager.setGridRowInfo(info);
-    return this;
-  }
-
-  setGridInfo(info: CustomGrid): GridServiceInterface {
-    this.gridManager.setGridColumnInfo(info.column);
-    this.gridManager.setGridRowInfo(info.row);
-    return this;
-  }
-
-  setGridCount(params: {
-    row: number;
-    column: number;
-    gap?: GridGap;
-  }): GridServiceInterface {
-    this.gridManager.setGridCount(params);
-    return this;
-  }
-
-  setGridGap(gap: GridGap): GridServiceInterface {
-    this.gridManager.setGap(gap);
-    return this;
-  }
-
-  setGridPaddingInfo(padding: SpacingPadding): GridServiceInterface {
-    this.gridManager.setPadding(padding);
-    return this;
-  }
-
-  setGridBorderInfo(border: SpacingPadding): GridServiceInterface {
-    this.gridManager.setBorder(border);
-    return this;
-  }
-
-  setChildrenGridInfo(childrenInfo: GridChildInfo[]): GridServiceInterface {
-    if (!this.gridManager.activeStatus) {
-      ErrorUtils.GridError('GridSize is undefined');
-      return this;
-    }
-    this.gridManager.setChildrenInfo(childrenInfo);
-    const gridItemRectList = this.gridManager.getGridItemRectList();
-    this.gridManager.childInfoList.forEach(childInfo => {
-      this.gridManager.updateChildRect(childInfo, gridItemRectList);
-    });
+  setChildrenGridInfo(childrenInfo: GridChildInfo[]): ComponentGridManager {
+    this.gridMapping.setChildrenInfo(childrenInfo);
     return this;
   }
 
@@ -133,25 +90,25 @@ export class GridService implements GridServiceInterface {
     info: GridChildInfo;
     needUpdateGridChildren: boolean;
   } {
-    return GridChildUtils.setDroppedInfo(dropped, this.gridManager);
+    return GridChildUtils.setDroppedInfo(dropped, this.gridMapping);
   }
 
   deleteChildByIdAndGetParentGridChildrenUpdateStatus(
     childId: string
   ): boolean {
-    const childIndex = this.gridManager.childInfoList.findIndex(
+    const childIndex = this.gridMapping.childInfoList.findIndex(
       childInfo => childInfo.id === childId
     );
     if (childIndex !== -1) {
-      this.gridManager.childInfoList.splice(childIndex, 1);
+      this.gridMapping.childInfoList.splice(childIndex, 1);
     }
-    return this.gridManager.needUpdateGridChildren();
+    return this.gridMapping.needUpdateGridChildren();
   }
 
   updateChildInfoAndGetParentGridChildrenUpdateStatus(
     child: GridChildInfo
   ): boolean {
-    const updateChildInfo = this.gridManager.childInfoList.find(
+    const updateChildInfo = this.gridMapping.childInfoList.find(
       childInfo => childInfo.id === child.id
     );
     if (updateChildInfo) {
@@ -159,35 +116,50 @@ export class GridService implements GridServiceInterface {
       updateChildInfo.margin = child.margin;
       updateChildInfo.size = child.size;
       updateChildInfo.placeSelf = child.placeSelf;
-      const gridItemRectList = this.gridManager.getGridItemRectList();
-      this.gridManager.updateChildRect(updateChildInfo, gridItemRectList);
+      updateChildInfo.rect = this.gridMapping.getGridChildRect(updateChildInfo);
     }
-    return this.gridManager.needUpdateGridChildren();
+    return this.gridMapping.needUpdateGridChildren();
   }
 
-  adjustChildrenAndResetAutoGridInfo(): GridChildInfo[] {
-    if (!this.gridManager.activeStatus) {
-      ErrorUtils.GridError('GridSize is undefined');
+  adjustChildrenAndResetAutoGridInfo(ignoreGridArea = false): GridChildInfo[] {
+    if (!this.gridMapping.childInfoList.length) {
       return [];
     }
-    if (!this.gridManager.childInfoList.length) return [];
-    return GridChildUtils.adjustChildrenAndResetAutoGridInfo(this.gridManager);
+    const gridChildList = GridChildUtils.adjustChildrenAndResetAutoGridInfo(
+      this.gridMapping
+    );
+    if (ignoreGridArea) {
+      gridChildList.forEach(gridChild => {
+        gridChild.gridArea.rowStart = 0;
+        gridChild.gridArea.rowEnd = 0;
+        gridChild.gridArea.columnStart = 0;
+        gridChild.gridArea.columnEnd = 0;
+      });
+    }
+    return gridChildList;
   }
 
-  getModifiedChildrenGirdInfo(): GridChildInfo[] {
-    if (
-      !this.gridManager.activeStatus ||
-      !this.gridManager.childInfoList.length
-    ) {
-      ErrorUtils.GridError('GridSize is undefined');
+  getModifiedChildrenGirdInfo(ignoreGridArea = false): GridChildInfo[] {
+    if (!this.gridMapping.childInfoList.length) {
       return [];
     }
-    return GridChildUtils.getModifiedChildrenGirdInfo(this.gridManager);
+    const gridChildList = GridChildUtils.getModifiedChildrenGirdInfo(
+      this.gridMapping
+    );
+    if (ignoreGridArea) {
+      gridChildList.forEach(gridChild => {
+        gridChild.gridArea.rowStart = 0;
+        gridChild.gridArea.rowEnd = 0;
+        gridChild.gridArea.columnStart = 0;
+        gridChild.gridArea.columnEnd = 0;
+      });
+    }
+    return gridChildList;
   }
 
   getGridLines(needBorder = false, needScale = false): LineInfo[] {
     let lines = GridLineUtils.getGridLineList(
-      this.gridManager.getGridItemRectList()
+      this.gridMapping.getGridItemRectList()
     );
     if (!needBorder) {
       lines = this.getNoCountBorderLine(lines);
@@ -207,7 +179,7 @@ export class GridService implements GridServiceInterface {
     lines: LineInfo[];
   } {
     let areaAndLines = GridLineUtils.getGridGapAreaAndLine({
-      gridItemRectList: this.gridManager.getGridItemRectList(),
+      gridItemRectList: this.gridMapping.getGridItemRectList(),
       lineSpace
     });
     if (!needBorder) {
@@ -227,17 +199,10 @@ export class GridService implements GridServiceInterface {
     area: RectInfo[];
     lines: LineInfo[];
   } {
-    if (!this.gridManager.activeStatus) {
-      ErrorUtils.GridError('GridSize is undefined');
-      return {
-        area: [],
-        lines: []
-      };
-    }
     let areaAndLines = GridLineUtils.getGridPaddingAreaAndLine({
-      gridPadding: this.gridManager.padding,
-      border: this.gridManager.border,
-      gridSize: this.gridManager.gridRect,
+      gridPadding: this.gridMapping.paddingInfo,
+      border: this.gridMapping.borderInfo,
+      gridSize: this.gridMapping.gridRect,
       lineSpace
     });
     if (!needBorder) {
@@ -249,7 +214,7 @@ export class GridService implements GridServiceInterface {
     return areaAndLines;
   }
 
-  startMovingChildById(id: string): GridServiceInterface {
+  startMovingChildById(id: string): ComponentGridManager {
     this.#movingLayerId = id;
     this.#movingOffsetX = 0;
     this.#movingOffsetY = 0;
@@ -257,13 +222,13 @@ export class GridService implements GridServiceInterface {
     return this;
   }
 
-  movingChild(offset: { x: number; y: number }): GridServiceInterface {
+  movingChild(offset: { x: number; y: number }): ComponentGridManager {
     this.#movingOffsetX = offset.x;
     this.#movingOffsetY = offset.y;
     return this;
   }
 
-  stopMovingChild(): GridServiceInterface {
+  stopMovingChild(): ComponentGridManager {
     this.#movingLayerId = '';
     this.#movingOffsetX = 0;
     this.#movingOffsetY = 0;
@@ -279,10 +244,10 @@ export class GridService implements GridServiceInterface {
     alignLines: LineInfo[];
     offset: AlignOffsetInfo;
   } {
-    const moveChild = this.gridManager.childInfoList.find(child => {
+    const moveChild = this.gridMapping.childInfoList.find(child => {
       return child.id === this.#movingLayerId;
     });
-    if (!moveChild || !moveChild.rect) {
+    if (!moveChild) {
       ErrorUtils.InteractError('Moving layer is not find');
       return {
         assistLines: [],
@@ -291,20 +256,12 @@ export class GridService implements GridServiceInterface {
         offset: AlignDefaultOffset
       };
     }
-    if (!this.gridManager.activeStatus) {
-      ErrorUtils.GridError('GridSize is undefined');
-      return {
-        assistLines: [],
-        alignLines: [],
-        assistSigns: [],
-        offset: AlignDefaultOffset
-      };
-    }
+    const childRect = this.gridMapping.getGridChildRect(moveChild);
     const movingRect = {
-      x: moveChild.rect.x + this.#movingOffsetX,
-      y: moveChild.rect.y + this.#movingOffsetY,
-      width: moveChild.rect.width,
-      height: moveChild.rect.height
+      x: childRect.x + this.#movingOffsetX,
+      y: childRect.y + this.#movingOffsetY,
+      width: childRect.width,
+      height: childRect.height
     };
     const alignLineInfo = GridAlignLineUtils.getAlignLineByMoveRect({
       rect: movingRect,
@@ -313,7 +270,7 @@ export class GridService implements GridServiceInterface {
       xList: this.#layerXList,
       yList: this.#layerYList,
       offset: maxActiveLength,
-      gridActiveRect: this.gridManager.gridActiveRect
+      gridActiveRect: this.gridMapping.gridActiveRect
     });
     const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns(
       {
@@ -321,9 +278,9 @@ export class GridService implements GridServiceInterface {
         movingOffsetX: this.#movingOffsetX + alignLineInfo.offset.x,
         movingOffsetY: this.#movingOffsetY + +alignLineInfo.offset.y
       },
-      this.gridManager
+      this.gridMapping
     );
-    const rect = this.gridManager.gridRect;
+    const rect = this.gridMapping.gridRect;
     if (needScale) {
       assistLineInfo.lines = this.getScaleLine(assistLineInfo.lines);
       alignLineInfo.lines = this.getScaleLine(alignLineInfo.lines);
@@ -364,15 +321,11 @@ export class GridService implements GridServiceInterface {
   }
 
   private prepareAlignLine(isNeedMiddle = true): void {
-    if (!this.gridManager.activeStatus) {
-      ErrorUtils.InteractError('GridSize is undefined');
-      return;
-    }
     if (!this.#movingLayerId) return;
     this.resetAlignLine();
     const layerLinesInfo = GridAlignLineUtils.prepareAlignLine({
       isNeedMiddle,
-      gridManager: this.gridManager,
+      gridMapping: this.gridMapping,
       movingLayerId: this.#movingLayerId
     });
     this.#layerCenterList = layerLinesInfo.layerCenterList;
@@ -428,8 +381,8 @@ export class GridService implements GridServiceInterface {
   } {
     return {
       area: areaAndLines.area.map(rect => {
-        rect.x -= this.gridManager.border.left;
-        rect.y -= this.gridManager.border.top;
+        rect.x -= this.gridMapping.borderInfo.left;
+        rect.y -= this.gridMapping.borderInfo.top;
         return rect;
       }),
       lines: this.getNoCountBorderLine(areaAndLines.lines)
@@ -438,10 +391,10 @@ export class GridService implements GridServiceInterface {
 
   private getNoCountBorderLine(lines: LineInfo[]): LineInfo[] {
     return lines.map(line => {
-      line.fromY -= this.gridManager.border.top;
-      line.fromX -= this.gridManager.border.left;
-      line.toY -= this.gridManager.border.top;
-      line.toX -= this.gridManager.border.left;
+      line.fromY -= this.gridMapping.borderInfo.top;
+      line.fromX -= this.gridMapping.borderInfo.left;
+      line.toY -= this.gridMapping.borderInfo.top;
+      line.toX -= this.gridMapping.borderInfo.left;
       return line;
     });
   }

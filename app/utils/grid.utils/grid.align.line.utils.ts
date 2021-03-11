@@ -4,8 +4,7 @@
  */
 import { LineInfo, RectInfo } from '../../type/common.type';
 import { AlignOffsetInfo } from '../../type/interact.type';
-import {ErrorUtils} from '../error.utils/error.utils';
-import {GridManager} from '../../manager/gird.manager/grid.manager';
+import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 
 export class GridAlignLineUtils {
   static getClosestValueInPositionList(params: {
@@ -34,9 +33,9 @@ export class GridAlignLineUtils {
     offset: number;
     gridActiveRect: RectInfo;
   }): {
-      lines: LineInfo[];
-      offset: AlignOffsetInfo;
-    } {
+    lines: LineInfo[];
+    offset: AlignOffsetInfo;
+  } {
     let offsetX = 0;
     let offsetY = 0;
     const xAlignLines: number[] = [];
@@ -136,32 +135,33 @@ export class GridAlignLineUtils {
   }
 
   static prepareAlignLine(params: {
-    isNeedMiddle: boolean,
-    gridManager: GridManager
-    movingLayerId: string,
+    isNeedMiddle: boolean;
+    gridMapping: GridMapping;
+    movingLayerId: string;
   }): {
-      layerCenterList: number[],
-      layerMiddleList: number[],
-      layerXList: number[],
-      layerYList: number[],
-    } {
+    layerCenterList: number[];
+    layerMiddleList: number[];
+    layerXList: number[];
+    layerYList: number[];
+  } {
     const layerCenterList: number[] = [];
     const layerMiddleList: number[] = [];
     const layerXList: number[] = [];
     const layerYList: number[] = [];
-    const canvasMinLeft = params.gridManager.gridActiveRect.x;
+    const canvasMinLeft = params.gridMapping.gridActiveRect.x;
     const canvasMaxRight =
-      params.gridManager.gridActiveRect.x + params.gridManager.gridActiveRect.width;
-    const canvasMinTop = params.gridManager.gridActiveRect.y;
+      params.gridMapping.gridActiveRect.x +
+      params.gridMapping.gridActiveRect.width;
+    const canvasMinTop = params.gridMapping.gridActiveRect.y;
     const canvasMaxBottom =
-      params.gridManager.gridActiveRect.y +
-      params.gridManager.gridActiveRect.height;
+      params.gridMapping.gridActiveRect.y +
+      params.gridMapping.gridActiveRect.height;
     const canvasCenterX =
-      params.gridManager.gridActiveRect.x +
-      params.gridManager.gridActiveRect.width / 2;
+      params.gridMapping.gridActiveRect.x +
+      params.gridMapping.gridActiveRect.width / 2;
     const canvasCenterY =
-      params.gridManager.gridActiveRect.y +
-      params.gridManager.gridActiveRect.height / 2;
+      params.gridMapping.gridActiveRect.y +
+      params.gridMapping.gridActiveRect.height / 2;
     if (params.isNeedMiddle) {
       layerCenterList.push(canvasCenterX);
       layerMiddleList.push(canvasCenterY);
@@ -170,12 +170,14 @@ export class GridAlignLineUtils {
     layerXList.push(canvasMaxRight);
     layerYList.push(canvasMinTop);
     layerYList.push(canvasMaxBottom);
-    params.gridManager.childInfoList.forEach(child => {
-      if (child.rect && child.id !== params.movingLayerId) {
-        const minLeft = child.rect.x;
-        const maxRight = child.rect.x + child.rect.width;
-        const minTop = child.rect.y;
-        const maxBottom = child.rect.y + child.rect.height;
+    let childRect;
+    params.gridMapping.childInfoList.forEach(child => {
+      childRect = params.gridMapping.getGridChildRect(child);
+      if (child.id !== params.movingLayerId) {
+        const minLeft = childRect.x;
+        const maxRight = childRect.x + childRect.width;
+        const minTop = childRect.y;
+        const maxBottom = childRect.y + childRect.height;
         if (layerXList.indexOf(maxRight) === -1) {
           layerXList.push(maxRight);
         }
@@ -189,8 +191,8 @@ export class GridAlignLineUtils {
           layerYList.push(maxBottom);
         }
         if (params.isNeedMiddle) {
-          const centerX = child.rect.x + child.rect.width / 2;
-          const centerY = child.rect.y + child.rect.height / 2;
+          const centerX = childRect.x + childRect.width / 2;
+          const centerY = childRect.y + childRect.height / 2;
           if (layerCenterList.indexOf(centerX) === -1) {
             layerCenterList.push(centerX);
           }
@@ -200,7 +202,7 @@ export class GridAlignLineUtils {
         }
       }
     });
-    const itemRectList = params.gridManager.getGridItemRectList();
+    const itemRectList = params.gridMapping.getGridItemRectList();
     itemRectList.forEach(rowItem => {
       rowItem.forEach(rect => {
         if (params.isNeedMiddle) {

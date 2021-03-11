@@ -23,7 +23,10 @@ export class GridUtils {
     let autoNumber = 0;
     for (startIndex; startIndex < params.end; startIndex += 1) {
       if (startIndex < params.sizeInfoList.length && startIndex >= 0) {
-        if (params.sizeInfoList[startIndex].unit === SizeUnit.Auto) {
+        if (
+          params.sizeInfoList[startIndex].unit === SizeUnit.Auto ||
+          params.sizeInfoList[startIndex].unit === SizeUnit.Fit
+        ) {
           autoNumber += 1;
         }
       }
@@ -49,7 +52,8 @@ export class GridUtils {
       if (startIndex < params.sizeInfoList.length && startIndex >= 0) {
         if (
           params.sizeInfoList[startIndex].unit !== SizeUnit.Auto &&
-          params.sizeInfoList[startIndex].unit !== SizeUnit.Unset
+          params.sizeInfoList[startIndex].unit !== SizeUnit.Unset &&
+          params.sizeInfoList[startIndex].unit !== SizeUnit.Fit
         ) {
           totalValue -= UISizeUtils.convertUISizeToNumber(
             params.sizeInfoList[startIndex]
@@ -86,7 +90,7 @@ export class GridUtils {
     let isAuto = false;
     const valueList: number[] = new Array(params.sizeInfoList.length);
     params.sizeInfoList.forEach((value, index) => {
-      isAuto = value.unit === SizeUnit.Auto;
+      isAuto = value.unit === SizeUnit.Auto || value.unit === SizeUnit.Fit;
       if (isAuto) {
         valueList[index] = 0;
         autoNumber += 1;
@@ -107,7 +111,7 @@ export class GridUtils {
         }
         const autoValue = spareValue / autoNumber;
         params.sizeInfoList.forEach((value, index) => {
-          isAuto = value.unit === SizeUnit.Auto;
+          isAuto = value.unit === SizeUnit.Auto || value.unit === SizeUnit.Fit;
           if (isAuto) {
             valueList[index] = autoValue;
           }

@@ -4,15 +4,12 @@
  */
 import { GridArea, SizeUnit } from 'towify-editor-common-values';
 import {
-  DefaultGridArea,
-  DefaultSizeInfo,
   GridChildInfo,
   RectInfo,
   SizeInfo,
   UnsetUnit
 } from '../../type/common.type';
-import { GridManager } from '../../manager/gird.manager/grid.manager';
-import { ErrorUtils } from '../error.utils/error.utils';
+import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 import { UISizeUtils } from '../ui.size.utils/ui.size.utils';
 import { GridUtils } from './grid.utils';
 
@@ -27,7 +24,7 @@ export class GridChildUtils {
     gridArea: GridArea;
     rightOffset: number;
     bottomOffset: number;
-    gridManager: GridManager;
+    gridMapping: GridMapping;
   }): GridChildInfo {
     if (!params.childInfo.rect) return params.childInfo;
     if (params.childInfo.placeSelf.justifySelf) {
@@ -42,7 +39,7 @@ export class GridChildUtils {
       const columnAutoNumber = GridUtils.getGridAreaAutoNumber({
         start: params.gridArea.columnStart - 1,
         end: params.gridArea.columnEnd - 1,
-        sizeInfoList: params.gridManager.gridColumnInfo
+        sizeInfoList: params.gridMapping.gridColumnInfo
       });
       let marginRight;
       if (columnAutoNumber) {
@@ -76,7 +73,7 @@ export class GridChildUtils {
       const rowAutoNumber = GridUtils.getGridAreaAutoNumber({
         start: params.gridArea.rowStart - 1,
         end: params.gridArea.rowEnd - 1,
-        sizeInfoList: params.gridManager.gridRowInfo
+        sizeInfoList: params.gridMapping.gridRowInfo
       });
       let marginBottom;
       if (rowAutoNumber) {
@@ -152,9 +149,9 @@ export class GridChildUtils {
   }
 
   static getModifiedChildrenGirdInfo(
-    gridManager: GridManager
+    gridMapping: GridMapping
   ): GridChildInfo[] {
-    const gridItemRectList = gridManager.getGridItemRectList();
+    const gridItemRectList = gridMapping.getGridItemRectList();
     let margin: {
       marginLeft: number;
       marginTop: number;
@@ -165,16 +162,18 @@ export class GridChildUtils {
       width: number;
       height: number;
     };
-    return gridManager.childInfoList.map(childInfo => {
+    return gridMapping.childInfoList.map(childInfo => {
       if (!childInfo.rect) return childInfo;
-      margin = gridManager.getChildGridMarginInfoByRect({
+      margin = GridUtils.getChildGridMarginInfoByRect({
         rect: childInfo.rect,
         gridArea: childInfo.gridArea,
+        columnGap: gridMapping.columnGap,
+        rowGap: gridMapping.rowGap,
         gridItemRectList
       });
       childGridRect = GridUtils.convertChildSizeInfoToNumber({
         gridArea: childInfo.gridArea,
-        gridRect: gridManager.gridActiveRect,
+        gridRect: gridMapping.gridActiveRect,
         gridItemRectList
       });
       const bottomOffset =
@@ -204,15 +203,15 @@ export class GridChildUtils {
         gridArea: childInfo.gridArea,
         bottomOffset,
         rightOffset,
-        gridManager
+        gridMapping
       });
     });
   }
 
   static adjustChildrenAndResetAutoGridInfo(
-    gridManager: GridManager
+    gridMapping: GridMapping
   ): GridChildInfo[] {
-    const gridItemRectList = gridManager.getGridItemRectList(false);
+    const gridItemRectList = gridMapping.getGridItemRectList(false);
     let areaInfo: {
       gridArea: GridArea;
       marginLeft: number;
@@ -224,17 +223,17 @@ export class GridChildUtils {
       width: number;
       height: number;
     };
-    return gridManager.childInfoList.map(childInfo => {
+    return gridMapping.childInfoList.map(childInfo => {
       if (!childInfo.rect) return childInfo;
       childInfo.placeSelf.justifySelf = '';
       childInfo.placeSelf.alignSelf = '';
-      areaInfo = gridManager.getChildGridAreaInfoByRect({
+      areaInfo = gridMapping.getChildGridAreaInfoByRect({
         rect: childInfo.rect,
         gridItemRectList
       });
       childGridRect = GridUtils.convertChildSizeInfoToNumber({
         gridArea: areaInfo.gridArea,
-        gridRect: gridManager.gridActiveRect,
+        gridRect: gridMapping.gridActiveRect,
         gridItemRectList
       });
       return GridChildUtils.adjustChildGridInfo({
@@ -244,7 +243,7 @@ export class GridChildUtils {
         childGridRect,
         rightOffset: 0,
         bottomOffset: 0,
-        gridManager
+        gridMapping
       });
     });
   }
@@ -257,54 +256,33 @@ export class GridChildUtils {
       size: SizeInfo;
       gridArea?: GridArea;
     },
-    gridManager: GridManager
+    gridMapping: GridMapping
   ): {
     info: GridChildInfo;
     needUpdateGridChildren: boolean;
   } {
-    if (!gridManager.activeStatus) {
-      ErrorUtils.GridError('GridSize is undefined');
-      return {
-        info: {
-          id: dropped.id,
-          gridArea: DefaultGridArea,
-          size: DefaultSizeInfo,
-          placeSelf: {
-            justifySelf: '',
-            alignSelf: ''
-          },
-          margin: {
-            left: { value: 0, unit: SizeUnit.PX },
-            right: { value: 0, unit: SizeUnit.PX },
-            top: { value: 0, unit: SizeUnit.PX },
-            bottom: { value: 0, unit: SizeUnit.PX }
-          }
-        },
-        needUpdateGridChildren: false
-      };
-    }
-    const childIndex = gridManager.childInfoList.findIndex(
+    const childIndex = gridMapping.childInfoList.findIndex(
       childInfo => childInfo.id === dropped.id
     );
     if (childIndex !== -1) {
-      gridManager.childInfoList.splice(childIndex, 1);
+      gridMapping.childInfoList.splice(childIndex, 1);
     }
-    const gridItemRectList = gridManager.getGridItemRectList();
+    const gridItemRectList = gridMapping.getGridItemRectList();
     let droppedOldParentRect: RectInfo | undefined;
     if (dropped.gridArea) {
       droppedOldParentRect = GridUtils.convertChildSizeInfoToNumber({
         gridArea: dropped.gridArea,
-        gridRect: gridManager.gridActiveRect,
+        gridRect: gridMapping.gridActiveRect,
         gridItemRectList
       });
     }
-    const rectWidth = gridManager.convertSizeInfoToNumber({
+    const rectWidth = gridMapping.convertSizeInfoToNumber({
       value: dropped.size.width,
       max: dropped.size.maxWidth,
       min: dropped.size.minWidth,
       maxValue: droppedOldParentRect?.width
     });
-    const rectHeight = gridManager.convertSizeInfoToNumber({
+    const rectHeight = gridMapping.convertSizeInfoToNumber({
       value: dropped.size.height,
       max: dropped.size.maxHeight,
       min: dropped.size.minHeight,
@@ -316,24 +294,24 @@ export class GridChildUtils {
       width: rectWidth,
       height: rectHeight
     };
-    const gridInfo = gridManager.getChildGridAreaInfoByRect({
+    const gridInfo = gridMapping.getChildGridAreaInfoByRect({
       rect: droppedRect,
       gridItemRectList
     });
     const droppedParentRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: gridInfo.gridArea,
-      gridRect: gridManager.gridActiveRect,
+      gridRect: gridMapping.gridActiveRect,
       gridItemRectList
     });
     const rowAutoNumber = GridUtils.getGridAreaAutoNumber({
       start: gridInfo.gridArea.rowStart - 1,
       end: gridInfo.gridArea.rowEnd - 1,
-      sizeInfoList: gridManager.gridRowInfo
+      sizeInfoList: gridMapping.gridRowInfo
     });
     const columnAutoNumber = GridUtils.getGridAreaAutoNumber({
       start: gridInfo.gridArea.columnStart - 1,
       end: gridInfo.gridArea.columnEnd - 1,
-      sizeInfoList: gridManager.gridColumnInfo
+      sizeInfoList: gridMapping.gridColumnInfo
     });
     let marginBottom = 0;
     if (rowAutoNumber) {
@@ -343,7 +321,7 @@ export class GridChildUtils {
     if (columnAutoNumber) {
       marginRight = 0 - gridInfo.marginLeft - droppedRect.width;
     }
-    const droppedInfo = {
+    const droppedInfo: GridChildInfo = {
       id: dropped.id,
       gridArea: gridInfo.gridArea,
       margin: {
@@ -389,12 +367,14 @@ export class GridChildUtils {
         })
       }
     };
-    gridManager.childInfoList.push(
-      gridManager.updateChildRect(droppedInfo, gridItemRectList)
+    droppedInfo.rect = gridMapping.getGridChildRect(
+      droppedInfo,
+      gridItemRectList
     );
+    gridMapping.childInfoList.push(droppedInfo);
     return {
       info: droppedInfo,
-      needUpdateGridChildren: gridManager.needUpdateGridChildren()
+      needUpdateGridChildren: gridMapping.needUpdateGridChildren()
     };
   }
 }

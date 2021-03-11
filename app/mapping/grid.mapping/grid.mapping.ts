@@ -4,6 +4,7 @@
  */
 
 import {
+  CustomGrid,
   GridArea,
   GridGap,
   SizeUnit,
@@ -11,135 +12,107 @@ import {
   UISize
 } from 'towify-editor-common-values';
 import {
-  DefaultOffset,
-  DefaultRect,
   GridChildInfo,
+  PaddingInfo,
   RectInfo,
   UnsetUnit
 } from '../../type/common.type';
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
-import { ErrorUtils } from '../../utils/error.utils/error.utils';
 import { UISizeUtils } from '../../utils/ui.size.utils/ui.size.utils';
 
-export class GridManager {
-  #gridRect?: RectInfo;
-  childInfoList: GridChildInfo[] = [];
-  gridColumnInfo: UISize[] = [];
-  gridRowInfo: UISize[] = [];
-  #rowGap = 0;
-  #columnGap = 0;
-  gridActiveRect = DefaultRect;
-  padding = DefaultOffset;
-  border = DefaultOffset;
+export class GridMapping {
+  #gridRect = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0
+  };
 
-  setGridRect(rect: RectInfo): GridManager {
-    this.#gridRect = rect;
-    this.updateGridActiveRect();
-    return this;
+  constructor(
+    public gap: GridGap,
+    public padding: SpacingPadding,
+    public border: SpacingPadding,
+    public columnCount: number,
+    public rowCount: number,
+    public customGrid?: CustomGrid,
+    public readonly childInfoList: GridChildInfo[] = []
+  ) {}
+
+  set gridRect(value: RectInfo) {
+    this.#gridRect = value;
+    this.childInfoList.forEach(child => {
+      child.rect = this.getGridChildRect(child);
+      this.childInfoList.push(child);
+    });
   }
 
   get gridRect(): RectInfo {
-    return this.#gridRect ?? DefaultRect;
+    return this.#gridRect;
   }
 
-  get activeStatus(): boolean {
-    return this.#gridRect !== undefined;
-  }
-
-  setGridColumnInfo(info: UISize[]): GridManager {
-    this.gridColumnInfo = [];
-    info.forEach(unit => {
-      this.gridColumnInfo.push(JSON.parse(JSON.stringify(unit)));
+  get gridActiveRect(): RectInfo {
+    return GridUtils.getActiveRect({
+      rect: this.gridRect,
+      padding: this.paddingInfo,
+      border: this.borderInfo
     });
-    return this;
   }
 
-  setGridRowInfo(info: UISize[]): GridManager {
-    this.gridRowInfo = [];
-    info.forEach(unit => {
-      this.gridRowInfo.push(JSON.parse(JSON.stringify(unit)));
-    });
-    return this;
+  get paddingInfo(): PaddingInfo {
+    return GridUtils.convertOffsetValue(this.padding, this.gridRect);
   }
 
-  setGridCount(params: {
-    row: number;
-    column: number;
-    gap?: GridGap;
-  }): GridManager {
-    if (!this.gridActiveRect) {
-      ErrorUtils.GridError('GridSize is undefined');
-      return this;
-    }
-    this.gridRowInfo = [];
-    this.gridColumnInfo = [];
-    if (params.gap?.row) {
-      this.#rowGap = UISizeUtils.convertUISizeToNumber(
-        params.gap.row,
-        this.gridActiveRect.height
-      );
-    }
-    if (params.gap?.column) {
-      this.#columnGap = UISizeUtils.convertUISizeToNumber(
-        params.gap.column,
-        this.gridActiveRect.width
-      );
-    }
-    let rowIndex = 0;
-    for (rowIndex; rowIndex < params.row; rowIndex += 1) {
-      this.gridRowInfo.push({
-        value:
-          (this.gridActiveRect.height - this.#rowGap * (params.row - 1)) /
-          params.row,
-        unit: SizeUnit.PX
-      });
+  get borderInfo(): PaddingInfo {
+    return GridUtils.convertOffsetValue(this.border, this.gridRect);
+  }
+
+  get rowGap(): number {
+    return UISizeUtils.convertUISizeToNumber(
+      this.gap.row,
+      this.gridActiveRect.height
+    );
+  }
+
+  get columnGap(): number {
+    return UISizeUtils.convertUISizeToNumber(
+      this.gap.column,
+      this.gridActiveRect.width
+    );
+  }
+
+  get gridColumnInfo(): UISize[] {
+    if (this.customGrid && this.customGrid.column.length) {
+      return this.customGrid.column;
     }
     let columnIndex = 0;
-    for (columnIndex; columnIndex < params.column; columnIndex += 1) {
-      this.gridColumnInfo.push({
+    const gridColumnInfo = [];
+    for (columnIndex; columnIndex < this.columnCount; columnIndex += 1) {
+      gridColumnInfo.push({
         value:
-          (this.gridActiveRect.width - this.#columnGap * (params.column - 1)) /
-          params.column,
+          (this.gridActiveRect.width -
+            this.columnGap * (this.columnCount - 1)) /
+          this.columnCount,
         unit: SizeUnit.PX
       });
     }
-    return this;
+    return gridColumnInfo;
   }
 
-  setGap(gap: GridGap): GridManager {
-    if (!this.gridActiveRect) {
-      ErrorUtils.GridError('GridSize is undefined');
-      return this;
+  get gridRowInfo(): UISize[] {
+    if (this.customGrid && this.customGrid.row.length) {
+      return this.customGrid.row;
     }
-    this.#rowGap = UISizeUtils.convertUISizeToNumber(
-      gap.row,
-      this.gridActiveRect?.height
-    );
-    this.#columnGap = UISizeUtils.convertUISizeToNumber(
-      gap.column,
-      this.gridActiveRect?.width
-    );
-    return this;
-  }
-
-  setPadding(padding: SpacingPadding): GridManager {
-    this.padding = GridUtils.convertOffsetValue(padding, this.#gridRect);
-    this.updateGridActiveRect();
-    return this;
-  }
-
-  setBorder(border: SpacingPadding): GridManager {
-    this.border = GridUtils.convertOffsetValue(border, this.#gridRect);
-    this.updateGridActiveRect();
-    return this;
-  }
-
-  setChildrenInfo(childrenInfo: GridChildInfo[]): GridManager {
-    this.childInfoList.splice(0, this.childInfoList.length);
-    childrenInfo.forEach(child => {
-      this.childInfoList.push(child);
-    });
-    return this;
+    let rowIndex = 0;
+    const gridRowInfo = [];
+    for (rowIndex; rowIndex < this.rowCount; rowIndex += 1) {
+      gridRowInfo.push({
+        value:
+          (this.gridActiveRect.height - this.rowGap * (this.rowCount - 1)) /
+          this.rowCount,
+        unit: SizeUnit.PX
+      });
+    }
+    return gridRowInfo;
   }
 
   convertSizeInfoToNumber(params: {
@@ -157,11 +130,17 @@ export class GridManager {
     return UISizeUtils.convertUISizeToNumber(sizeInfo, params.maxValue);
   }
 
+  setChildrenInfo(childrenInfo: GridChildInfo[]): GridMapping {
+    this.childInfoList.splice(0, this.childInfoList.length);
+    childrenInfo.forEach(child => {
+      child.rect = this.getGridChildRect(child);
+      this.childInfoList.push(child);
+    });
+    return this;
+  }
+
   // 获取 grid 布局下每个 item 的 rect
   getGridItemRectList(autoActive: boolean = true): RectInfo[][] {
-    if (!this.gridActiveRect) {
-      return [];
-    }
     const gridColumnInfo = this.gridColumnInfo ?? [];
     const gridRowInfo = this.gridRowInfo ?? [];
     let columnAutoOffsetList;
@@ -171,9 +150,9 @@ export class GridManager {
       rowAutoOffsetList = this.getAutoOffsetList(gridRowInfo, true);
     }
     const gridWidth =
-      this.gridActiveRect.width - (gridColumnInfo.length - 1) * this.#columnGap;
+      this.gridActiveRect.width - (gridColumnInfo.length - 1) * this.columnGap;
     const gridHeight =
-      this.gridActiveRect.height - (gridRowInfo.length - 1) * this.#rowGap;
+      this.gridActiveRect.height - (gridRowInfo.length - 1) * this.rowGap;
     const columnsNumberArray = GridUtils.getGridRowOrColumnItemValues({
       sizeInfoList: gridColumnInfo,
       maxValue: gridWidth,
@@ -215,10 +194,10 @@ export class GridManager {
           height: rowHeight
         });
         columnX += columnWidth;
-        columnX += this.#columnGap;
+        columnX += this.columnGap;
       }
       rowY += rowHeight;
-      rowY += this.#rowGap;
+      rowY += this.rowGap;
       itemRectList.push(rowArray);
     }
     return itemRectList;
@@ -235,32 +214,91 @@ export class GridManager {
     return GridUtils.getChildGridAreaInfoByRect({
       rect: params.rect,
       gridItemRectList: params.gridItemRectList,
-      rowGap: this.#rowGap,
-      columnGap: this.#columnGap
+      rowGap: this.rowGap,
+      columnGap: this.columnGap
     });
   }
 
-  getChildGridMarginInfoByRect(params: {
-    rect: RectInfo;
-    gridArea: GridArea;
-    gridItemRectList: RectInfo[][];
-  }): {
-    marginLeft: number;
-    marginTop: number;
-  } {
-    return GridUtils.getChildGridMarginInfoByRect({
-      rect: params.rect,
-      gridArea: params.gridArea,
-      gridItemRectList: params.gridItemRectList,
-      rowGap: this.#columnGap,
-      columnGap: this.#columnGap
-    });
-  }
+  // updateChildRect(
+  //   child: GridChildInfo,
+  //   gridItemRectList: RectInfo[][]
+  // ): GridChildInfo {
+  //   const childGridRect = GridUtils.convertChildSizeInfoToNumber({
+  //     gridArea: child.gridArea,
+  //     gridRect: this.gridActiveRect,
+  //     gridItemRectList
+  //   });
+  //   const childWidth = this.convertSizeInfoToNumber({
+  //     value: child.size.width,
+  //     max: child.size.maxWidth,
+  //     min: child.size.minWidth,
+  //     maxValue: childGridRect.width
+  //   });
+  //   const childHeight = this.convertSizeInfoToNumber({
+  //     value: child.size.height,
+  //     max: child.size.maxHeight,
+  //     min: child.size.minHeight,
+  //     maxValue: childGridRect.height
+  //   });
+  //   let childX =
+  //     childGridRect.x +
+  //     UISizeUtils.convertUISizeToNumber(child.margin.left, childGridRect.width);
+  //   let childY =
+  //     childGridRect.y +
+  //     UISizeUtils.convertUISizeToNumber(child.margin.top, childGridRect.height);
+  //   if (child.placeSelf.justifySelf) {
+  //     switch (child.placeSelf.justifySelf) {
+  //       case 'start': {
+  //         childX = childGridRect.x;
+  //         break;
+  //       }
+  //       case 'center': {
+  //         childX = childGridRect.x + (childGridRect.width - childWidth) / 2;
+  //         break;
+  //       }
+  //       case 'end': {
+  //         childX = childGridRect.x + (childGridRect.width - childWidth);
+  //         break;
+  //       }
+  //       default: {
+  //         break;
+  //       }
+  //     }
+  //   }
+  //   if (child.placeSelf.alignSelf) {
+  //     switch (child.placeSelf.alignSelf) {
+  //       case 'start': {
+  //         childY = childGridRect.y;
+  //         break;
+  //       }
+  //       case 'center': {
+  //         childY = childGridRect.y + (childGridRect.height - childHeight) / 2;
+  //         break;
+  //       }
+  //       case 'end': {
+  //         childY = childGridRect.y + (childGridRect.height - childHeight);
+  //         break;
+  //       }
+  //       default: {
+  //         break;
+  //       }
+  //     }
+  //   }
+  //   child.rect = {
+  //     x: childX,
+  //     y: childY,
+  //     width: childWidth,
+  //     height: childHeight
+  //   };
+  //   child.parentRect = childGridRect;
+  //   return child;
+  // }
 
-  updateChildRect(
+  getGridChildRect(
     child: GridChildInfo,
-    gridItemRectList: RectInfo[][]
-  ): GridChildInfo {
+    itemRectList?: RectInfo[][]
+  ): RectInfo {
+    const gridItemRectList = itemRectList ?? this.getGridItemRectList();
     const childGridRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: child.gridArea,
       gridRect: this.gridActiveRect,
@@ -322,26 +360,24 @@ export class GridManager {
         }
       }
     }
-    child.rect = {
+    return {
       x: childX,
       y: childY,
       width: childWidth,
       height: childHeight
     };
-    child.parentRect = childGridRect;
-    return child;
   }
 
   needUpdateGridChildren(): boolean {
     let rowAutoNumber = 0;
     this.gridRowInfo.forEach(row => {
-      if (row.unit === SizeUnit.Auto) {
+      if (row.unit === SizeUnit.Auto || row.unit === SizeUnit.Fit) {
         rowAutoNumber += 1;
       }
     });
     let columnAutoNumber = 0;
     this.gridColumnInfo.forEach(column => {
-      if (column.unit === SizeUnit.Auto) {
+      if (column.unit === SizeUnit.Auto || column.unit === SizeUnit.Fit) {
         columnAutoNumber += 1;
       }
     });
@@ -359,7 +395,7 @@ export class GridManager {
     plusOffset: number;
   }[] {
     return list.map((size, index) => {
-      if (size.unit === SizeUnit.Auto) {
+      if (size.unit === SizeUnit.Auto || size.unit === SizeUnit.Fit) {
         return this.getGridAutoOffsetValueByIndex({
           index,
           sizeInfoList: list,
@@ -447,15 +483,5 @@ export class GridManager {
       minusOffset,
       plusOffset
     };
-  }
-
-  private updateGridActiveRect(): void {
-    if (this.#gridRect) {
-      this.gridActiveRect = GridUtils.getActiveRect({
-        rect: this.#gridRect,
-        padding: this.padding,
-        border: this.border
-      });
-    }
   }
 }
