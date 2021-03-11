@@ -14,7 +14,7 @@ import {
   RectInfo,
   SizeInfo
 } from '../../type/common.type';
-import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
+import { GridMappingModel } from '../../model/grid/grid.mapping.model';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
 import { ErrorUtils } from '../../utils/error.utils/error.utils';
 import { GridChildUtils } from '../../utils/grid.utils/grid.child.utils';
@@ -43,14 +43,14 @@ export class ComponentGridManager {
 
   #scale = 1;
 
-  gridMapping: GridMapping;
+  gridMapping: GridMappingModel;
 
   constructor(
     public readonly gap: GridGap,
     public readonly padding: SpacingPadding,
     public readonly border: SpacingPadding
   ) {
-    this.gridMapping = new GridMapping(gap, padding, border, 1, 1);
+    this.gridMapping = new GridMappingModel(gap, padding, border, 1, 1);
   }
 
   setGridCount(params: { row: number; column: number }): ComponentGridManager {

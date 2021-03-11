@@ -9,7 +9,7 @@ import {
   SizeInfo,
   UnsetUnit
 } from '../../type/common.type';
-import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
+import { GridMappingModel } from '../../model/grid/grid.mapping.model';
 import { UISizeUtils } from '../ui.size.utils/ui.size.utils';
 import { GridUtils } from './grid.utils';
 
@@ -24,7 +24,7 @@ export class GridChildUtils {
     gridArea: GridArea;
     rightOffset: number;
     bottomOffset: number;
-    gridMapping: GridMapping;
+    gridMapping: GridMappingModel;
   }): GridChildInfo {
     if (!params.childInfo.rect) return params.childInfo;
     if (params.childInfo.placeSelf.justifySelf) {
@@ -149,7 +149,7 @@ export class GridChildUtils {
   }
 
   static getModifiedChildrenGirdInfo(
-    gridMapping: GridMapping
+    gridMapping: GridMappingModel
   ): GridChildInfo[] {
     const gridItemRectList = gridMapping.getGridItemRectList();
     let margin: {
@@ -209,7 +209,7 @@ export class GridChildUtils {
   }
 
   static adjustChildrenAndResetAutoGridInfo(
-    gridMapping: GridMapping
+    gridMapping: GridMappingModel
   ): GridChildInfo[] {
     const gridItemRectList = gridMapping.getGridItemRectList(false);
     let areaInfo: {
@@ -256,7 +256,7 @@ export class GridChildUtils {
       size: SizeInfo;
       gridArea?: GridArea;
     },
-    gridMapping: GridMapping
+    gridMapping: GridMappingModel
   ): {
     info: GridChildInfo;
     needUpdateGridChildren: boolean;

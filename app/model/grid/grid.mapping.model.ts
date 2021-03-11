@@ -20,7 +20,7 @@ import {
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
 import { UISizeUtils } from '../../utils/ui.size.utils/ui.size.utils';
 
-export class GridMapping {
+export class GridMappingModel {
   #gridRect = {
     x: 0,
     y: 0,
@@ -130,7 +130,7 @@ export class GridMapping {
     return UISizeUtils.convertUISizeToNumber(sizeInfo, params.maxValue);
   }
 
-  setChildrenInfo(childrenInfo: GridChildInfo[]): GridMapping {
+  setChildrenInfo(childrenInfo: GridChildInfo[]): GridMappingModel {
     this.childInfoList.splice(0, this.childInfoList.length);
     childrenInfo.forEach(child => {
       child.rect = this.getGridChildRect(child);

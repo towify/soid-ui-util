@@ -7,7 +7,7 @@ import { LineInfo, RectInfo } from '../../type/common.type';
 import { SignInfo } from '../../type/interact.type';
 import { NumberUtils } from '../number.utils/number.utils';
 import { ErrorUtils } from '../error.utils/error.utils';
-import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
+import { GridMappingModel } from '../../model/grid/grid.mapping.model';
 
 export class GridAssistLineUtils {
   static getAssistLinesAndSignsByActivePoint(
@@ -124,7 +124,7 @@ export class GridAssistLineUtils {
       movingOffsetX: number;
       movingOffsetY: number;
     },
-    gridManager: GridMapping
+    gridManager: GridMappingModel
   ): {
     lines: LineInfo[];
     signs: SignInfo[];

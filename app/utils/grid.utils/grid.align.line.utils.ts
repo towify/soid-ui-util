@@ -4,7 +4,7 @@
  */
 import { LineInfo, RectInfo } from '../../type/common.type';
 import { AlignOffsetInfo } from '../../type/interact.type';
-import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
+import { GridMappingModel } from '../../model/grid/grid.mapping.model';
 
 export class GridAlignLineUtils {
   static getClosestValueInPositionList(params: {
@@ -136,7 +136,7 @@ export class GridAlignLineUtils {
 
   static prepareAlignLine(params: {
     isNeedMiddle: boolean;
-    gridMapping: GridMapping;
+    gridMapping: GridMappingModel;
     movingLayerId: string;
   }): {
     layerCenterList: number[];
