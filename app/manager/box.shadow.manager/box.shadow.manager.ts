@@ -46,20 +46,20 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
       verticalOffset: number;
     }) => void
   ): BoxShadowManager {
-    if (!this.#spinButtonPosition || !this.#rect) return this;
-    const distance = this.#distance ?? this.#radius!;
-    // 比例值: 根据传入的distance，要等比例控制 horizontalOffset 和 verticalOffset 的缩放
-    const scale = distance / this.#radius!;
-    const horizontalOffset = this.#spinButtonPosition.x * scale;
-    const verticalOffset = this.#spinButtonPosition.y * scale;
+    if (!this.#spinButtonPosition || !this.#rect || !this.#distance)
+      return this;
     const resultAngle = BoxShadowManager.getAngle(
       this.#spinButtonPosition.x,
       this.#spinButtonPosition.y
     );
+    const result = this.getHorizontalAndVerticalAndPositionByAngle(
+      resultAngle,
+      this.#distance
+    );
     const parameter = {
       angle: resultAngle,
-      horizontalOffset: parseFloat(horizontalOffset.toFixed(2)),
-      verticalOffset: parseFloat(verticalOffset.toFixed(2))
+      horizontalOffset: result.horizontal,
+      verticalOffset: result.vertical
     };
     hold(parameter);
     return this;
@@ -79,8 +79,7 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     if (!this.#radius) this.#radius = 16;
     const radiusMin = this.#radius - this.#pointRadius - this.#offsetFix;
     const angle = BoxShadowManager.getAngle(horizontal, vertical);
-    const distance =
-      (Math.sqrt(horizontal ** 2 + vertical ** 2) * this.#radius) / radiusMin;
+    const distance = Math.round(Math.sqrt(horizontal ** 2 + vertical ** 2));
     const positionX =
       this.#radius -
       this.#pointRadius +
@@ -92,19 +91,22 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
 
     return {
       angle,
-      positionX,
-      positionY,
-      distance: parseFloat(distance.toFixed(2))
+      positionX: parseFloat(positionX.toFixed(2)),
+      positionY: parseFloat(positionY.toFixed(2)),
+      distance
     };
   }
 
   private static getAngle(horizontal: number, vertical: number): number {
+    if (horizontal === 0 && vertical === 0) {
+      return 0;
+    }
     const cosValue = horizontal / Math.sqrt(horizontal ** 2 + vertical ** 2);
     let currentAngle = (Math.acos(cosValue) * 180) / Math.PI;
     if (vertical > 0) {
       currentAngle = 360 - currentAngle;
     }
-    return parseFloat(currentAngle.toFixed(2));
+    return Math.round(currentAngle);
   }
 
   getHorizontalAndVerticalAndPositionByAngle(
@@ -120,11 +122,8 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     if (!this.#pointRadius) this.#pointRadius = 3;
     if (!this.#radius) this.#radius = 16;
     const radiusMin = this.#radius - this.#pointRadius - this.#offsetFix;
-    const horizontal =
-      (distance * Math.cos((angle * Math.PI) / 180) * radiusMin) / this.#radius;
-    const vertical =
-      (-distance * Math.sin((angle * Math.PI) / 180) * radiusMin) /
-      this.#radius;
+    const horizontal = distance * Math.cos((angle * Math.PI) / 180);
+    const vertical = -distance * Math.sin((angle * Math.PI) / 180);
     const positionX =
       this.#radius -
       this.#pointRadius +
@@ -134,10 +133,10 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
       this.#pointRadius -
       radiusMin * Math.sin((angle * Math.PI) / 180);
     return {
-      horizontal: parseFloat(horizontal.toFixed(2)),
-      vertical: parseFloat(vertical.toFixed(2)),
-      positionX,
-      positionY
+      horizontal: parseFloat(horizontal.toFixed(1)),
+      vertical: parseFloat(vertical.toFixed(1)),
+      positionX: parseFloat(positionX.toFixed(2)),
+      positionY: parseFloat(positionY.toFixed(2))
     };
   }
 }
