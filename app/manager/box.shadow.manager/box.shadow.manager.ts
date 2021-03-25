@@ -137,8 +137,8 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
       this.#pointRadius -
       radiusMin * Math.sin((angle * Math.PI) / 180);
     return {
-      horizontal: parseFloat(horizontal.toFixed(1)),
-      vertical: parseFloat(vertical.toFixed(1)),
+      horizontal: parseFloat(horizontal.toFixed(2)),
+      vertical: parseFloat(vertical.toFixed(2)),
       positionX: parseFloat(positionX.toFixed(2)),
       positionY: parseFloat(positionY.toFixed(2))
     };
