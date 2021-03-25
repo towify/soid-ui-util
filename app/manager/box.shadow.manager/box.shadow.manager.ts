@@ -46,7 +46,11 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
       verticalOffset: number;
     }) => void
   ): BoxShadowManager {
-    if (!this.#spinButtonPosition || !this.#rect || !this.#distance)
+    if (
+      !this.#spinButtonPosition ||
+      !this.#rect ||
+      this.#distance === undefined
+    )
       return this;
     const resultAngle = BoxShadowManager.getAngle(
       this.#spinButtonPosition.x,
