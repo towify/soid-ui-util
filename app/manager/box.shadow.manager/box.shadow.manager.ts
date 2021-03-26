@@ -82,17 +82,17 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     if (!this.#offsetFix) this.#offsetFix = 3;
     if (!this.#pointRadius) this.#pointRadius = 3;
     if (!this.#radius) this.#radius = 16;
-    const radiusMin = this.#radius - this.#pointRadius - this.#offsetFix;
+    const minRadius = this.#radius - this.#pointRadius - this.#offsetFix;
     const angle = BoxShadowManager.getAngle(horizontal, vertical);
     const distance = Math.round(Math.sqrt(horizontal ** 2 + vertical ** 2));
     const positionX =
       this.#radius -
       this.#pointRadius +
-      radiusMin * Math.cos((angle * Math.PI) / 180);
+      minRadius * Math.cos((angle * Math.PI) / 180);
     const positionY =
       this.#radius -
       this.#pointRadius -
-      radiusMin * Math.sin((angle * Math.PI) / 180);
+      minRadius * Math.sin((angle * Math.PI) / 180);
 
     return {
       angle,
@@ -126,17 +126,17 @@ export class BoxShadowManager implements BoxShadowManagerInterface {
     if (!this.#offsetFix) this.#offsetFix = 3;
     if (!this.#pointRadius) this.#pointRadius = 3;
     if (!this.#radius) this.#radius = 16;
-    const radiusMin = this.#radius - this.#pointRadius - this.#offsetFix;
+    const minRadius = this.#radius - this.#pointRadius - this.#offsetFix;
     const horizontal = distance * Math.cos((angle * Math.PI) / 180);
     const vertical = -distance * Math.sin((angle * Math.PI) / 180);
     const positionX =
       this.#radius -
       this.#pointRadius +
-      radiusMin * Math.cos((angle * Math.PI) / 180);
+      minRadius * Math.cos((angle * Math.PI) / 180);
     const positionY =
       this.#radius -
       this.#pointRadius -
-      radiusMin * Math.sin((angle * Math.PI) / 180);
+      minRadius * Math.sin((angle * Math.PI) / 180);
     return {
       horizontal: parseFloat(horizontal.toFixed(2)),
       vertical: parseFloat(vertical.toFixed(2)),
