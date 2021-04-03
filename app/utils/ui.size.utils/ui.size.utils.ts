@@ -15,7 +15,8 @@ export class UISizeUtils {
   }): UISize {
     const originValue = UISizeUtils.convertUISizeToNumber(
       params.origin,
-      params.parentSizeValue
+      params.parentSizeValue,
+      false
     );
     if (
       params.min.unit !== SizeUnit.Auto &&
@@ -24,7 +25,8 @@ export class UISizeUtils {
     ) {
       const minValue = UISizeUtils.convertUISizeToNumber(
         params.min,
-        params.parentSizeValue
+        params.parentSizeValue,
+        false
       );
       if (originValue > minValue) {
         if (
@@ -34,7 +36,8 @@ export class UISizeUtils {
         ) {
           const maxValue = UISizeUtils.convertUISizeToNumber(
             params.max,
-            params.parentSizeValue
+            params.parentSizeValue,
+            false
           );
           if (maxValue < minValue || originValue < maxValue) {
             return params.origin;
@@ -52,7 +55,8 @@ export class UISizeUtils {
     ) {
       const maxValue = UISizeUtils.convertUISizeToNumber(
         params.max,
-        params.parentSizeValue
+        params.parentSizeValue,
+        false
       );
       if (originValue < maxValue) {
         return params.origin;
@@ -62,7 +66,11 @@ export class UISizeUtils {
     return params.origin;
   }
 
-  static convertUISizeToNumber(sizeInfo: UISize, maxValue?: number): number {
+  static convertUISizeToNumber(
+    sizeInfo: UISize,
+    maxValue?: number,
+    isAlert = true
+  ): number {
     let valueNumber = sizeInfo.value;
     if (sizeInfo.unit === SizeUnit.Auto) {
       return 0;
@@ -75,7 +83,7 @@ export class UISizeUtils {
     }
     if (sizeInfo.unit === SizeUnit.Percent) {
       valueNumber = ((maxValue ?? 0) * valueNumber) / 100;
-      if (!maxValue) {
+      if (!maxValue && isAlert) {
         ErrorUtils.GridError(
           'Value unit is percent and parent value is undefined'
         );

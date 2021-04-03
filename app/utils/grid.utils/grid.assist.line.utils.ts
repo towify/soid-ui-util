@@ -6,7 +6,6 @@ import { SizeUnit } from 'towify-editor-common-values';
 import { LineInfo, RectInfo } from '../../type/common.type';
 import { SignInfo } from '../../type/interact.type';
 import { NumberUtils } from '../number.utils/number.utils';
-import { ErrorUtils } from '../error.utils/error.utils';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 
 export class GridAssistLineUtils {
@@ -119,33 +118,12 @@ export class GridAssistLineUtils {
   }
 
   static getAssistLinesAndSigns(
-    movingInfo: {
-      movingId: string;
-      movingOffsetX: number;
-      movingOffsetY: number;
-    },
+    movingRect: RectInfo,
     gridManager: GridMapping
   ): {
     lines: LineInfo[];
     signs: SignInfo[];
   } {
-    const moveChild = gridManager.childInfoList.find(child => {
-      return child.id === movingInfo.movingId;
-    });
-    if (!moveChild) {
-      ErrorUtils.GridError('Moving layer is not find');
-      return {
-        lines: [],
-        signs: []
-      };
-    }
-    const childRect = gridManager.getGridChildRect(moveChild);
-    const movingRect = {
-      x: childRect.x + movingInfo.movingOffsetX,
-      y: childRect.y + movingInfo.movingOffsetY,
-      width: childRect.width,
-      height: childRect.height
-    };
     const gridItemRectList = gridManager.getGridItemRectList();
     const activeAreaInfo = gridManager.getChildGridAreaInfoByRect({
       rect: movingRect,

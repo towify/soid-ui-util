@@ -80,6 +80,34 @@ export {
   PaddingInfo
 };
 
+export type RadialColorGradientSizeType =
+  | 'closest-side'
+  | 'farthest-side'
+  | 'closest-corner'
+  | 'farthest-corner';
+
+export type ColorGradientType = {
+  linear?: {
+    angle: number;
+  };
+  radial?: {
+    left: number;
+    top: number;
+    sizeType: RadialColorGradientSizeType;
+  };
+  shared: {
+    repeat: boolean;
+    colors: {
+      // hex eg: #ff00ff
+      hex: string;
+      // opacity eg: 50
+      opacity: number;
+      // proportion eg: 51
+      percent: number;
+    }[];
+  };
+};
+
 export const DefaultRect = {
   x: 0,
   y: 0,

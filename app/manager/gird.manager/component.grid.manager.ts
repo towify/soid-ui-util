@@ -165,7 +165,7 @@ export class ComponentGridManager {
       lines = this.getNoCountBorderLine(lines);
     }
     if (needScale) {
-      return this.getScaleLine(lines);
+      return GridLineUtils.getScaleLine(lines, this.#scale);
     }
     return lines;
   }
@@ -273,51 +273,16 @@ export class ComponentGridManager {
       gridActiveRect: this.gridMapping.gridActiveRect
     });
     const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns(
-      {
-        movingId: this.#movingLayerId,
-        movingOffsetX: this.#movingOffsetX + alignLineInfo.offset.x,
-        movingOffsetY: this.#movingOffsetY + +alignLineInfo.offset.y
-      },
+      movingRect,
       this.gridMapping
     );
-    const rect = this.gridMapping.gridRect;
-    if (needScale) {
-      assistLineInfo.lines = this.getScaleLine(assistLineInfo.lines);
-      alignLineInfo.lines = this.getScaleLine(alignLineInfo.lines);
-      assistLineInfo.signs = assistLineInfo.signs.map(sign => {
-        return {
-          x: sign.x * this.#scale,
-          y: sign.y * this.#scale,
-          sign: sign.sign
-        };
-      });
-    }
-    return {
-      assistLines: assistLineInfo.lines.map(line => {
-        return {
-          fromX: line.fromX + rect.x,
-          fromY: line.fromY + rect.y,
-          toX: line.toX + rect.x,
-          toY: line.toY + rect.y
-        };
-      }),
-      alignLines: alignLineInfo.lines.map(line => {
-        return {
-          fromX: line.fromX + rect.x,
-          fromY: line.fromY + rect.y,
-          toX: line.toX + rect.x,
-          toY: line.toY + rect.y
-        };
-      }),
-      assistSigns: assistLineInfo.signs.map(sign => {
-        return {
-          x: sign.x + rect.x,
-          y: sign.y + rect.y,
-          sign: sign.sign
-        };
-      }),
-      offset: alignLineInfo.offset
-    };
+    return GridLineUtils.convertAlignAndAssistLineInfo({
+      needScale,
+      scale: this.#scale,
+      alignLineInfo,
+      assistLineInfo,
+      gridMapping: this.gridMapping
+    });
   }
 
   private prepareAlignLine(isNeedMiddle = true): void {
@@ -357,19 +322,8 @@ export class ComponentGridManager {
           height: parseFloat((rect.height * this.#scale).toFixed(1))
         };
       }),
-      lines: this.getScaleLine(areaAndLines.lines)
+      lines: GridLineUtils.getScaleLine(areaAndLines.lines, this.#scale)
     };
-  }
-
-  private getScaleLine(lines: LineInfo[]): LineInfo[] {
-    return lines.map(line => {
-      return {
-        fromX: parseFloat((line.fromX * this.#scale).toFixed(1)),
-        toX: parseFloat((line.toX * this.#scale).toFixed(1)),
-        fromY: parseFloat((line.fromY * this.#scale).toFixed(1)),
-        toY: parseFloat((line.toY * this.#scale).toFixed(1))
-      };
-    });
   }
 
   private getNoCountBorderAreaAndLine(areaAndLines: {
@@ -396,6 +350,52 @@ export class ComponentGridManager {
       line.toY -= this.gridMapping.borderInfo.top;
       line.toX -= this.gridMapping.borderInfo.left;
       return line;
+    });
+  }
+
+  getDropOverAlignAndAssistLineInfo(
+    droppedRect: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    },
+    needScale = false,
+    maxActiveLength = 4
+  ): {
+    assistLines: LineInfo[];
+    assistSigns: SignInfo[];
+    alignLines: LineInfo[];
+    offset: AlignOffsetInfo;
+  } {
+    const layerLinesInfo = GridAlignLineUtils.prepareAlignLine({
+      isNeedMiddle: true,
+      gridMapping: this.gridMapping
+    });
+    const alignLineInfo = GridAlignLineUtils.getAlignLineByMoveRect({
+      rect: droppedRect,
+      middleList: layerLinesInfo.layerMiddleList,
+      centerList: layerLinesInfo.layerCenterList,
+      xList: layerLinesInfo.layerXList,
+      yList: layerLinesInfo.layerYList,
+      offset: maxActiveLength,
+      gridActiveRect: this.gridMapping.gridActiveRect
+    });
+    const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns(
+      {
+        x: droppedRect.x + alignLineInfo.offset.x,
+        y: droppedRect.y + alignLineInfo.offset.y,
+        width: droppedRect.width,
+        height: droppedRect.height
+      },
+      this.gridMapping
+    );
+    return GridLineUtils.convertAlignAndAssistLineInfo({
+      needScale,
+      scale: this.#scale,
+      alignLineInfo,
+      assistLineInfo,
+      gridMapping: this.gridMapping
     });
   }
 }

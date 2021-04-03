@@ -137,7 +137,7 @@ export class GridAlignLineUtils {
   static prepareAlignLine(params: {
     isNeedMiddle: boolean;
     gridMapping: GridMapping;
-    movingLayerId: string;
+    movingLayerId?: string;
   }): {
     layerCenterList: number[];
     layerMiddleList: number[];

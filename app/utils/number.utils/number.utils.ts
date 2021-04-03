@@ -16,4 +16,14 @@ export class NumberUtils {
     }
     return intValue + radix;
   }
+
+  static convertValueInRange(percent: number, max = 100, min = 0): number {
+    if (percent > max) {
+      percent = max;
+    }
+    if (percent < min) {
+      percent = min;
+    }
+    return percent;
+  }
 }

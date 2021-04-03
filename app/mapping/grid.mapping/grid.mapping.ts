@@ -219,81 +219,6 @@ export class GridMapping {
     });
   }
 
-  // updateChildRect(
-  //   child: GridChildInfo,
-  //   gridItemRectList: RectInfo[][]
-  // ): GridChildInfo {
-  //   const childGridRect = GridUtils.convertChildSizeInfoToNumber({
-  //     gridArea: child.gridArea,
-  //     gridRect: this.gridActiveRect,
-  //     gridItemRectList
-  //   });
-  //   const childWidth = this.convertSizeInfoToNumber({
-  //     value: child.size.width,
-  //     max: child.size.maxWidth,
-  //     min: child.size.minWidth,
-  //     maxValue: childGridRect.width
-  //   });
-  //   const childHeight = this.convertSizeInfoToNumber({
-  //     value: child.size.height,
-  //     max: child.size.maxHeight,
-  //     min: child.size.minHeight,
-  //     maxValue: childGridRect.height
-  //   });
-  //   let childX =
-  //     childGridRect.x +
-  //     UISizeUtils.convertUISizeToNumber(child.margin.left, childGridRect.width);
-  //   let childY =
-  //     childGridRect.y +
-  //     UISizeUtils.convertUISizeToNumber(child.margin.top, childGridRect.height);
-  //   if (child.placeSelf.justifySelf) {
-  //     switch (child.placeSelf.justifySelf) {
-  //       case 'start': {
-  //         childX = childGridRect.x;
-  //         break;
-  //       }
-  //       case 'center': {
-  //         childX = childGridRect.x + (childGridRect.width - childWidth) / 2;
-  //         break;
-  //       }
-  //       case 'end': {
-  //         childX = childGridRect.x + (childGridRect.width - childWidth);
-  //         break;
-  //       }
-  //       default: {
-  //         break;
-  //       }
-  //     }
-  //   }
-  //   if (child.placeSelf.alignSelf) {
-  //     switch (child.placeSelf.alignSelf) {
-  //       case 'start': {
-  //         childY = childGridRect.y;
-  //         break;
-  //       }
-  //       case 'center': {
-  //         childY = childGridRect.y + (childGridRect.height - childHeight) / 2;
-  //         break;
-  //       }
-  //       case 'end': {
-  //         childY = childGridRect.y + (childGridRect.height - childHeight);
-  //         break;
-  //       }
-  //       default: {
-  //         break;
-  //       }
-  //     }
-  //   }
-  //   child.rect = {
-  //     x: childX,
-  //     y: childY,
-  //     width: childWidth,
-  //     height: childHeight
-  //   };
-  //   child.parentRect = childGridRect;
-  //   return child;
-  // }
-
   getGridChildRect(
     child: GridChildInfo,
     itemRectList?: RectInfo[][]
@@ -360,6 +285,7 @@ export class GridMapping {
         }
       }
     }
+    child.parentRect = childGridRect;
     return {
       x: childX,
       y: childY,
