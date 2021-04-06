@@ -43,6 +43,8 @@ export class ComponentGridManager {
 
   #scale = 1;
 
+  #gridRect?: RectInfo;
+
   gridMapping: GridMapping;
 
   constructor(
@@ -66,13 +68,25 @@ export class ComponentGridManager {
 
   setGridRect(rect: RectInfo, scale: number = 1): ComponentGridManager {
     this.#scale = scale;
+    this.#gridRect = rect;
     this.gridMapping.gridRect = {
-      x: rect.x,
-      y: rect.y,
-      width: parseFloat((rect.width / scale).toFixed(1)),
-      height: parseFloat((rect.height / scale).toFixed(1))
+      x: this.#gridRect.x,
+      y: this.#gridRect.y,
+      width: parseFloat((this.#gridRect.width / scale).toFixed(1)),
+      height: parseFloat((this.#gridRect.height / scale).toFixed(1))
     };
     return this;
+  }
+
+  getGridRect(): RectInfo {
+    return (
+      this.#gridRect ?? {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+      }
+    );
   }
 
   setChildrenGridInfo(childrenInfo: GridChildInfo[]): ComponentGridManager {
@@ -272,6 +286,8 @@ export class ComponentGridManager {
       offset: maxActiveLength,
       gridActiveRect: this.gridMapping.gridActiveRect
     });
+    movingRect.x += alignLineInfo.offset.x;
+    movingRect.y += alignLineInfo.offset.y;
     const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns(
       movingRect,
       this.gridMapping
