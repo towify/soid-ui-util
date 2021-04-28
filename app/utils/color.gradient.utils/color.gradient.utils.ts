@@ -47,12 +47,12 @@ export class ColorGradientUtils {
     if (positionX === 0 && positionY === 0) {
       return 0;
     }
-    const cosValue = positionX / Math.sqrt(positionX ** 2 + positionY ** 2);
+    const cosValue =
+      (0 - positionY) / Math.sqrt(positionX ** 2 + positionY ** 2);
     let currentAngle = (Math.acos(cosValue) * 180) / Math.PI;
-    if (positionY > 0) {
+    if (positionX < 0) {
       currentAngle = 360 - currentAngle;
     }
-    currentAngle -= 90;
     if (currentAngle < 0) {
       currentAngle += 360;
     }
@@ -69,18 +69,14 @@ export class ColorGradientUtils {
     y: number;
   } {
     const minRadius = params.radius - params.pointRadius - params.offset;
-    let angle = params.angle + 90;
-    if (angle > 360) {
-      angle %= 360;
-    }
     const positionX =
       params.radius -
       params.pointRadius +
-      minRadius * Math.cos((angle * Math.PI) / 180);
+      minRadius * Math.sin((params.angle * Math.PI) / 180);
     const positionY =
       params.radius -
       params.pointRadius -
-      minRadius * Math.sin((angle * Math.PI) / 180);
+      minRadius * Math.cos((params.angle * Math.PI) / 180);
     return {
       x: parseFloat(positionX.toFixed(2)),
       y: parseFloat(positionY.toFixed(2))
