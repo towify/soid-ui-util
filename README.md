@@ -4,19 +4,24 @@
 
 utils for ui render
 
-## Grid Area
+## Grid Service
 
-Use grid Area service to manage grid area.
+Use grid service to manage grid info.
 
 ### Get Dropped GridInfo
 
 After set grid rect / grid row info / grid column info / drop rect, base grid row / column info set dropped info , get dropped grid info
 
 ```typescript
-const gridService = GridService.getInstance();
+const gridService = ComponentGridManager.getInstance();
 const droppedInfo = gridService
   .setWindowSize(1024, 768)
-  .setGridSize(500, 400)
+  .setGridRect({
+    x: 0,
+    y: 0,
+    width: 500,
+    height: 400
+  })
   .setGridRowInfo([
     {
       value: 20,
@@ -67,7 +72,7 @@ if (droppedInfo.needUpdateGridChildren) {
 update child width / height / margin
 
 ```typescript
-const gridService = GridService.getInstance();
+const gridService = ComponentGridManager.getInstance();
 const isNeedUpdateGridChildren = gridService.updateChildInfoAndGetParentGridChildrenUpdateStatus(
   {
     id: 'test',
@@ -100,7 +105,7 @@ if (isNeedUpdateGridChildren) {
 delete child grid
 
 ```typescript
-const gridService = GridService.getInstance();
+const gridService = ComponentGridManager.getInstance();
 const isNeedUpdateGridChildren = gridService.deleteChildByIdAndGetParentGridChildrenUpdateStatus(
   'test'
 );
@@ -115,7 +120,7 @@ if (isNeedUpdateGridChildren) {
 After change grid gap \ grid padding \ children info, you can update children grid info.
 
 ```typescript
-const gridService = GridService.getInstance();
+const gridService = ComponentGridManager.getInstance();
 gridService.setGridGap({ value: 10, unit: 'px' }, { value: 10, unit: 'px' });
 
 const childrenGridInfo = gridService.getModifiedChildrenGirdInfo();
@@ -126,10 +131,15 @@ const childrenGridInfo = gridService.getModifiedChildrenGirdInfo();
 After change grid row / column info , you can adjust children grid info.
 
 ```typescript
-const gridService = GridService.getInstance();
+const gridService = ComponentGridManager.getInstance();
 gridService
   .setWindowSize(1024, 768)
-  .setGridSize(500, 400)
+  .setGridRect({
+    x: 0,
+    y: 0,
+    width: 500,
+    height: 400
+  })
   .setGridCount(2, 2)
   .setChildrenGridInfo([
     {
@@ -173,10 +183,15 @@ gridService
 If you want draw grid lines, you can get grid lines coordinates(eg: { fromX: 0; fromY: 0; toX: 100; toY: 0 }) to draw grid line
 
 ```typescript
-const gridService = GridService.getInstance();
+const gridService = ComponentGridManager.getInstance();
 gridService
   .setWindowSize(1024, 768)
-  .setGridSize(500, 400)
+  .setGridRect({
+    x: 0,
+    y: 0,
+    width: 500,
+    height: 400
+  })
   .setGridRowInfo([
     {
       value: 20,
@@ -221,10 +236,15 @@ const gridLineList = gridService.getGridLines();
 If you want draw grid gap area and lines, you can get grid gap area rects and lines coordinates(eg: { fromX: 0; fromY: 0; toX: 100; toY: 0 })
 
 ```typescript
-const gridService = GridService.getInstance();
+const gridService = ComponentGridManager.getInstance();
 gridService
   .setWindowSize(1024, 768)
-  .setGridSize(500, 400)
+  .setGridRect({
+    x: 0,
+    y: 0,
+    width: 500,
+    height: 400
+  })
   .setGridRowInfo([
     {
       value: 20,
@@ -274,10 +294,15 @@ const gridGapArea = gridService.getGridGapAreaAndLines(5).area;
 If you want draw grid gap area and lines, you can get grid gap area rects and lines coordinates(eg: { fromX: 0; fromY: 0; toX: 100; toY: 0 })
 
 ```typescript
-const gridService = GridService.getInstance();
+const gridService = ComponentGridManager.getInstance();
 gridService
   .setWindowSize(1024, 768)
-  .setGridSize(500, 400)
+  .setGridRect({
+    x: 0,
+    y: 0,
+    width: 500,
+    height: 400
+  })
   .setGridRowInfo([
     {
       value: 20,
@@ -338,4 +363,77 @@ const gridPaddingArea = gridService.getGridPaddingAreaAndLines(5).area;
           [attr.height]="paddingRect.height"
           [attr.fill]="'green'"
           fill-opacity="0.4"></rect>
+```
+
+### Assist Line And Align Line
+
+```typescript
+const moveX = 100;
+const moveY = 100;
+const gridService = ComponentGridManager.getInstance();
+gridService.startMovingChildById('testing');
+gridService.movingChild({
+  x: moveX,
+  y: moveY
+});
+
+const alignAndAssistLineInfo = gridService.getAlignAndAssistLineInfo();
+const { alignLines } = alignAndAssistLineInfo;
+const { assistLines } = alignAndAssistLineInfo;
+const { assistSigns } = alignAndAssistLineInfo;
+const { offset } = alignAndAssistLineInfo;
+```
+
+```HTML
+// draw area and line in angular eg:
+<line *ngFor="let line of alignLines"
+            [attr.x1]="line.fromX"
+            [attr.x2]="line.toX"
+            [attr.y1]="line.fromY"
+            [attr.y2]="line.toY"
+            [attr.stroke]="'red'"
+            [attr.stroke-width]="1"
+            [attr.stroke-dasharray]="'3, 2'"></line>
+
+<line *ngFor="let line of assistLines"
+            [attr.x1]="line.fromX"
+            [attr.x2]="line.toX"
+            [attr.y1]="line.fromY"
+            [attr.y2]="line.toY"
+            [attr.stroke]="'white'"
+            [attr.stroke-width]="1"
+            [attr.stroke-dasharray]="'3, 2'"></line>
+
+<text *ngFor="let sign of assistSigns"
+            text-anchor="middle"
+            [attr.stroke]="'white'"
+            [attr.x]="sign.x"
+            [attr.y]="sign.y"
+            [attr.font-size]="10">{{sign.sign}}</text>
+```
+
+## Operator Service
+
+Use operator service to manage you handle
+
+```typescript
+const operatorService = OperatorService.getInstance();
+operatorService.minDistance = 10;
+operatorService
+  .setPageContainerRectList([
+    {
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100
+    }
+  ])
+  .setParentRect({
+    x: 50,
+    y: 50,
+    width: 100,
+    height: 100
+  })
+  .setOperatorSize(50, 20);
+const operatorRect = operatorService.getOperatorRect();
 ```

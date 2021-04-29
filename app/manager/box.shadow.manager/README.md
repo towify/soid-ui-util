@@ -66,7 +66,6 @@ box.shadow.manager.ts 中的方法 getAngleAndPositionByHorizontalAndVertical：
 ```
 示例：
 const res2 = manager.getAngleAndPositionByHorizontalAndVertical(9, 2);
-console.log('获取angle , position :', res2);
 
 ```
 

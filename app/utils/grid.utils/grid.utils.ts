@@ -2,15 +2,70 @@
  * @author allen
  * @data 2020/11/18 12:12
  */
-import { GridArea, Mark, SizeUnit, UISize } from 'towify-editor-common-values';
-import { RectInfo } from '../../type/common.type';
+import {
+  GridArea,
+  SizeUnit,
+  SpacingPadding,
+  UISize
+} from 'towify-editor-common-values';
+import { PaddingInfo, RectInfo } from '../../type/common.type';
 import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';
+import { UISizeUtils } from '../ui.size.utils/ui.size.utils';
 
 export class GridUtils {
-  static AutoNumber = Mark.Auto;
+  static getGridAreaAutoNumber(params: {
+    start: number;
+    end: number;
+    sizeInfoList: UISize[];
+  }): number {
+    let startIndex = params.start;
+    let autoNumber = 0;
+    for (startIndex; startIndex < params.end; startIndex += 1) {
+      if (startIndex < params.sizeInfoList.length && startIndex >= 0) {
+        if (
+          params.sizeInfoList[startIndex].unit === SizeUnit.Auto ||
+          params.sizeInfoList[startIndex].unit === SizeUnit.Fit
+        ) {
+          autoNumber += 1;
+        }
+      }
+    }
+    return autoNumber;
+  }
 
-  static NotSetNumber = Mark.Unset;
+  static getChildOffValueInGridAutoItem(params: {
+    start: number;
+    end: number;
+    sizeValue: UISize;
+    marginMax: UISize;
+    marginMin: UISize;
+    sizeInfoList: UISize[];
+  }): number {
+    let totalValue = 0;
+    const autoNumber = GridUtils.getGridAreaAutoNumber(params);
+    totalValue += UISizeUtils.convertUISizeToNumber(params.sizeValue);
+    totalValue += UISizeUtils.convertUISizeToNumber(params.marginMin);
+    totalValue += UISizeUtils.convertUISizeToNumber(params.marginMax);
+    let startIndex = params.start;
+    for (startIndex; startIndex < params.end; startIndex += 1) {
+      if (startIndex < params.sizeInfoList.length && startIndex >= 0) {
+        if (
+          params.sizeInfoList[startIndex].unit !== SizeUnit.Auto &&
+          params.sizeInfoList[startIndex].unit !== SizeUnit.Unset &&
+          params.sizeInfoList[startIndex].unit !== SizeUnit.Fit
+        ) {
+          totalValue -= UISizeUtils.convertUISizeToNumber(
+            params.sizeInfoList[startIndex]
+          );
+        }
+      }
+    }
+    if (autoNumber > 0 && totalValue > 0) {
+      return parseFloat((totalValue / autoNumber).toFixed(2));
+    }
+    return 0;
+  }
 
   static checkPointIsInRect(
     point: { x: number; y: number },
@@ -21,73 +76,8 @@ export class GridUtils {
     return checkXIn && checkYIn;
   }
 
-  static convertNumberToSizeInfo(params: {
-    valueNumber: number;
-    unit: SizeUnit;
-    windowSize?: { width: number; height: number };
-    maxValue?: number;
-  }): UISize {
-    let value = params.valueNumber;
-    if (params.unit === SizeUnit.VW) {
-      value = (params.valueNumber / (params.windowSize?.width ?? 1)) * 100;
-      if (!params.windowSize?.width) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
-    if (params.unit === SizeUnit.VH) {
-      value = (params.valueNumber / (params.windowSize?.height ?? 1)) * 100;
-      if (!params.windowSize?.height) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
-    if (params.unit === SizeUnit.Percent) {
-      value = (params.valueNumber / (params.maxValue ?? 1)) * 100;
-    }
-    if (params.unit === SizeUnit.PX) {
-      return {
-        value: NumberUtils.parseViewNumber(value),
-        unit: params.unit
-      };
-    }
-    return {
-      value: parseFloat(value.toFixed(1)),
-      unit: params.unit
-    };
-  }
-
-  static convertSizeInfoToNumber(params: {
-    sizeInfo: UISize;
-    windowSize?: { width: number; height: number };
-    maxValue?: number;
-  }): number {
-    let valueNumber = params.sizeInfo.value;
-    if (valueNumber === GridUtils.AutoNumber) {
-      return 0;
-    }
-    if (valueNumber === GridUtils.NotSetNumber) {
-      return 0;
-    }
-    if (params.sizeInfo.unit === 'vw') {
-      valueNumber = ((params.windowSize?.width ?? 0) * valueNumber) / 100;
-      if (!params.windowSize?.width) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
-    if (params.sizeInfo.unit === 'vh') {
-      valueNumber = ((params.windowSize?.height ?? 0) * valueNumber) / 100;
-      if (!params.windowSize?.height) {
-        ErrorUtils.GridError('Window size is undefined');
-      }
-    }
-    if (params.sizeInfo.unit === '%') {
-      valueNumber = ((params.maxValue ?? 0) * valueNumber) / 100;
-    }
-    return valueNumber;
-  }
-
   static getGridRowOrColumnItemValues(params: {
     sizeInfoList: UISize[];
-    windowSize?: { width: number; height: number };
     maxValue?: number;
     autoOffsetList?: {
       minusOffsetId: string;
@@ -100,16 +90,15 @@ export class GridUtils {
     let isAuto = false;
     const valueList: number[] = new Array(params.sizeInfoList.length);
     params.sizeInfoList.forEach((value, index) => {
-      isAuto = value.value === GridUtils.AutoNumber;
+      isAuto = value.unit === SizeUnit.Auto || value.unit === SizeUnit.Fit;
       if (isAuto) {
         valueList[index] = 0;
         autoNumber += 1;
       } else {
-        valueList[index] = GridUtils.convertSizeInfoToNumber({
-          sizeInfo: value,
-          maxValue: params.maxValue,
-          windowSize: params.windowSize
-        });
+        valueList[index] = UISizeUtils.convertUISizeToNumber(
+          value,
+          params.maxValue
+        );
       }
     });
     valueList.forEach(value => {
@@ -122,7 +111,7 @@ export class GridUtils {
         }
         const autoValue = spareValue / autoNumber;
         params.sizeInfoList.forEach((value, index) => {
-          isAuto = value.value === GridUtils.AutoNumber;
+          isAuto = value.unit === SizeUnit.Auto || value.unit === SizeUnit.Fit;
           if (isAuto) {
             valueList[index] = autoValue;
           }
@@ -222,6 +211,12 @@ export class GridUtils {
       width: 0,
       height: 0
     };
+    if (
+      params.gridItemRectList.length === 0 ||
+      params.gridItemRectList[0].length === 0
+    ) {
+      return childGridRect;
+    }
     if (rowStart < 0) {
       childGridRect.y = params.gridItemRectList[0][0].y;
     } else if (rowStart >= params.gridItemRectList.length) {
@@ -246,8 +241,14 @@ export class GridUtils {
       childGridRect.height =
         maxRowItem[0].y + maxRowItem[0].height - childGridRect.y;
     } else if (rowEnd < params.gridItemRectList.length) {
+      let rowIndex = rowEnd - 1;
+      if (rowIndex < 0) {
+        rowIndex = 0;
+      }
       childGridRect.height =
-        params.gridItemRectList[rowEnd][0].y - childGridRect.y;
+        params.gridItemRectList[rowIndex][0].y +
+        params.gridItemRectList[rowIndex][0].height -
+        childGridRect.y;
     } else {
       childGridRect.height =
         params.gridRect.y + params.gridRect.height - childGridRect.y;
@@ -258,8 +259,14 @@ export class GridUtils {
       childGridRect.width =
         maxColumnItem.x + maxColumnItem.width - childGridRect.x;
     } else if (columnEnd < params.gridItemRectList[0].length) {
+      let columnIndex = columnEnd - 1;
+      if (columnEnd <= 0) {
+        columnIndex = 0;
+      }
       childGridRect.width =
-        params.gridItemRectList[0][columnEnd].x - childGridRect.x;
+        params.gridItemRectList[0][columnIndex].x +
+        params.gridItemRectList[0][columnIndex].width -
+        childGridRect.x;
     } else {
       childGridRect.width =
         params.gridRect.x + params.gridRect.width - childGridRect.x;
@@ -279,10 +286,10 @@ export class GridUtils {
     rowGap: number;
     columnGap: number;
   }): {
-      gridArea: GridArea;
-      marginLeft: number;
-      marginTop: number;
-    } {
+    gridArea: GridArea;
+    marginLeft: number;
+    marginTop: number;
+  } {
     const maxWidth = params.rect.x + params.rect.width;
     const maxHeight = params.rect.y + params.rect.height;
     const rowLength = params.gridItemRectList.length;
@@ -362,12 +369,7 @@ export class GridUtils {
     }
     params.gridItemRectList.forEach((rowItem, rowIndex) => {
       rowItem.forEach((gridItemRect, columnIndex) => {
-        const activeRect = {
-          x: gridItemRect.x,
-          y: gridItemRect.y,
-          width: gridItemRect.width,
-          height: gridItemRect.height
-        };
+        const activeRect = { ...gridItemRect };
         if (columnIndex < columnLength - 1) {
           activeRect.width += params.columnGap;
         }
@@ -396,7 +398,8 @@ export class GridUtils {
           GridUtils.checkPointIsInRect(
             { x: activeRect.x, y: maxHeight },
             activeRect
-          )
+          ) &&
+          maxHeight !== activeRect.y
         ) {
           rowEnd = rowIndex + 2;
         }
@@ -404,7 +407,8 @@ export class GridUtils {
           GridUtils.checkPointIsInRect(
             { x: maxWidth, y: activeRect.y },
             activeRect
-          )
+          ) &&
+          maxWidth !== activeRect.x
         ) {
           columnEnd = columnIndex + 2;
         }
@@ -417,29 +421,86 @@ export class GridUtils {
     };
   }
 
-  static getGridMarginInfoByRect(params: {
+  static getChildGridMarginInfoByRect(params: {
     rect: RectInfo;
     gridArea: GridArea;
     gridItemRectList: RectInfo[][];
     rowGap: number;
     columnGap: number;
   }): {
-      marginLeft: number;
-      marginTop: number;
-    } {
+    marginLeft: number;
+    marginTop: number;
+  } {
     const rowStart = params.gridArea.rowStart - 1;
     const columnStart = params.gridArea.columnStart - 1;
     let marginLeft = params.rect.x;
     let marginTop = params.rect.y;
     if (rowStart < params.gridItemRectList.length) {
-      marginTop = params.rect.y - params.gridItemRectList[rowStart][0].y;
+      marginTop =
+        params.rect.y -
+        params.gridItemRectList[rowStart > 0 ? rowStart : 0][0].y;
     }
     if (columnStart < params.gridItemRectList[0].length) {
-      marginLeft = params.rect.x - params.gridItemRectList[0][columnStart].x;
+      marginLeft =
+        params.rect.x -
+        params.gridItemRectList[0][columnStart > 0 ? columnStart : 0].x;
     }
     return {
       marginLeft: NumberUtils.parseViewNumber(marginLeft),
       marginTop: NumberUtils.parseViewNumber(marginTop)
+    };
+  }
+
+  static getActiveRect(params: {
+    rect: RectInfo;
+    padding: PaddingInfo;
+    border: PaddingInfo;
+  }): RectInfo {
+    return {
+      x: params.padding.left + params.border.left,
+      y: params.padding.top + params.border.top,
+      width:
+        params.rect.width -
+        params.padding.left -
+        params.padding.right -
+        params.border.left -
+        params.border.right,
+      height:
+        params.rect.height -
+        params.padding.top -
+        params.padding.bottom -
+        params.border.top -
+        params.border.bottom
+    };
+  }
+
+  static convertOffsetValue(
+    offset: SpacingPadding,
+    gridRect?: RectInfo
+  ): {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+  } {
+    const left = UISizeUtils.convertUISizeToNumber(
+      offset.left,
+      gridRect?.width
+    );
+    const right = UISizeUtils.convertUISizeToNumber(
+      offset.right,
+      gridRect?.width
+    );
+    const top = UISizeUtils.convertUISizeToNumber(offset.top, gridRect?.height);
+    const bottom = UISizeUtils.convertUISizeToNumber(
+      offset.bottom,
+      gridRect?.height
+    );
+    return {
+      left,
+      right,
+      top,
+      bottom
     };
   }
 }

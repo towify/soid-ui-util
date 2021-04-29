@@ -2,7 +2,9 @@
  * @author allen
  * @data 2020/11/23 23:02
  */
-import { RectInfo } from '../../type/common.type';
+import { LineInfo, RectInfo } from '../../type/common.type';
+import { AlignOffsetInfo, SignInfo } from '../../type/interact.type';
+import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 
 enum GridLineType {
   Horizontal = 'horizontal',
@@ -134,9 +136,9 @@ export class GridLineUtils {
     gridItemRectList: RectInfo[][];
     lineSpace: number;
   }): {
-      area: RectInfo[];
-      lines: { fromX: number; fromY: number; toX: number; toY: number }[];
-    } {
+    area: RectInfo[];
+    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
+  } {
     let columnGapArea: RectInfo[] = [];
     let rowGapArea: RectInfo[] = [];
     let columnIndex = 1;
@@ -229,9 +231,9 @@ export class GridLineUtils {
     };
     lineSpace: number;
   }): {
-      area: RectInfo[];
-      lines: { fromX: number; fromY: number; toX: number; toY: number }[];
-    } {
+    area: RectInfo[];
+    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
+  } {
     let columnPaddingArea: RectInfo[] = [];
     let rowPaddingArea: RectInfo[] = [];
     if (params.gridPadding.left > 0) {
@@ -390,5 +392,80 @@ export class GridLineUtils {
       lineArray.push(position);
     }
     return lineArray;
+  }
+
+  static convertAlignAndAssistLineInfo(params: {
+    needScale: boolean;
+    scale: number;
+    alignLineInfo: {
+      lines: LineInfo[];
+      offset: AlignOffsetInfo;
+    };
+    assistLineInfo: {
+      lines: LineInfo[];
+      signs: SignInfo[];
+    };
+    gridMapping: GridMapping;
+  }): {
+    assistLines: LineInfo[];
+    assistSigns: SignInfo[];
+    alignLines: LineInfo[];
+    offset: AlignOffsetInfo;
+  } {
+    const rect = params.gridMapping.gridRect;
+    if (params.needScale) {
+      params.assistLineInfo.lines = GridLineUtils.getScaleLine(
+        params.assistLineInfo.lines,
+        params.scale
+      );
+      params.alignLineInfo.lines = GridLineUtils.getScaleLine(
+        params.alignLineInfo.lines,
+        params.scale
+      );
+      params.assistLineInfo.signs = params.assistLineInfo.signs.map(sign => {
+        return {
+          x: sign.x * params.scale,
+          y: sign.y * params.scale,
+          sign: sign.sign
+        };
+      });
+    }
+    return {
+      assistLines: params.assistLineInfo.lines.map(line => {
+        return {
+          fromX: line.fromX + rect.x,
+          fromY: line.fromY + rect.y,
+          toX: line.toX + rect.x,
+          toY: line.toY + rect.y
+        };
+      }),
+      alignLines: params.alignLineInfo.lines.map(line => {
+        return {
+          fromX: line.fromX + rect.x,
+          fromY: line.fromY + rect.y,
+          toX: line.toX + rect.x,
+          toY: line.toY + rect.y
+        };
+      }),
+      assistSigns: params.assistLineInfo.signs.map(sign => {
+        return {
+          x: sign.x + rect.x,
+          y: sign.y + rect.y,
+          sign: sign.sign
+        };
+      }),
+      offset: params.alignLineInfo.offset
+    };
+  }
+
+  static getScaleLine(lines: LineInfo[], scale: number): LineInfo[] {
+    return lines.map(line => {
+      return {
+        fromX: parseFloat((line.fromX * scale).toFixed(1)),
+        toX: parseFloat((line.toX * scale).toFixed(1)),
+        fromY: parseFloat((line.fromY * scale).toFixed(1)),
+        toY: parseFloat((line.toY * scale).toFixed(1))
+      };
+    });
   }
 }
