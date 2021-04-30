@@ -1,8 +1,42 @@
+[TOC]
+
 # soid-ui-util
 
 ## Description
 
 utils for ui render
+
+- Grid
+- Shadow
+- Color
+- Operate
+- ColorGradientUtils
+- Size
+- Number
+
+## Install
+
+This project uses `node` and `npm`.Go check them out if you don`t have them locally installed.
+
+```
+npm install soid-ui-util
+```
+
+## Usage
+
+### Grid
+
+### Shadow
+
+### Color
+
+### Operate
+
+### ColorGradientUtils
+
+### Size
+
+### Number
 
 ## Grid Service
 
