@@ -8,7 +8,7 @@ utils for ui render
 
 - Grid
 - Shadow
-- Color
+- Color 颜色值管理
 - Operate
 - ColorGradientUtils
 - Size
@@ -24,19 +24,21 @@ npm install soid-ui-util
 
 ## Usage
 
-### Grid
+### 1.Grid
 
-### Shadow
+### 2.Shadow
 
-### Color
+### 3.Color
 
-### Operate
+颜色值管理
 
-### ColorGradientUtils
+### 4.Operate
 
-### Size
+### 5.ColorGradientUtils
 
-### Number
+### 6.Size
+
+### 7.Number
 
 ## Grid Service
 
