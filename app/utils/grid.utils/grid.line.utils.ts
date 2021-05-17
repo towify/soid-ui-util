@@ -395,8 +395,6 @@ export class GridLineUtils {
   }
 
   static convertAlignAndAssistLineInfo(params: {
-    needScale: boolean;
-    scale: number;
     alignLineInfo: {
       lines: LineInfo[];
       offset: AlignOffsetInfo;
@@ -413,23 +411,6 @@ export class GridLineUtils {
     offset: AlignOffsetInfo;
   } {
     const rect = params.gridMapping.gridRect;
-    if (params.needScale) {
-      params.assistLineInfo.lines = GridLineUtils.getScaleLine(
-        params.assistLineInfo.lines,
-        params.scale
-      );
-      params.alignLineInfo.lines = GridLineUtils.getScaleLine(
-        params.alignLineInfo.lines,
-        params.scale
-      );
-      params.assistLineInfo.signs = params.assistLineInfo.signs.map(sign => {
-        return {
-          x: sign.x * params.scale,
-          y: sign.y * params.scale,
-          sign: sign.sign
-        };
-      });
-    }
     return {
       assistLines: params.assistLineInfo.lines.map(line => {
         return {
@@ -456,16 +437,5 @@ export class GridLineUtils {
       }),
       offset: params.alignLineInfo.offset
     };
-  }
-
-  static getScaleLine(lines: LineInfo[], scale: number): LineInfo[] {
-    return lines.map(line => {
-      return {
-        fromX: parseFloat((line.fromX * scale).toFixed(1)),
-        toX: parseFloat((line.toX * scale).toFixed(1)),
-        fromY: parseFloat((line.fromY * scale).toFixed(1)),
-        toY: parseFloat((line.toY * scale).toFixed(1))
-      };
-    });
   }
 }

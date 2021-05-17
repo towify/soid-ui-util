@@ -41,8 +41,6 @@ export class ComponentGridManager {
 
   #layerMiddleList: number[] = [];
 
-  #scale = 1;
-
   #gridRect?: RectInfo;
 
   gridMapping: GridMapping;
@@ -66,15 +64,9 @@ export class ComponentGridManager {
     return this;
   }
 
-  setGridRect(rect: RectInfo, scale: number = 1): ComponentGridManager {
-    this.#scale = scale;
+  setGridRect(rect: RectInfo): ComponentGridManager {
     this.#gridRect = rect;
-    this.gridMapping.gridRect = {
-      x: this.#gridRect.x,
-      y: this.#gridRect.y,
-      width: parseFloat((this.#gridRect.width / scale).toFixed(1)),
-      height: parseFloat((this.#gridRect.height / scale).toFixed(1))
-    };
+    this.gridMapping.gridRect = rect;
     return this;
   }
 
@@ -171,23 +163,19 @@ export class ComponentGridManager {
     return gridChildList;
   }
 
-  getGridLines(needBorder = false, needScale = false): LineInfo[] {
+  getGridLines(needBorder = false): LineInfo[] {
     let lines = GridLineUtils.getGridLineList(
       this.gridMapping.getGridItemRectList()
     );
     if (!needBorder) {
       lines = this.getNoCountBorderLine(lines);
     }
-    if (needScale) {
-      return GridLineUtils.getScaleLine(lines, this.#scale);
-    }
     return lines;
   }
 
   getGridGapAreaAndLines(
     lineSpace: number,
-    needBorder = false,
-    needScale = false
+    needBorder = false
   ): {
     area: RectInfo[];
     lines: LineInfo[];
@@ -199,16 +187,12 @@ export class ComponentGridManager {
     if (!needBorder) {
       areaAndLines = this.getNoCountBorderAreaAndLine(areaAndLines);
     }
-    if (needScale) {
-      return this.getScaleAreaAndLine(areaAndLines);
-    }
     return areaAndLines;
   }
 
   getGridPaddingAreaAndLines(
     lineSpace: number,
-    needBorder = false,
-    needScale = false
+    needBorder = false
   ): {
     area: RectInfo[];
     lines: LineInfo[];
@@ -221,9 +205,6 @@ export class ComponentGridManager {
     });
     if (!needBorder) {
       areaAndLines = this.getNoCountBorderAreaAndLine(areaAndLines);
-    }
-    if (needScale) {
-      return this.getScaleAreaAndLine(areaAndLines);
     }
     return areaAndLines;
   }
@@ -250,7 +231,6 @@ export class ComponentGridManager {
   }
 
   getAlignAndAssistLineInfo(
-    needScale = false,
     maxActiveLength: number = 4
   ): {
     assistLines: LineInfo[];
@@ -293,8 +273,6 @@ export class ComponentGridManager {
       this.gridMapping
     );
     return GridLineUtils.convertAlignAndAssistLineInfo({
-      needScale,
-      scale: this.#scale,
       alignLineInfo,
       assistLineInfo,
       gridMapping: this.gridMapping
@@ -320,26 +298,6 @@ export class ComponentGridManager {
     this.#layerYList = [];
     this.#layerCenterList = [];
     this.#layerMiddleList = [];
-  }
-
-  private getScaleAreaAndLine(areaAndLines: {
-    area: RectInfo[];
-    lines: LineInfo[];
-  }): {
-    area: RectInfo[];
-    lines: LineInfo[];
-  } {
-    return {
-      area: areaAndLines.area.map(rect => {
-        return {
-          x: parseFloat((rect.x * this.#scale).toFixed(1)),
-          y: parseFloat((rect.y * this.#scale).toFixed(1)),
-          width: parseFloat((rect.width * this.#scale).toFixed(1)),
-          height: parseFloat((rect.height * this.#scale).toFixed(1))
-        };
-      }),
-      lines: GridLineUtils.getScaleLine(areaAndLines.lines, this.#scale)
-    };
   }
 
   private getNoCountBorderAreaAndLine(areaAndLines: {
@@ -376,7 +334,6 @@ export class ComponentGridManager {
       width: number;
       height: number;
     },
-    needScale = false,
     maxActiveLength = 4
   ): {
     assistLines: LineInfo[];
@@ -407,8 +364,6 @@ export class ComponentGridManager {
       this.gridMapping
     );
     return GridLineUtils.convertAlignAndAssistLineInfo({
-      needScale,
-      scale: this.#scale,
       alignLineInfo,
       assistLineInfo,
       gridMapping: this.gridMapping
