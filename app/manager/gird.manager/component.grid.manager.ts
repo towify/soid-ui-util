@@ -118,6 +118,7 @@ export class ComponentGridManager {
       childInfo => childInfo.id === child.id
     );
     if (updateChildInfo) {
+      updateChildInfo.isFullParent = child.isFullParent;
       updateChildInfo.gridArea = child.gridArea;
       updateChildInfo.margin = child.margin;
       updateChildInfo.size = child.size;
