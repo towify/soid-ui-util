@@ -241,20 +241,23 @@ export class GridMapping {
       min: child.size.minHeight,
       maxValue: childGridRect.height
     });
-    let childX =
-      childGridRect.x +
-      UISizeUtils.convertUISizeToNumber(child.margin.left, childGridRect.width);
-    let childY =
-      childGridRect.y +
-      UISizeUtils.convertUISizeToNumber(child.margin.top, childGridRect.height);
+    const marginLeftValue = UISizeUtils.convertUISizeToNumber(
+      child.margin.left,
+      childGridRect.width
+    );
+    const marginTopValue = UISizeUtils.convertUISizeToNumber(
+      child.margin.top,
+      childGridRect.height
+    );
+    let childX = childGridRect.x + marginLeftValue;
+    let childY = childGridRect.y + marginTopValue;
     if (child.placeSelf.justifySelf) {
       switch (child.placeSelf.justifySelf) {
-        case 'start': {
-          childX = childGridRect.x;
-          break;
-        }
         case 'center': {
-          childX = childGridRect.x + (childGridRect.width - childWidth) / 2;
+          childX =
+            childGridRect.x +
+            (childGridRect.width - childWidth) / 2 +
+            marginLeftValue / 2;
           break;
         }
         case 'end': {
@@ -262,18 +265,18 @@ export class GridMapping {
           break;
         }
         default: {
+          childX = childGridRect.x + marginLeftValue;
           break;
         }
       }
     }
     if (child.placeSelf.alignSelf) {
       switch (child.placeSelf.alignSelf) {
-        case 'start': {
-          childY = childGridRect.y;
-          break;
-        }
         case 'center': {
-          childY = childGridRect.y + (childGridRect.height - childHeight) / 2;
+          childY =
+            childGridRect.y +
+            (childGridRect.height - childHeight) / 2 +
+            marginTopValue / 2;
           break;
         }
         case 'end': {
@@ -281,6 +284,7 @@ export class GridMapping {
           break;
         }
         default: {
+          childY = childGridRect.y + marginTopValue;
           break;
         }
       }
