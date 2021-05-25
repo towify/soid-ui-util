@@ -12,6 +12,7 @@ import {
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 import { UISizeUtils } from '../ui.size.utils/ui.size.utils';
 import { GridUtils } from './grid.utils';
+import { NumberUtils } from '../number.utils/number.utils';
 
 export class GridChildUtils {
   static adjustChildGridInfo(params: {
@@ -299,39 +300,51 @@ export class GridChildUtils {
     let marginRightUnit: SizeUnit = SizeUnit.PX;
     let marginTopUnit: SizeUnit = SizeUnit.PX;
     let marginBottomUnit: SizeUnit = SizeUnit.PX;
-    if (droppedRect.x === droppedParentRect.x) {
+    if (
+      NumberUtils.parseViewNumber(droppedRect.x) ===
+      NumberUtils.parseViewNumber(droppedParentRect.x)
+    ) {
       justifySelf = 'start';
       marginLeftUnit = SizeUnit.Unset;
       marginRightUnit = SizeUnit.Unset;
     } else if (
-      droppedRect.x + droppedRect.width / 2 ===
-      droppedParentRect.x + droppedParentRect.width / 2
+      NumberUtils.parseViewNumber(droppedRect.x + droppedRect.width / 2) ===
+      NumberUtils.parseViewNumber(
+        droppedParentRect.x + droppedParentRect.width / 2
+      )
     ) {
       justifySelf = 'center';
       marginLeftUnit = SizeUnit.Unset;
       marginRightUnit = SizeUnit.Unset;
     } else if (
-      droppedRect.x + droppedRect.width ===
-      droppedParentRect.x + droppedParentRect.width
+      NumberUtils.parseViewNumber(droppedRect.x + droppedRect.width) ===
+      NumberUtils.parseViewNumber(droppedParentRect.x + droppedParentRect.width)
     ) {
       justifySelf = 'end';
       marginLeftUnit = SizeUnit.Unset;
       marginRightUnit = SizeUnit.Unset;
     }
-    if (droppedRect.y === droppedParentRect.y) {
+    if (
+      NumberUtils.parseViewNumber(droppedRect.y) ===
+      NumberUtils.parseViewNumber(droppedParentRect.y)
+    ) {
       alignSelf = 'start';
       marginTopUnit = SizeUnit.Unset;
       marginBottomUnit = SizeUnit.Unset;
     } else if (
-      droppedRect.y + droppedRect.height / 2 ===
-      droppedParentRect.y + droppedParentRect.height / 2
+      NumberUtils.parseViewNumber(droppedRect.y + droppedRect.height / 2) ===
+      NumberUtils.parseViewNumber(
+        droppedParentRect.y + droppedParentRect.height / 2
+      )
     ) {
       alignSelf = 'center';
       marginTopUnit = SizeUnit.Unset;
       marginBottomUnit = SizeUnit.Unset;
     } else if (
-      droppedRect.y + droppedRect.height ===
-      droppedParentRect.y + droppedParentRect.height
+      NumberUtils.parseViewNumber(droppedRect.y + droppedRect.height) ===
+      NumberUtils.parseViewNumber(
+        droppedParentRect.y + droppedParentRect.height
+      )
     ) {
       alignSelf = 'end';
       marginTopUnit = SizeUnit.Unset;
