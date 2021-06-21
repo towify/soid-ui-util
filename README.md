@@ -1,8 +1,59 @@
+[TOC]
+
 # soid-ui-util
 
 ## Description
 
 utils for ui render
+
+- Color 颜色值管理
+
+* Grid
+* Shadow
+* Operate
+* ColorGradientUtils
+* Size
+* Number
+
+## Install
+
+This project uses `node` and `npm`.Go check them out if you don`t have them locally installed.
+
+```
+npm install soid-ui-util
+```
+
+## Usage
+
+### 1.Color
+
+颜色值管理
+
+**ColorManager 中的方法：**
+
+| 方法     | 说明                                           |
+| -------- | ---------------------------------------------- |
+| fromRgba | 通过 RGBA 形式的颜色值构建 ColorManager 实例   |
+| fromHex  | 通过十六进制形式的颜色值构建 ColorManager 实例 |
+| rgba     | 获取 RGBA 格式的颜色值                         |
+| filter   | 转换颜色值                                     |
+
+**使用示例**
+
+```
+// 导入 ColorManager
+import { ColorManager } from 'soid-ui-util';
+
+// 构建 ColorManager
+const color = ColorManager.fromHex('#FFB6C1');
+const color = ColorManager.fromRgba({red:225,green:182,blue:193,alpha:1});
+
+// 获取 RGBA 颜色值
+const rgbaColor = color.rgba;
+
+// 转换颜色值
+const filterColor = color.filter;
+```
 
 ## Grid Service
 
