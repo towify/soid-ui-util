@@ -155,4 +155,37 @@ export class UISizeUtils {
       unit: params.sizeInfo.unit
     };
   }
+
+  static getSizeInfoByNumberValue(params: {
+    newValue: number
+    oldSizeInfo: UISize,
+    oldValue: number,
+  }): UISize {
+    if (
+      params.oldSizeInfo.unit === SizeUnit.Unset ||
+      params.oldSizeInfo.unit === SizeUnit.Auto ||
+      params.oldSizeInfo.unit === SizeUnit.Fit
+    ) {
+      return params.oldSizeInfo;
+    }
+    let value = parseFloat(params.newValue.toFixed(2));
+    if (value === 0 || params.oldValue === 0) {
+      return {
+        value,
+        unit: SizeUnit.PX
+      };
+    }
+    if (params.oldSizeInfo.unit === SizeUnit.Percent) {
+      value = parseFloat((params.oldSizeInfo.value * params.newValue / params.oldValue).toFixed(4));
+    }
+    return {
+      value,
+      unit: params.oldSizeInfo.unit
+    };
+  }
+
+  static checkSizeInfoIsAuto(sizeInfo?: UISize): boolean {
+    if (!sizeInfo) return false;
+    return sizeInfo.unit === SizeUnit.Auto || sizeInfo.unit === SizeUnit.Fit;
+  }
 }

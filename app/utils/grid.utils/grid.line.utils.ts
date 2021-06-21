@@ -2,9 +2,11 @@
  * @author allen
  * @data 2020/11/23 23:02
  */
-import { LineInfo, RectInfo } from '../../type/common.type';
-import { AlignOffsetInfo, SignInfo } from '../../type/interact.type';
-import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
+import {SizeUnit} from 'towify-editor-common-values';
+import {LineInfo, RectInfo} from '../../type/common.type';
+import {AlignOffsetInfo, SignInfo} from '../../type/interact.type';
+import {GridMapping} from '../../mapping/grid.mapping/grid.mapping';
+import {UISizeUtils} from "../ui.size.utils/ui.size.utils";
 
 enum GridLineType {
   Horizontal = 'horizontal',
@@ -12,48 +14,85 @@ enum GridLineType {
 }
 
 export class GridLineUtils {
-  static getGridLineList(
-    gridItemRectList: RectInfo[][]
-  ): { fromX: number; fromY: number; toX: number; toY: number }[] {
+  static getGridLineInfos(
+    gridMapping: GridMapping
+  ): {
+      canDrag: boolean,
+      direction: 'top' | 'bottom' | 'left' | 'right',
+      position: { fromRow: number, toRow: number, fromColumn: number, toColumn: number },
+      line: LineInfo
+    }[] {
     const result: {
-      fromX: number;
-      fromY: number;
-      toX: number;
-      toY: number;
+      canDrag: boolean,
+      direction: 'top' | 'bottom' | 'left' | 'right',
+      position: { fromRow: number, toRow: number, fromColumn: number, toColumn: number },
+      line: LineInfo
     }[] = [];
-    gridItemRectList.forEach(rowItem => {
-      rowItem.forEach(rect => {
-        result.push({
-          fromX: rect.x,
-          toX: rect.x + rect.width,
-          fromY: rect.y,
-          toY: rect.y
-        });
-        result.push({
-          fromX: rect.x + rect.width,
-          toX: rect.x + rect.width,
-          fromY: rect.y,
-          toY: rect.y + rect.height
-        });
-        result.push({
-          fromX: rect.x,
-          toX: rect.x + rect.width,
-          fromY: rect.y + rect.height,
-          toY: rect.y + rect.height
-        });
-        result.push({
-          fromX: rect.x,
-          toX: rect.x,
-          fromY: rect.y,
-          toY: rect.y + rect.height
-        });
+    const gridItemRectList = gridMapping.getGridItemRectList();
+    gridItemRectList.forEach((rowItem, row) => {
+      const position = { fromRow: row, toRow: row, fromColumn: 0, toColumn: rowItem.length - 1 };
+      result.push({
+        canDrag: !(gridMapping.isMoreAutoSizeInRow() &&
+          (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row]) ||
+            UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row-1]))),
+        direction: 'top',
+        position,
+        line: {
+          fromX: rowItem[0].x,
+          toX: rowItem[rowItem.length - 1].x + rowItem[rowItem.length - 1].width,
+          fromY: rowItem[0].y,
+          toY: rowItem[0].y
+        }
+      });
+      result.push({
+        canDrag: !(gridMapping.isMoreAutoSizeInRow() &&
+          (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row]) ||
+            UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row+1]))),
+        direction: 'bottom',
+        position,
+        line: {
+          fromX: rowItem[0].x,
+          toX: rowItem[rowItem.length - 1].x + rowItem[rowItem.length - 1].width,
+          fromY: rowItem[0].y + rowItem[0].height,
+          toY: rowItem[0].y + rowItem[0].height
+        }
+      });
+    });
+    const toY = gridItemRectList[gridItemRectList.length - 1][0].y + gridItemRectList[gridItemRectList.length - 1][0].height;
+    gridItemRectList[0].forEach((columnRect, column) => {
+      const position = { fromRow: 0, toRow: gridItemRectList.length - 1, fromColumn: column, toColumn: column };
+      result.push({
+        canDrag: !(gridMapping.isMoreAutoSizeInColumn() &&
+          (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column]) ||
+            UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column-1]))),
+        direction: 'left',
+        position,
+        line: {
+          fromX: columnRect.x,
+          toX: columnRect.x,
+          fromY: columnRect.y,
+          toY
+        }
+      });
+      result.push({
+        canDrag: !(gridMapping.isMoreAutoSizeInColumn() &&
+          (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column]) ||
+            UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column+1]))),
+        direction: 'right',
+        position,
+        line: {
+          fromX: columnRect.x + columnRect.width,
+          toX: columnRect.x + columnRect.width,
+          fromY: columnRect.y,
+          toY
+        }
       });
     });
     result.sort((a, b) => {
       const aType =
-        a.fromY === a.toY ? GridLineType.Horizontal : GridLineType.Vertical;
+        a.line.fromY === a.line.toY ? GridLineType.Horizontal : GridLineType.Vertical;
       const bType =
-        b.fromY === b.toY ? GridLineType.Horizontal : GridLineType.Vertical;
+        b.line.fromY === b.line.toY ? GridLineType.Horizontal : GridLineType.Vertical;
       if (
         aType === GridLineType.Horizontal &&
         bType === GridLineType.Vertical
@@ -68,35 +107,34 @@ export class GridLineUtils {
       }
       if (aType === bType) {
         if (aType === GridLineType.Horizontal) {
-          if (a.fromY < b.fromY) {
+          if (a.line.fromY < b.line.fromY) {
             return -1;
           }
-          if (a.fromY > b.fromY) {
+          if (a.line.fromY > b.line.fromY) {
             return 1;
           }
-          if (a.fromY === b.fromY) {
-            return a.fromX < b.fromX ? -1 : 1;
+          if (a.line.fromY === b.line.fromY) {
+            return a.line.fromX < b.line.fromX ? -1 : 1;
           }
         }
         if (aType === GridLineType.Vertical) {
-          if (a.fromX < b.fromX) {
+          if (a.line.fromX < b.line.fromX) {
             return -1;
           }
-          if (a.fromX > b.fromX) {
+          if (a.line.fromX > b.line.fromX) {
             return 1;
           }
-          if (a.fromX === b.fromX) {
-            return a.fromY < b.fromY ? -1 : 1;
+          if (a.line.fromX === b.line.fromX) {
+            return a.line.fromY < b.line.fromY ? -1 : 1;
           }
         }
       }
       return 1;
     });
     let previousItem: {
-      fromX: number;
-      fromY: number;
-      toX: number;
-      toY: number;
+      direction: 'top' | 'bottom' | 'left' | 'right',
+      position: { fromRow: number, toRow: number, fromColumn: number, toColumn: number },
+      line: LineInfo
     };
     return result.filter(item => {
       if (!previousItem) {
@@ -104,27 +142,13 @@ export class GridLineUtils {
         return true;
       }
       if (
-        previousItem.fromX === item.fromX &&
-        previousItem.fromY === item.fromY &&
-        previousItem.toX === item.toX &&
-        previousItem.toY === item.toY
+        previousItem.line.fromX === item.line.fromX &&
+        previousItem.line.fromY === item.line.fromY &&
+        previousItem.line.toX === item.line.toX &&
+        previousItem.line.toY === item.line.toY &&
+          ((previousItem.direction === 'bottom' && item.direction === 'top') ||
+              (previousItem.direction === 'right' && item.direction === 'left'))
       ) {
-        return false;
-      }
-      if (
-        previousItem.fromY === item.fromY &&
-        previousItem.toY === item.toY &&
-        (previousItem.toX === item.fromX || previousItem.toX === item.toX)
-      ) {
-        previousItem.toX = item.toX;
-        return false;
-      }
-      if (
-        previousItem.fromX === item.fromX &&
-        previousItem.toX === item.toX &&
-        (previousItem.toY === item.fromY || previousItem.toY === item.toY)
-      ) {
-        previousItem.toY = item.toY;
         return false;
       }
       previousItem = item;
@@ -132,13 +156,13 @@ export class GridLineUtils {
     });
   }
 
-  static getGridGapAreaAndLine(params: {
+  static getGridGapRectAndSlashLinesList(params: {
     gridItemRectList: RectInfo[][];
     lineSpace: number;
   }): {
-    area: RectInfo[];
-    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
-  } {
+      rect: RectInfo,
+      slashLines: LineInfo[]
+    }[] {
     let columnGapArea: RectInfo[] = [];
     let rowGapArea: RectInfo[] = [];
     let columnIndex = 1;
@@ -181,38 +205,32 @@ export class GridLineUtils {
     rowGapArea = rowGapArea.filter(rect => {
       return !(rect.width <= 0 || rect.height <= 0);
     });
-    let lines: {
-      fromX: number;
-      fromY: number;
-      toX: number;
-      toY: number;
-    }[] = [];
-    columnGapArea.forEach(rect => {
-      lines = lines.concat(
-        GridLineUtils.getRectSlantLines({
-          rect,
-          lineSpace: params.lineSpace,
-          rectType: GridLineType.Vertical
-        })
-      );
-    });
-    rowGapArea.forEach(rect => {
-      lines = lines.concat(
-        GridLineUtils.getRectSlantLines({
-          rect,
-          lineSpace: params.lineSpace,
-          rectType: GridLineType.Horizontal
-        })
-      );
-    });
-    const area = columnGapArea.concat(rowGapArea);
-    return {
-      area,
-      lines
-    };
+    const columnResult = columnGapArea.map<{
+      rect: RectInfo,
+      slashLines: LineInfo[]
+    }>(rect => ({
+      rect,
+      slashLines: GridLineUtils.getRectSlashLines({
+        rect,
+        lineSpace: params.lineSpace,
+        rectType: GridLineType.Vertical
+      })
+    }));
+    const rowResult = rowGapArea.map<{
+      rect: RectInfo,
+      slashLines: LineInfo[]
+    }>(rect => ({
+      rect,
+      slashLines: GridLineUtils.getRectSlashLines({
+        rect,
+        lineSpace: params.lineSpace,
+        rectType: GridLineType.Horizontal
+      })
+    }));
+    return columnResult.concat(rowResult);
   }
 
-  static getGridPaddingAreaAndLine(params: {
+  static getGridPaddingRectAndSlashLinesList(params: {
     gridPadding: {
       left: number;
       top: number;
@@ -231,9 +249,9 @@ export class GridLineUtils {
     };
     lineSpace: number;
   }): {
-    area: RectInfo[];
-    lines: { fromX: number; fromY: number; toX: number; toY: number }[];
-  } {
+      rect: RectInfo,
+      slashLines: LineInfo[]
+    }[] {
     let columnPaddingArea: RectInfo[] = [];
     let rowPaddingArea: RectInfo[] = [];
     if (params.gridPadding.left > 0) {
@@ -282,42 +300,37 @@ export class GridLineUtils {
     columnPaddingArea = columnPaddingArea.filter(rect => {
       return !(rect.width <= 0 || rect.height <= 0);
     });
-    let lines: {
-      fromX: number;
-      fromY: number;
-      toX: number;
-      toY: number;
-    }[] = [];
-    columnPaddingArea.forEach(rect => {
-      lines = lines.concat(
-        GridLineUtils.getRectSlantLines({
-          rect,
-          lineSpace: params.lineSpace,
-          rectType: GridLineType.Vertical
-        })
-      );
-    });
-    rowPaddingArea.forEach(rect => {
-      lines = lines.concat(
-        GridLineUtils.getRectSlantLines({
-          rect,
-          lineSpace: params.lineSpace,
-          rectType: GridLineType.Horizontal
-        })
-      );
-    });
-    const area = rowPaddingArea.concat(columnPaddingArea);
-    return {
-      area,
-      lines
-    };
+    const columnResult = columnPaddingArea.map<{
+      rect: RectInfo,
+      slashLines: LineInfo[]
+    }>(rect => ({
+      rect,
+      slashLines: GridLineUtils.getRectSlashLines({
+        rect,
+        lineSpace: params.lineSpace,
+        rectType: GridLineType.Vertical
+      })
+    }));
+    const rowResult = rowPaddingArea.map<{
+      rect: RectInfo,
+      slashLines: LineInfo[]
+    }>(rect => ({
+      rect,
+      slashLines: GridLineUtils.getRectSlashLines({
+        rect,
+        lineSpace: params.lineSpace,
+        rectType: GridLineType.Horizontal
+      })
+    }));
+    return columnResult.concat(rowResult);
   }
 
-  static getRectSlantLines(params: {
+  static getRectSlashLines(params: {
     rect: RectInfo;
     rectType: GridLineType;
     lineSpace: number;
-  }): { fromX: number; fromY: number; toX: number; toY: number }[] {
+    appendRect?: boolean
+  }): LineInfo[] {
     const distance = Math.sqrt(2) * params.lineSpace;
     const maxValue = params.rect.width + params.rect.height;
     let linePosition = 0;
@@ -385,10 +398,12 @@ export class GridLineUtils {
           position.toY = params.rect.height;
         }
       }
-      position.fromX += params.rect.x;
-      position.toX += params.rect.x;
-      position.fromY += params.rect.y;
-      position.toY += params.rect.y;
+      if (params.appendRect) {
+        position.fromX += params.rect.x;
+        position.toX += params.rect.x;
+        position.fromY += params.rect.y;
+        position.toY += params.rect.y;
+      }
       lineArray.push(position);
     }
     return lineArray;
@@ -405,36 +420,30 @@ export class GridLineUtils {
     };
     gridMapping: GridMapping;
   }): {
-    assistLines: LineInfo[];
-    assistSigns: SignInfo[];
-    alignLines: LineInfo[];
-    offset: AlignOffsetInfo;
-  } {
+      assistLines: LineInfo[];
+      assistSigns: SignInfo[];
+      alignLines: LineInfo[];
+      offset: AlignOffsetInfo;
+    } {
     const rect = params.gridMapping.gridRect;
     return {
-      assistLines: params.assistLineInfo.lines.map(line => {
-        return {
-          fromX: line.fromX + rect.x,
-          fromY: line.fromY + rect.y,
-          toX: line.toX + rect.x,
-          toY: line.toY + rect.y
-        };
-      }),
-      alignLines: params.alignLineInfo.lines.map(line => {
-        return {
-          fromX: line.fromX + rect.x,
-          fromY: line.fromY + rect.y,
-          toX: line.toX + rect.x,
-          toY: line.toY + rect.y
-        };
-      }),
-      assistSigns: params.assistLineInfo.signs.map(sign => {
-        return {
-          x: sign.x + rect.x,
-          y: sign.y + rect.y,
-          sign: sign.sign
-        };
-      }),
+      assistLines: params.assistLineInfo.lines.map(line => ({
+        fromX: line.fromX + rect.x,
+        fromY: line.fromY + rect.y,
+        toX: line.toX + rect.x,
+        toY: line.toY + rect.y
+      })),
+      alignLines: params.alignLineInfo.lines.map(line => ({
+        fromX: line.fromX + rect.x,
+        fromY: line.fromY + rect.y,
+        toX: line.toX + rect.x,
+        toY: line.toY + rect.y
+      })),
+      assistSigns: params.assistLineInfo.signs.map(sign => ({
+        x: sign.x + rect.x,
+        y: sign.y + rect.y,
+        sign: sign.sign
+      })),
       offset: params.alignLineInfo.offset
     };
   }

@@ -2,7 +2,6 @@
  * @author allen
  * @data 2020/11/12 15:56
  */
-
 import {
   CustomGrid,
   GridArea,
@@ -298,22 +297,28 @@ export class GridMapping {
     };
   }
 
-  needUpdateGridChildren(): boolean {
+  isMoreAutoSizeInRow(): boolean {
     let rowAutoNumber = 0;
     this.gridRowInfo.forEach(row => {
-      if (row.unit === SizeUnit.Auto || row.unit === SizeUnit.Fit) {
+      if (UISizeUtils.checkSizeInfoIsAuto(row)) {
         rowAutoNumber += 1;
       }
     });
+    return rowAutoNumber > 1;
+  }
+
+  isMoreAutoSizeInColumn(): boolean {
     let columnAutoNumber = 0;
     this.gridColumnInfo.forEach(column => {
-      if (column.unit === SizeUnit.Auto || column.unit === SizeUnit.Fit) {
+      if (UISizeUtils.checkSizeInfoIsAuto(column)) {
         columnAutoNumber += 1;
       }
     });
-    const isNeedUpdateRow = rowAutoNumber > 1;
-    const isNeedUpdateColumn = columnAutoNumber > 1;
-    return isNeedUpdateRow || isNeedUpdateColumn;
+    return columnAutoNumber > 1;
+  }
+
+  needUpdateGridChildren(): boolean {
+    return this.isMoreAutoSizeInColumn() || this.isMoreAutoSizeInRow();
   }
 
   private getAutoOffsetList(
