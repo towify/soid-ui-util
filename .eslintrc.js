@@ -31,8 +31,8 @@ module.exports = {
       'error',
       {
         max: 500,
-        skipBlankLines: false,
-        skipComments: false
+        skipBlankLines: true,
+        skipComments: true
       }
     ],
     'max-len': [
@@ -56,11 +56,12 @@ module.exports = {
     'global-require': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     'import/prefer-default-export': 'off',
-    '@typescript-eslint/no-unused-expressions': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-expressions': ['error', { allowShortCircuit: true }],
+    '@typescript-eslint/no-unused-vars-experimental': 'error',
     'prefer-destructuring': 'off',
     'class-methods-use-this': 'off',
     'no-extend-native': 'off',
-    'comma-dangle': ['error', 'never'],
     'object-curly-newline': 'off',
     'no-param-reassign': 'off',
     'no-restricted-syntax': 'off',
@@ -71,6 +72,9 @@ module.exports = {
     // 或者说，认为在现在的业务下没办法作出 不循环引用的设计。暂时关闭。待日后寻解。
     'import/no-cycle': 'off',
     'no-shadow': 'off',
-    '@typescript-eslint/no-shadow': ['error']
+    '@typescript-eslint/no-shadow': ['error'],
+    '@typescript-eslint/keyword-spacing': 'off',
+    '@typescript-eslint/comma-dangle': ['error', 'never'],
+    'func-names': 'off'
   }
 };
