@@ -84,48 +84,41 @@ export class OperatorUtils {
   }
 
   static getRectDistance(rect: RectInfo, parentRect: RectInfo): number {
+    let verticalOffset = 0;
+    let horizontalOffset = 0;
+    let result = 0;
     if (rect.x > parentRect.x + parentRect.width) {
-      if (
-        rect.y >= parentRect.y &&
-        rect.y <= parentRect.y + parentRect.height - rect.height
-      ) {
-        return rect.x - (parentRect.x + parentRect.width);
+      if ( Math.abs(rect.y + rect.height - parentRect.y) < Math.abs(rect.x - (parentRect.x + parentRect.width)) ||
+        Math.abs(rect.y - parentRect.y - parentRect.height) < Math.abs(rect.x - (parentRect.x + parentRect.width))) {
+        result = rect.x - (parentRect.x + parentRect.width);
+      } else if (rect.y < parentRect.y) {
+        verticalOffset = parentRect.y - rect.y;
+        horizontalOffset = rect.x - parentRect.x - parentRect.width;
+      } else {
+        verticalOffset = rect.y + rect.height - parentRect.y - parentRect.height;
+        horizontalOffset = rect.x - parentRect.x - parentRect.width;
       }
-      if (rect.y < parentRect.y) {
-        return Math.sqrt(
-          (parentRect.y - rect.y) ** 2 +
-            (rect.x - (parentRect.x + parentRect.width)) ** 2
-        );
+    } else if (rect.x < parentRect.x - rect.width) {
+      if ( Math.abs(rect.y + rect.height - parentRect.y) < Math.abs(rect.x + rect.width - parentRect.x) ||
+          Math.abs(rect.y - parentRect.y - parentRect.height) < Math.abs(rect.x + rect.width - parentRect.x))  {
+        result = parentRect.x - (rect.x + rect.width);
+      } else if (rect.y < parentRect.y) {
+        verticalOffset = parentRect.y - rect.y;
+        horizontalOffset = parentRect.x - rect.x - rect.width;
+      } else {
+        verticalOffset = rect.y + rect.height - parentRect.y - parentRect.height;
+        horizontalOffset = parentRect.x - rect.x - rect.width;
       }
-      return Math.sqrt(
-        (rect.y + rect.height - (parentRect.y + parentRect.height)) ** 2 +
-          (rect.x - (parentRect.x + parentRect.width)) ** 2
-      );
     }
-    if (rect.x < parentRect.x - rect.width) {
-      if (
-        rect.y >= parentRect.y &&
-        rect.y <= parentRect.y + parentRect.height - rect.height
-      ) {
-        return parentRect.x - (rect.x + rect.width);
+    if (result === 0) {
+      if (verticalOffset !== 0 && horizontalOffset !== 0) {
+        result = Math.sqrt(verticalOffset ** 2 + horizontalOffset ** 2);
+      } else if (parentRect.y > rect.y + rect.height) {
+        result = parentRect.y - (rect.y + rect.height);
+      } else if (rect.y > parentRect.y + parentRect.height){
+        result = rect.y - (parentRect.y + parentRect.height);
       }
-      if (rect.y < parentRect.y) {
-        return Math.sqrt(
-          (parentRect.y - rect.y) ** 2 +
-            (parentRect.x - (rect.x + rect.width)) ** 2
-        );
-      }
-      return Math.sqrt(
-        (rect.y + rect.height - (parentRect.y + parentRect.height)) ** 2 +
-          (parentRect.x - (rect.x + rect.width)) ** 2
-      );
     }
-    if (parentRect.y > rect.y + rect.height) {
-      return parentRect.y - (rect.y + rect.height);
-    }
-    if (rect.y > parentRect.y + parentRect.height) {
-      return rect.y - (parentRect.y + parentRect.height);
-    }
-    return 0;
+    return Math.round(result);
   }
 }

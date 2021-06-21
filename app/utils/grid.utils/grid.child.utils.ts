@@ -12,6 +12,7 @@ import {
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 import { UISizeUtils } from '../ui.size.utils/ui.size.utils';
 import { GridUtils } from './grid.utils';
+import { NumberUtils } from '../number.utils/number.utils';
 
 export class GridChildUtils {
   static adjustChildGridInfo(params: {
@@ -145,7 +146,7 @@ export class GridChildUtils {
       height: number;
     };
     return gridMapping.childInfoList.map(childInfo => {
-      if (!childInfo.rect) return childInfo;
+      if (!childInfo.rect || childInfo.isFullParent) return childInfo;
       margin = GridUtils.getChildGridMarginInfoByRect({
         rect: childInfo.rect,
         gridArea: childInfo.gridArea,
@@ -206,9 +207,7 @@ export class GridChildUtils {
       height: number;
     };
     return gridMapping.childInfoList.map(childInfo => {
-      if (!childInfo.rect) return childInfo;
-      childInfo.placeSelf.justifySelf = '';
-      childInfo.placeSelf.alignSelf = '';
+      if (!childInfo.rect || childInfo.isFullParent) return childInfo;
       areaInfo = gridMapping.getChildGridAreaInfoByRect({
         rect: childInfo.rect,
         gridItemRectList
@@ -295,26 +294,84 @@ export class GridChildUtils {
       end: gridInfo.gridArea.columnEnd - 1,
       sizeInfoList: gridMapping.gridColumnInfo
     });
-    let marginBottom = 0;
-    if (rowAutoNumber) {
-      marginBottom = 0 - gridInfo.marginTop - droppedRect.height;
+    let justifySelf = '';
+    let alignSelf = '';
+    let marginLeftUnit: SizeUnit = SizeUnit.PX;
+    let marginRightUnit: SizeUnit = SizeUnit.PX;
+    let marginTopUnit: SizeUnit = SizeUnit.PX;
+    let marginBottomUnit: SizeUnit = SizeUnit.PX;
+    if (
+      NumberUtils.parseViewNumber(droppedRect.x) ===
+      NumberUtils.parseViewNumber(droppedParentRect.x)
+    ) {
+      justifySelf = 'start';
+      marginLeftUnit = SizeUnit.Unset;
+      marginRightUnit = SizeUnit.Unset;
+    } else if (
+      NumberUtils.parseViewNumber(droppedRect.x + droppedRect.width / 2) ===
+      NumberUtils.parseViewNumber(
+        droppedParentRect.x + droppedParentRect.width / 2
+      )
+    ) {
+      justifySelf = 'center';
+      marginLeftUnit = SizeUnit.Unset;
+      marginRightUnit = SizeUnit.Unset;
+    } else if (
+      NumberUtils.parseViewNumber(droppedRect.x + droppedRect.width) ===
+      NumberUtils.parseViewNumber(droppedParentRect.x + droppedParentRect.width)
+    ) {
+      justifySelf = 'end';
+      marginLeftUnit = SizeUnit.Unset;
+      marginRightUnit = SizeUnit.Unset;
     }
-    let marginRight = 0;
-    if (columnAutoNumber) {
-      marginRight = 0 - gridInfo.marginLeft - droppedRect.width;
+    if (
+      NumberUtils.parseViewNumber(droppedRect.y) ===
+      NumberUtils.parseViewNumber(droppedParentRect.y)
+    ) {
+      alignSelf = 'start';
+      marginTopUnit = SizeUnit.Unset;
+      marginBottomUnit = SizeUnit.Unset;
+    } else if (
+      NumberUtils.parseViewNumber(droppedRect.y + droppedRect.height / 2) ===
+      NumberUtils.parseViewNumber(
+        droppedParentRect.y + droppedParentRect.height / 2
+      )
+    ) {
+      alignSelf = 'center';
+      marginTopUnit = SizeUnit.Unset;
+      marginBottomUnit = SizeUnit.Unset;
+    } else if (
+      NumberUtils.parseViewNumber(droppedRect.y + droppedRect.height) ===
+      NumberUtils.parseViewNumber(
+        droppedParentRect.y + droppedParentRect.height
+      )
+    ) {
+      alignSelf = 'end';
+      marginTopUnit = SizeUnit.Unset;
+      marginBottomUnit = SizeUnit.Unset;
     }
     const droppedInfo: GridChildInfo = {
       id: dropped.id,
       gridArea: gridInfo.gridArea,
       margin: {
-        top: { value: gridInfo.marginTop, unit: SizeUnit.PX },
-        left: { value: gridInfo.marginLeft, unit: SizeUnit.PX },
-        right: { value: marginRight, unit: SizeUnit.PX },
-        bottom: { value: marginBottom, unit: SizeUnit.PX }
+        top: { value: gridInfo.marginTop, unit: marginTopUnit },
+        left: { value: gridInfo.marginLeft, unit: marginLeftUnit },
+        right: {
+          value: columnAutoNumber
+            ? 0 - gridInfo.marginLeft - droppedRect.width
+            : 0,
+          unit: marginRightUnit
+        },
+        bottom: {
+          value: rowAutoNumber
+            ? 0 - gridInfo.marginTop - droppedRect.height
+            : 0,
+          unit: marginBottomUnit
+        }
       },
       placeSelf: {
-        justifySelf: '',
-        alignSelf: ''
+        justifySelf,
+        alignSelf
       },
       size: {
         width: UISizeUtils.convertUISizeWithParentValue({

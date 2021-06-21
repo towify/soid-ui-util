@@ -19,4 +19,12 @@ export class ColorUtils {
     const alpha = parseFloat((opacity / 100).toFixed(2));
     return `rgba(${red},${green},${blue},${alpha})`;
   }
+
+  static hexToRgbaArray(hex: string, opacity: number): number[] {
+    const red = parseInt(`0x${hex.slice(1, 3)}`, 16);
+    const green = parseInt(`0x${hex.slice(3, 5)}`, 16);
+    const blue = parseInt(`0x${hex.slice(5, 7)}`, 16);
+    const alpha = parseFloat((opacity / 100).toFixed(2));
+    return [red, green, blue, alpha];
+  }
 }

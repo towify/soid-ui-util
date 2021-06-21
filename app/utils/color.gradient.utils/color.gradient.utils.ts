@@ -6,6 +6,17 @@ import { ColorGradientType } from '../../type/common.type';
 import { ColorUtils } from '../color.utils/color.utils';
 
 export class ColorGradientUtils {
+  static getColorGradientListCss(colorGradientList: ColorGradientType[]) {
+    let cssString = '';
+    colorGradientList.forEach((type, index) => {
+      cssString += ColorGradientUtils.getColorGradientCss(type);
+      if (index < colorGradientList.length - 1) {
+        cssString += ',';
+      }
+    });
+    return cssString;
+  }
+
   static getColorGradientCss(colorGradient: ColorGradientType) {
     let colorGradientCss = colorGradient.shared.repeat ? 'repeating-' : '';
     if (colorGradient.linear) {

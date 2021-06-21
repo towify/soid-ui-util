@@ -41,6 +41,7 @@ type GridChildInfo = {
   size: SizeInfo;
   rect?: RectInfo;
   parentRect?: RectInfo;
+  isFullParent?: boolean;
 };
 
 type RectInfo = {

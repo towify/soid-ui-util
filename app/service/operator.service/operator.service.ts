@@ -304,47 +304,6 @@ export class OperatorService implements OperatorServiceInterface {
     };
   }
 
-  private findMinXPosition(params: {
-    start: number;
-    rectList: RectInfo[];
-    positive: boolean;
-  }): {
-    x: number;
-    mergeList: RectInfo[];
-  } {
-    if (!this.#size)
-      return {
-        x: 0,
-        mergeList: []
-      };
-    let xStart;
-    let xEnd;
-    if (params.positive) {
-      xStart = params.start;
-      xEnd = params.start + this.#size.width;
-    } else {
-      xStart = params.start - this.#size.width;
-      xEnd = params.start;
-    }
-    const mergeList = OperatorUtils.getRectListInXRange(
-      {
-        from: xStart,
-        to: xEnd
-      },
-      params.rectList
-    );
-    if (!mergeList.length) {
-      return {
-        x: xStart,
-        mergeList
-      };
-    }
-    return {
-      x: xStart,
-      mergeList
-    };
-  }
-
   private findVerticalRect(params: {
     xStart: number;
     rectList: RectInfo[];
@@ -353,7 +312,7 @@ export class OperatorService implements OperatorServiceInterface {
     if (!this.#size || !this.#parentRect) return undefined;
     let positiveY;
     let positiveInfo;
-    let positiveStart = this.#parentRect.y;
+    let positiveStart = this.#parentRect.y - this.#size.height;
     let range;
     while (!positiveY) {
       positiveInfo = this.findMinYPosition({
@@ -427,7 +386,7 @@ export class OperatorService implements OperatorServiceInterface {
     if (!this.#size || !this.#parentRect) return undefined;
     let positiveX;
     let positiveInfo;
-    let positiveStart = this.#parentRect.x - this.#size.width;
+    let positiveStart = this.#parentRect.x;
     while (!positiveX) {
       positiveInfo = this.findMinXPosition({
         start: positiveStart,
@@ -450,6 +409,41 @@ export class OperatorService implements OperatorServiceInterface {
       };
     }
     return undefined;
+  }
+
+  private findMinXPosition(params: {
+    start: number;
+    rectList: RectInfo[];
+    positive: boolean;
+  }): {
+    x: number;
+    mergeList: RectInfo[];
+  } {
+    if (!this.#size)
+      return {
+        x: 0,
+        mergeList: []
+      };
+    let xStart;
+    let xEnd;
+    if (params.positive) {
+      xStart = params.start;
+      xEnd = params.start + this.#size.width;
+    } else {
+      xStart = params.start - this.#size.width;
+      xEnd = params.start;
+    }
+    const mergeList = OperatorUtils.getRectListInXRange(
+        {
+          from: xStart,
+          to: xEnd
+        },
+        params.rectList
+    );
+    return {
+      x: xStart,
+      mergeList
+    };
   }
 
   private findMinYPosition(params: {
@@ -478,12 +472,6 @@ export class OperatorService implements OperatorServiceInterface {
       { from: yStart, to: yEnd },
       params.rectList
     );
-    if (!mergeList.length) {
-      return {
-        y: yStart,
-        mergeList
-      };
-    }
     return {
       y: yStart,
       mergeList
