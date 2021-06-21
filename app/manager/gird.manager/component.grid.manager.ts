@@ -2,6 +2,7 @@
  * @author allen
  * @data 2020/11/23 22:24
  */
+
 import {
   CustomGrid,
   GridArea,
@@ -68,7 +69,7 @@ export class ComponentGridManager {
     return this.#gridMapping.gridActiveRect;
   }
 
-  get gridItemRectList(): RectInfo [][] {
+  get gridItemRectList(): RectInfo[][] {
     return this.#gridMapping.getGridItemRectList();
   }
 
@@ -101,9 +102,9 @@ export class ComponentGridManager {
     size: SizeInfo;
     gridArea?: GridArea;
   }): {
-      info: GridChildInfo;
-      needUpdateGridChildren: boolean;
-    } {
+    info: GridChildInfo;
+    needUpdateGridChildren: boolean;
+  } {
     return GridChildUtils.setDroppedInfo(dropped, this.#gridMapping);
   }
 
@@ -131,7 +132,8 @@ export class ComponentGridManager {
       updateChildInfo.margin = child.margin;
       updateChildInfo.size = child.size;
       updateChildInfo.placeSelf = child.placeSelf;
-      updateChildInfo.rect = this.#gridMapping.getGridChildRect(updateChildInfo);
+      updateChildInfo.rect =
+        this.#gridMapping.getGridChildRect(updateChildInfo);
     }
     return this.#gridMapping.needUpdateGridChildren();
   }
@@ -173,10 +175,15 @@ export class ComponentGridManager {
   }
 
   getGridLineInfos(needBorder = false): {
-    canDrag: boolean,
-    direction: 'top' | 'bottom' | 'left' | 'right',
-    position: { fromRow: number, toRow: number, fromColumn: number, toColumn: number },
-    line: LineInfo
+    canDrag: boolean;
+    direction: 'top' | 'bottom' | 'left' | 'right';
+    position: {
+      fromRow: number;
+      toRow: number;
+      fromColumn: number;
+      toColumn: number;
+    };
+    line: LineInfo;
   }[] {
     return GridLineUtils.getGridLineInfos(this.#gridMapping).map(info => {
       if (!needBorder) {
@@ -193,9 +200,9 @@ export class ComponentGridManager {
     lineSpace: number,
     needBorder = false
   ): {
-      rect: RectInfo,
-      slashLines: LineInfo[]
-    }[] {
+    rect: RectInfo;
+    slashLines: LineInfo[];
+  }[] {
     return GridLineUtils.getGridGapRectAndSlashLinesList({
       gridItemRectList: this.#gridMapping.getGridItemRectList(),
       lineSpace
@@ -213,9 +220,9 @@ export class ComponentGridManager {
     lineSpace: number,
     needBorder = false
   ): {
-      rect: RectInfo,
-      slashLines: LineInfo[]
-    }[] {
+    rect: RectInfo;
+    slashLines: LineInfo[];
+  }[] {
     return GridLineUtils.getGridPaddingRectAndSlashLinesList({
       gridPadding: this.#gridMapping.paddingInfo,
       border: this.#gridMapping.borderInfo,
@@ -252,17 +259,15 @@ export class ComponentGridManager {
     return this;
   }
 
-  getAlignAndAssistLineInfo(
-    maxActiveLength: number = 4
-  ): {
-      assistLines: LineInfo[];
-      assistSigns: SignInfo[];
-      alignLines: LineInfo[];
-      offset: AlignOffsetInfo;
-    } {
-    const moveChild = this.#gridMapping.childInfoList.find(child => {
-      return child.id === this.#movingLayerId;
-    });
+  getAlignAndAssistLineInfo(maxActiveLength: number = 4): {
+    assistLines: LineInfo[];
+    assistSigns: SignInfo[];
+    alignLines: LineInfo[];
+    offset: AlignOffsetInfo;
+  } {
+    const moveChild = this.#gridMapping.childInfoList.find(
+      child => child.id === this.#movingLayerId
+    );
     if (!moveChild) {
       ErrorUtils.InteractError('Moving layer is not find');
       return {
@@ -341,11 +346,11 @@ export class ComponentGridManager {
     },
     maxActiveLength = 4
   ): {
-      assistLines: LineInfo[];
-      assistSigns: SignInfo[];
-      alignLines: LineInfo[];
-      offset: AlignOffsetInfo;
-    } {
+    assistLines: LineInfo[];
+    assistSigns: SignInfo[];
+    alignLines: LineInfo[];
+    offset: AlignOffsetInfo;
+  } {
     const layerLinesInfo = GridAlignLineUtils.prepareAlignLine({
       isNeedMiddle: true,
       gridMapping: this.#gridMapping

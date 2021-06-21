@@ -9,7 +9,9 @@
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch:build": "webpack --watch",
-    "watch:server": "nodemon \"./dist/main.js\" --watch \"./build\" "
+    "watch:server": "nodemon \"./dist/main.js\" --watch \"./build\" ",
+    "prepare": "husky install",
+    "pre-commit": "lint-staged"
   },
   "husky": {
     "hooks": {
@@ -30,15 +32,16 @@
   "dependencies": {
     "@babel/runtime-corejs3": "^7.11.2",
     "core-js": "^2.6.11",
-    "eslint": "^7.12.1",
-    "eslint-config-airbnb-typescript": "^8.0.2",
-    "eslint-config-prettier": "^6.15.0",
-    "eslint-plugin-import": "^2.22.1",
-    "husky": "^4.3.0",
+    "eslint": "^7.29.0",
+    "eslint-config-airbnb-typescript": "^12.3.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-prettier": "^3.4.0",
+    "husky": "^6.0.0",
     "install": "^0.13.0",
     "lint-staged": "^10.5.0",
     "npm": "^6.14.8",
-    "prettier": "^2.1.2",
+    "prettier": "^2.3.1",
     "soid-data": "^0.0.28",
     "towify-editor-common-values": "^0.0.10"
   },
@@ -51,18 +54,12 @@
     "@typescript-eslint/eslint-plugin-tslint": "^4.6.0",
     "@typescript-eslint/parser": "^4.6.0",
     "babel-loader": "^8.1.0",
-    "eslint": "^7.12.1",
-    "eslint-config-airbnb-typescript": "^8.0.2",
-    "eslint-config-prettier": "^6.15.0",
-    "eslint-plugin-import": "^2.22.1",
     "glob": "^7.1.6",
-    "husky": "^6.0.0",
     "lint-staged": "^10.5.0",
-    "prettier": "^2.3.1",
     "ts-loader": "^6.2.2",
     "tslint": "^6.1.3",
     "tslint-loader": "^3.5.4",
-    "typescript": "^4.0.5"
+    "typescript": "~4.2.4"
   },
   "version": "0.0.114"
 }

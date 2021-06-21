@@ -2,6 +2,7 @@
  * @author allen
  * @data 2020/12/6 16:07
  */
+
 import { OperatorServiceInterface } from './operator.service.interface';
 import { DefaultRect, RectInfo } from '../../type/common.type';
 import { OperatorUtils } from '../../utils/operator.utils/operator.utils';
@@ -434,11 +435,11 @@ export class OperatorService implements OperatorServiceInterface {
       xEnd = params.start;
     }
     const mergeList = OperatorUtils.getRectListInXRange(
-        {
-          from: xStart,
-          to: xEnd
-        },
-        params.rectList
+      {
+        from: xStart,
+        to: xEnd
+      },
+      params.rectList
     );
     return {
       x: xStart,

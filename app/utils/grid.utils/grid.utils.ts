@@ -483,24 +483,11 @@ export class GridUtils {
     top: number;
     bottom: number;
   } {
-    const left = UISizeUtils.convertUISizeToNumber(
-      offset.left,
-      gridRect?.width
-    );
-    const right = UISizeUtils.convertUISizeToNumber(
-      offset.right,
-      gridRect?.width
-    );
-    const top = UISizeUtils.convertUISizeToNumber(offset.top, gridRect?.height);
-    const bottom = UISizeUtils.convertUISizeToNumber(
-      offset.bottom,
-      gridRect?.height
-    );
     return {
-      left,
-      right,
-      top,
-      bottom
+      left: UISizeUtils.convertUISizeToNumber(offset.left, gridRect?.width),
+      right: UISizeUtils.convertUISizeToNumber(offset.right, gridRect?.width),
+      top: UISizeUtils.convertUISizeToNumber(offset.top, gridRect?.height),
+      bottom: UISizeUtils.convertUISizeToNumber(offset.bottom, gridRect?.height)
     };
   }
 }

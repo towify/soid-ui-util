@@ -2,6 +2,7 @@
  * @author allen
  * @data 2021/1/22 11:37
  */
+
 import { SizeUnit, UISize } from 'towify-editor-common-values';
 import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';
@@ -157,9 +158,9 @@ export class UISizeUtils {
   }
 
   static getSizeInfoByNumberValue(params: {
-    newValue: number
-    oldSizeInfo: UISize,
-    oldValue: number,
+    newValue: number;
+    oldSizeInfo: UISize;
+    oldValue: number;
   }): UISize {
     if (
       params.oldSizeInfo.unit === SizeUnit.Unset ||
@@ -176,7 +177,12 @@ export class UISizeUtils {
       };
     }
     if (params.oldSizeInfo.unit === SizeUnit.Percent) {
-      value = parseFloat((params.oldSizeInfo.value * params.newValue / params.oldValue).toFixed(4));
+      value = parseFloat(
+        (
+          (params.oldSizeInfo.value * params.newValue) /
+          params.oldValue
+        ).toFixed(4)
+      );
     }
     return {
       value,
