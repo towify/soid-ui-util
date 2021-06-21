@@ -88,25 +88,35 @@ export class OperatorUtils {
     let horizontalOffset = 0;
     let result = 0;
     if (rect.x > parentRect.x + parentRect.width) {
-      if ( Math.abs(rect.y + rect.height - parentRect.y) < Math.abs(rect.x - (parentRect.x + parentRect.width)) ||
-        Math.abs(rect.y - parentRect.y - parentRect.height) < Math.abs(rect.x - (parentRect.x + parentRect.width))) {
+      if (
+        Math.abs(rect.y + rect.height - parentRect.y) <
+          Math.abs(rect.x - (parentRect.x + parentRect.width)) ||
+        Math.abs(rect.y - parentRect.y - parentRect.height) <
+          Math.abs(rect.x - (parentRect.x + parentRect.width))
+      ) {
         result = rect.x - (parentRect.x + parentRect.width);
       } else if (rect.y < parentRect.y) {
         verticalOffset = parentRect.y - rect.y;
         horizontalOffset = rect.x - parentRect.x - parentRect.width;
       } else {
-        verticalOffset = rect.y + rect.height - parentRect.y - parentRect.height;
+        verticalOffset =
+          rect.y + rect.height - parentRect.y - parentRect.height;
         horizontalOffset = rect.x - parentRect.x - parentRect.width;
       }
     } else if (rect.x < parentRect.x - rect.width) {
-      if ( Math.abs(rect.y + rect.height - parentRect.y) < Math.abs(rect.x + rect.width - parentRect.x) ||
-          Math.abs(rect.y - parentRect.y - parentRect.height) < Math.abs(rect.x + rect.width - parentRect.x))  {
+      if (
+        Math.abs(rect.y + rect.height - parentRect.y) <
+          Math.abs(rect.x + rect.width - parentRect.x) ||
+        Math.abs(rect.y - parentRect.y - parentRect.height) <
+          Math.abs(rect.x + rect.width - parentRect.x)
+      ) {
         result = parentRect.x - (rect.x + rect.width);
       } else if (rect.y < parentRect.y) {
         verticalOffset = parentRect.y - rect.y;
         horizontalOffset = parentRect.x - rect.x - rect.width;
       } else {
-        verticalOffset = rect.y + rect.height - parentRect.y - parentRect.height;
+        verticalOffset =
+          rect.y + rect.height - parentRect.y - parentRect.height;
         horizontalOffset = parentRect.x - rect.x - rect.width;
       }
     }
@@ -115,7 +125,7 @@ export class OperatorUtils {
         result = Math.sqrt(verticalOffset ** 2 + horizontalOffset ** 2);
       } else if (parentRect.y > rect.y + rect.height) {
         result = parentRect.y - (rect.y + rect.height);
-      } else if (rect.y > parentRect.y + parentRect.height){
+      } else if (rect.y > parentRect.y + parentRect.height) {
         result = rect.y - (parentRect.y + parentRect.height);
       }
     }

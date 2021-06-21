@@ -120,3 +120,8 @@ export const UnsetUnit = {
   value: 0,
   unit: SizeUnit.Unset
 };
+
+export enum GridLineType {
+  Horizontal = 'horizontal',
+  Vertical = 'vertical'
+}

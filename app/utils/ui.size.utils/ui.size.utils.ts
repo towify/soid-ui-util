@@ -157,9 +157,9 @@ export class UISizeUtils {
   }
 
   static getSizeInfoByNumberValue(params: {
-    newValue: number
-    oldSizeInfo: UISize,
-    oldValue: number,
+    newValue: number;
+    oldSizeInfo: UISize;
+    oldValue: number;
   }): UISize {
     if (
       params.oldSizeInfo.unit === SizeUnit.Unset ||
@@ -176,7 +176,12 @@ export class UISizeUtils {
       };
     }
     if (params.oldSizeInfo.unit === SizeUnit.Percent) {
-      value = parseFloat((params.oldSizeInfo.value * params.newValue / params.oldValue).toFixed(4));
+      value = parseFloat(
+        (
+          (params.oldSizeInfo.value * params.newValue) /
+          params.oldValue
+        ).toFixed(4)
+      );
     }
     return {
       value,

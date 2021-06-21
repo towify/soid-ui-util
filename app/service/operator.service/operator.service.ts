@@ -434,11 +434,11 @@ export class OperatorService implements OperatorServiceInterface {
       xEnd = params.start;
     }
     const mergeList = OperatorUtils.getRectListInXRange(
-        {
-          from: xStart,
-          to: xEnd
-        },
-        params.rectList
+      {
+        from: xStart,
+        to: xEnd
+      },
+      params.rectList
     );
     return {
       x: xStart,
