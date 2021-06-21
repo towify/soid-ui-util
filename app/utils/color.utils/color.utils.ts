@@ -2,7 +2,6 @@
  * @author allen
  * @data 2021/3/30 15:48
  */
-
 export class ColorUtils {
   static rgbToHex(red: number, green: number, blue: number): string {
     return `#${[red, green, blue]

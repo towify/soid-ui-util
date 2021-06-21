@@ -2,7 +2,6 @@
  * @author allen
  * @data 2020/12/7 17:58
  */
-
 import { RectInfo, RegionInfo } from '../../type/common.type';
 
 export class OperatorUtils {

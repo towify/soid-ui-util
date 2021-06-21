@@ -2,7 +2,6 @@
  * @author allen
  * @data 2020/12/6 16:07
  */
-
 import { OperatorServiceInterface } from './operator.service.interface';
 import { DefaultRect, RectInfo } from '../../type/common.type';
 import { OperatorUtils } from '../../utils/operator.utils/operator.utils';

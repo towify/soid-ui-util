@@ -2,7 +2,6 @@
  * @author allen
  * @data 2021/1/22 11:37
  */
-
 import { SizeUnit, UISize } from 'towify-editor-common-values';
 import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';

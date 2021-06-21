@@ -2,15 +2,10 @@
  * @author allen
  * @data 2020/11/23 23:02
  */
-import { LineInfo, RectInfo } from '../../type/common.type';
+import { GridLineType, LineInfo, RectInfo } from '../../type/common.type';
 import { AlignOffsetInfo, SignInfo } from '../../type/interact.type';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 import { UISizeUtils } from '../ui.size.utils/ui.size.utils';
-
-enum GridLineType {
-  Horizontal = 'horizontal',
-  Vertical = 'vertical'
-}
 
 export class GridLineUtils {
   static getGridLineInfos(gridMapping: GridMapping): {

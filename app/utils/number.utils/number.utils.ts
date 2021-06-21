@@ -2,7 +2,6 @@
  * @author allen
  * @data 2020/12/4 16:25
  */
-
 export class NumberUtils {
   static parseViewNumber(value: number): number {
     const intValue = Math.floor(value);

@@ -2,7 +2,6 @@
  * @author allen
  * @data 2021/3/30 15:49
  */
-
 import { ColorGradientType } from '../../type/common.type';
 import { ColorUtils } from '../color.utils/color.utils';
 

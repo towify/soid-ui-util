@@ -2,7 +2,6 @@
  * @author allen
  * @data 2020/12/14 17:22
  */
-
 import { LineInfo, RectInfo } from '../../type/common.type';
 import { AlignOffsetInfo } from '../../type/interact.type';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
