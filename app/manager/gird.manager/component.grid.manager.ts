@@ -6,25 +6,19 @@ import {
   CustomGrid,
   GridArea,
   GridGap,
-  SpacingPadding
+  SizeUnit,
+  SpacingPadding,
+  UISize
 } from 'towify-editor-common-values';
-import {
-  GridChildInfo,
-  LineInfo,
-  RectInfo,
-  SizeInfo
-} from '../../type/common.type';
+import { GridChildInfo, LineInfo, RectInfo, SizeInfo } from '../../type/common.type';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
 import { ErrorUtils } from '../../utils/error.utils/error.utils';
 import { GridChildUtils } from '../../utils/grid.utils/grid.child.utils';
-import {
-  AlignDefaultOffset,
-  AlignOffsetInfo,
-  SignInfo
-} from '../../type/interact.type';
+import { AlignDefaultOffset, AlignOffsetInfo, SignInfo } from '../../type/interact.type';
 import { GridAssistLineUtils } from '../../utils/grid.utils/grid.assist.line.utils';
 import { GridAlignLineUtils } from '../../utils/grid.utils/grid.align.line.utils';
+import { GridUtils } from '../../utils/grid.utils/grid.utils';
 
 export class ComponentGridManager {
   #movingLayerId = '';
@@ -41,9 +35,7 @@ export class ComponentGridManager {
 
   #layerMiddleList: number[] = [];
 
-  #gridRect?: RectInfo;
-
-  #gridMapping: GridMapping;
+  readonly #gridMapping: GridMapping;
 
   constructor(
     public readonly gap: GridGap,
@@ -54,14 +46,7 @@ export class ComponentGridManager {
   }
 
   get gridRect(): RectInfo {
-    return (
-      this.#gridRect ?? {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0
-      }
-    );
+    return this.#gridMapping.gridRect;
   }
 
   get gridActiveRect(): RectInfo {
@@ -83,8 +68,14 @@ export class ComponentGridManager {
     return this;
   }
 
+  setGridParentRect(rect?: RectInfo): ComponentGridManager {
+    if (rect) {
+      this.#gridMapping.parentRect = rect;
+    }
+    return this;
+  }
+
   setGridRect(rect: RectInfo): ComponentGridManager {
-    this.#gridRect = rect;
     this.#gridMapping.gridRect = rect;
     return this;
   }
@@ -107,9 +98,7 @@ export class ComponentGridManager {
     return GridChildUtils.setDroppedInfo(dropped, this.#gridMapping);
   }
 
-  deleteChildByIdAndGetParentGridChildrenUpdateStatus(
-    childId: string
-  ): boolean {
+  deleteChildByIdAndGetParentGridChildrenUpdateStatus(childId: string): boolean {
     const childIndex = this.#gridMapping.childInfoList.findIndex(
       childInfo => childInfo.id === childId
     );
@@ -119,9 +108,7 @@ export class ComponentGridManager {
     return this.#gridMapping.needUpdateGridChildren();
   }
 
-  updateChildInfoAndGetParentGridChildrenUpdateStatus(
-    child: GridChildInfo
-  ): boolean {
+  updateChildInfoAndGetParentGridChildrenUpdateStatus(child: GridChildInfo): boolean {
     const updateChildInfo = this.#gridMapping.childInfoList.find(
       childInfo => childInfo.id === child.id
     );
@@ -131,8 +118,7 @@ export class ComponentGridManager {
       updateChildInfo.margin = child.margin;
       updateChildInfo.size = child.size;
       updateChildInfo.placeSelf = child.placeSelf;
-      updateChildInfo.rect =
-        this.#gridMapping.getGridChildRect(updateChildInfo);
+      updateChildInfo.rect = this.#gridMapping.getGridChildRect(updateChildInfo);
     }
     return this.#gridMapping.needUpdateGridChildren();
   }
@@ -141,9 +127,7 @@ export class ComponentGridManager {
     if (!this.#gridMapping.childInfoList.length) {
       return [];
     }
-    const gridChildList = GridChildUtils.adjustChildrenAndResetAutoGridInfo(
-      this.#gridMapping
-    );
+    const gridChildList = GridChildUtils.adjustChildrenAndResetAutoGridInfo(this.#gridMapping);
     if (ignoreGridArea) {
       gridChildList.forEach(gridChild => {
         gridChild.gridArea.rowStart = 0;
@@ -159,9 +143,7 @@ export class ComponentGridManager {
     if (!this.#gridMapping.childInfoList.length) {
       return [];
     }
-    const gridChildList = GridChildUtils.getModifiedChildrenGirdInfo(
-      this.#gridMapping
-    );
+    const gridChildList = GridChildUtils.getModifiedChildrenGirdInfo(this.#gridMapping);
     if (ignoreGridArea) {
       gridChildList.forEach(gridChild => {
         gridChild.gridArea.rowStart = 0;
@@ -171,6 +153,50 @@ export class ComponentGridManager {
       });
     }
     return gridChildList;
+  }
+
+  getChildGridRect(gridArea: GridArea) {
+    return GridUtils.convertChildSizeInfoToNumber({
+      gridArea,
+      gridRect: this.#gridMapping.gridActiveRect,
+      gridItemRectList: this.#gridMapping.getGridItemRectList()
+    });
+  }
+
+  convertChildPxValueToPercentSizeInfo(params: {
+    gridArea: GridArea;
+    pxValue: number;
+    compareType: 'width' | 'height';
+  }): UISize {
+    const childGridRect = this.getChildGridRect(params.gridArea);
+    let value = 0;
+    if (params.compareType === 'width') {
+      value = (params.pxValue / childGridRect.width) * 100;
+    } else if (params.compareType === 'height') {
+      value = (params.pxValue / childGridRect.height) * 100;
+    }
+    return {
+      value: parseFloat(value.toFixed(2)),
+      unit: SizeUnit.Percent
+    };
+  }
+
+  convertChildPercentValueToNumberSizeInfo(params: {
+    gridArea: GridArea;
+    percentValue: number;
+    compareType: 'width' | 'height';
+  }): UISize {
+    const childGridRect = this.getChildGridRect(params.gridArea);
+    let value = 0;
+    if (params.compareType === 'width') {
+      value = (params.percentValue * childGridRect.width) / 100;
+    } else if (params.compareType === 'height') {
+      value = (params.percentValue * childGridRect.height) / 100;
+    }
+    return {
+      value: parseFloat(value.toFixed(1)),
+      unit: SizeUnit.PX
+    };
   }
 
   getGridLineInfos(needBorder = false): {

@@ -10,17 +10,19 @@ import {
   SpacingPadding,
   UISize
 } from 'towify-editor-common-values';
-import {
-  GridChildInfo,
-  PaddingInfo,
-  RectInfo,
-  UnsetUnit
-} from '../../type/common.type';
+import { GridChildInfo, PaddingInfo, RectInfo, UnsetUnit } from '../../type/common.type';
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
 import { UISizeUtils } from '../../utils/ui.size.utils/ui.size.utils';
 
 export class GridMapping {
   #gridRect = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0
+  };
+
+  #parentRect = {
     x: 0,
     y: 0,
     width: 0,
@@ -36,6 +38,10 @@ export class GridMapping {
     public customGrid?: CustomGrid,
     public readonly childInfoList: GridChildInfo[] = []
   ) {}
+
+  set parentRect(value: RectInfo) {
+    this.#parentRect = value;
+  }
 
   set gridRect(value: RectInfo) {
     this.#gridRect = value;
@@ -58,25 +64,19 @@ export class GridMapping {
   }
 
   get paddingInfo(): PaddingInfo {
-    return GridUtils.convertOffsetValue(this.padding, this.gridRect);
+    return GridUtils.convertOffsetValue(this.padding, this.#parentRect.width);
   }
 
   get borderInfo(): PaddingInfo {
-    return GridUtils.convertOffsetValue(this.border, this.gridRect);
+    return GridUtils.convertOffsetValue(this.border);
   }
 
   get rowGap(): number {
-    return UISizeUtils.convertUISizeToNumber(
-      this.gap.row,
-      this.gridActiveRect.height
-    );
+    return UISizeUtils.convertUISizeToNumber(this.gap.row, this.gridActiveRect.height);
   }
 
   get columnGap(): number {
-    return UISizeUtils.convertUISizeToNumber(
-      this.gap.column,
-      this.gridActiveRect.width
-    );
+    return UISizeUtils.convertUISizeToNumber(this.gap.column, this.gridActiveRect.width);
   }
 
   get gridColumnInfo(): UISize[] {
@@ -88,9 +88,7 @@ export class GridMapping {
     for (columnIndex; columnIndex < this.columnCount; columnIndex += 1) {
       gridColumnInfo.push({
         value:
-          (this.gridActiveRect.width -
-            this.columnGap * (this.columnCount - 1)) /
-          this.columnCount,
+          (this.gridActiveRect.width - this.columnGap * (this.columnCount - 1)) / this.columnCount,
         unit: SizeUnit.PX
       });
     }
@@ -105,9 +103,7 @@ export class GridMapping {
     const gridRowInfo = [];
     for (rowIndex; rowIndex < this.rowCount; rowIndex += 1) {
       gridRowInfo.push({
-        value:
-          (this.gridActiveRect.height - this.rowGap * (this.rowCount - 1)) /
-          this.rowCount,
+        value: (this.gridActiveRect.height - this.rowGap * (this.rowCount - 1)) / this.rowCount,
         unit: SizeUnit.PX
       });
     }
@@ -148,10 +144,8 @@ export class GridMapping {
       columnAutoOffsetList = this.getAutoOffsetList(gridColumnInfo, false);
       rowAutoOffsetList = this.getAutoOffsetList(gridRowInfo, true);
     }
-    const gridWidth =
-      this.gridActiveRect.width - (gridColumnInfo.length - 1) * this.columnGap;
-    const gridHeight =
-      this.gridActiveRect.height - (gridRowInfo.length - 1) * this.rowGap;
+    const gridWidth = this.gridActiveRect.width - (gridColumnInfo.length - 1) * this.columnGap;
+    const gridHeight = this.gridActiveRect.height - (gridRowInfo.length - 1) * this.rowGap;
     const columnsNumberArray = GridUtils.getGridRowOrColumnItemValues({
       sizeInfoList: gridColumnInfo,
       maxValue: gridWidth,
@@ -202,10 +196,7 @@ export class GridMapping {
     return itemRectList;
   }
 
-  getChildGridAreaInfoByRect(params: {
-    rect: RectInfo;
-    gridItemRectList: RectInfo[][];
-  }): {
+  getChildGridAreaInfoByRect(params: { rect: RectInfo; gridItemRectList: RectInfo[][] }): {
     gridArea: GridArea;
     marginLeft: number;
     marginTop: number;
@@ -218,10 +209,7 @@ export class GridMapping {
     });
   }
 
-  getGridChildRect(
-    child: GridChildInfo,
-    itemRectList?: RectInfo[][]
-  ): RectInfo {
+  getGridChildRect(child: GridChildInfo, itemRectList?: RectInfo[][]): RectInfo {
     const gridItemRectList = itemRectList ?? this.getGridItemRectList();
     const childGridRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: child.gridArea,
@@ -244,19 +232,13 @@ export class GridMapping {
       child.margin.left,
       childGridRect.width
     );
-    const marginTopValue = UISizeUtils.convertUISizeToNumber(
-      child.margin.top,
-      childGridRect.height
-    );
+    const marginTopValue = UISizeUtils.convertUISizeToNumber(child.margin.top, childGridRect.width);
     let childX = childGridRect.x + marginLeftValue;
     let childY = childGridRect.y + marginTopValue;
     if (child.placeSelf.justifySelf) {
       switch (child.placeSelf.justifySelf) {
         case 'center': {
-          childX =
-            childGridRect.x +
-            (childGridRect.width - childWidth) / 2 +
-            marginLeftValue / 2;
+          childX = childGridRect.x + (childGridRect.width - childWidth) / 2 + marginLeftValue / 2;
           break;
         }
         case 'end': {
@@ -272,10 +254,7 @@ export class GridMapping {
     if (child.placeSelf.alignSelf) {
       switch (child.placeSelf.alignSelf) {
         case 'center': {
-          childY =
-            childGridRect.y +
-            (childGridRect.height - childHeight) / 2 +
-            marginTopValue / 2;
+          childY = childGridRect.y + (childGridRect.height - childHeight) / 2 + marginTopValue / 2;
           break;
         }
         case 'end': {
