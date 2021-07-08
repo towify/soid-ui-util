@@ -156,11 +156,14 @@ export class ComponentGridManager {
   }
 
   getChildGridRect(gridArea: GridArea) {
-    return GridUtils.convertChildSizeInfoToNumber({
+    const childRectRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea,
       gridRect: this.#gridMapping.gridActiveRect,
       gridItemRectList: this.#gridMapping.getGridItemRectList()
     });
+    childRectRect.x += this.gridRect.x;
+    childRectRect.y += this.gridRect.y;
+    return childRectRect;
   }
 
   convertChildPxValueToPercentSizeInfo(params: {

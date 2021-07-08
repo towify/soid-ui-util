@@ -3,12 +3,7 @@
  * @data 2020/12/14 16:43
  */
 import { GridArea, SizeUnit } from 'towify-editor-common-values';
-import {
-  GridChildInfo,
-  RectInfo,
-  SizeInfo,
-  UnsetUnit
-} from '../../type/common.type';
+import { GridChildInfo, RectInfo, SizeInfo, UnsetUnit } from '../../type/common.type';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 import { UISizeUtils } from '../ui.size.utils/ui.size.utils';
 import { GridUtils } from './grid.utils';
@@ -45,9 +40,7 @@ export class GridChildUtils {
       let marginRight;
       if (columnAutoNumber) {
         const rightValueNumber =
-          params.rightOffset -
-          params.margin.marginLeft -
-          params.childInfo.rect.width;
+          params.rightOffset - params.margin.marginLeft - params.childInfo.rect.width;
         marginRight = UISizeUtils.convertNumberToUISize({
           valueNumber: rightValueNumber,
           unit: params.childInfo.margin.right.unit,
@@ -61,6 +54,8 @@ export class GridChildUtils {
       }
       params.childInfo.margin.left = marginLeft;
       params.childInfo.margin.right = marginRight;
+      params.childInfo.gridArea.columnStart = params.gridArea.columnStart;
+      params.childInfo.gridArea.columnEnd = params.gridArea.columnEnd;
     }
     if (params.childInfo.placeSelf.alignSelf) {
       params.childInfo.margin.top = UnsetUnit;
@@ -79,9 +74,7 @@ export class GridChildUtils {
       let marginBottom;
       if (rowAutoNumber) {
         const bottomValueNumber =
-          params.bottomOffset -
-          params.margin.marginTop -
-          params.childInfo.rect.height;
+          params.bottomOffset - params.margin.marginTop - params.childInfo.rect.height;
         marginBottom = UISizeUtils.convertNumberToUISize({
           valueNumber: bottomValueNumber,
           unit: params.childInfo.margin.bottom.unit,
@@ -95,6 +88,8 @@ export class GridChildUtils {
       }
       params.childInfo.margin.top = marginTop;
       params.childInfo.margin.bottom = marginBottom;
+      params.childInfo.gridArea.rowStart = params.gridArea.rowStart;
+      params.childInfo.gridArea.rowEnd = params.gridArea.rowEnd;
     }
     params.childInfo.size.width = UISizeUtils.convertUISizeWithParentValue({
       sizeInfo: params.childInfo.size.width,
@@ -127,13 +122,10 @@ export class GridChildUtils {
       newParentValue: params.childGridRect.height
     });
     params.childInfo.parentRect = params.childGridRect;
-    params.childInfo.gridArea = params.gridArea;
     return params.childInfo;
   }
 
-  static getModifiedChildrenGirdInfo(
-    gridMapping: GridMapping
-  ): GridChildInfo[] {
+  static getModifiedChildrenGirdInfo(gridMapping: GridMapping): GridChildInfo[] {
     const gridItemRectList = gridMapping.getGridItemRectList();
     let margin: {
       marginLeft: number;
@@ -160,24 +152,12 @@ export class GridChildUtils {
         gridItemRectList
       });
       const bottomOffset =
-        UISizeUtils.convertUISizeToNumber(
-          childInfo.margin.top,
-          childGridRect.height
-        ) +
-        UISizeUtils.convertUISizeToNumber(
-          childInfo.margin.bottom,
-          childGridRect.height
-        ) +
+        UISizeUtils.convertUISizeToNumber(childInfo.margin.top, childGridRect.height) +
+        UISizeUtils.convertUISizeToNumber(childInfo.margin.bottom, childGridRect.height) +
         childInfo.rect.height;
       const rightOffset =
-        UISizeUtils.convertUISizeToNumber(
-          childInfo.margin.left,
-          childGridRect.width
-        ) +
-        UISizeUtils.convertUISizeToNumber(
-          childInfo.margin.right,
-          childGridRect.width
-        ) +
+        UISizeUtils.convertUISizeToNumber(childInfo.margin.left, childGridRect.width) +
+        UISizeUtils.convertUISizeToNumber(childInfo.margin.right, childGridRect.width) +
         childInfo.rect.width;
       return GridChildUtils.adjustChildGridInfo({
         childInfo,
@@ -191,9 +171,7 @@ export class GridChildUtils {
     });
   }
 
-  static adjustChildrenAndResetAutoGridInfo(
-    gridMapping: GridMapping
-  ): GridChildInfo[] {
+  static adjustChildrenAndResetAutoGridInfo(gridMapping: GridMapping): GridChildInfo[] {
     const gridItemRectList = gridMapping.getGridItemRectList(false);
     let areaInfo: {
       gridArea: GridArea;
@@ -309,9 +287,7 @@ export class GridChildUtils {
       marginRightUnit = SizeUnit.Unset;
     } else if (
       NumberUtils.parseViewNumber(droppedRect.x + droppedRect.width / 2) ===
-      NumberUtils.parseViewNumber(
-        droppedParentRect.x + droppedParentRect.width / 2
-      )
+      NumberUtils.parseViewNumber(droppedParentRect.x + droppedParentRect.width / 2)
     ) {
       justifySelf = 'center';
       marginLeftUnit = SizeUnit.Unset;
@@ -333,18 +309,14 @@ export class GridChildUtils {
       marginBottomUnit = SizeUnit.Unset;
     } else if (
       NumberUtils.parseViewNumber(droppedRect.y + droppedRect.height / 2) ===
-      NumberUtils.parseViewNumber(
-        droppedParentRect.y + droppedParentRect.height / 2
-      )
+      NumberUtils.parseViewNumber(droppedParentRect.y + droppedParentRect.height / 2)
     ) {
       alignSelf = 'center';
       marginTopUnit = SizeUnit.Unset;
       marginBottomUnit = SizeUnit.Unset;
     } else if (
       NumberUtils.parseViewNumber(droppedRect.y + droppedRect.height) ===
-      NumberUtils.parseViewNumber(
-        droppedParentRect.y + droppedParentRect.height
-      )
+      NumberUtils.parseViewNumber(droppedParentRect.y + droppedParentRect.height)
     ) {
       alignSelf = 'end';
       marginTopUnit = SizeUnit.Unset;
@@ -357,15 +329,11 @@ export class GridChildUtils {
         top: { value: gridInfo.marginTop, unit: marginTopUnit },
         left: { value: gridInfo.marginLeft, unit: marginLeftUnit },
         right: {
-          value: columnAutoNumber
-            ? 0 - gridInfo.marginLeft - droppedRect.width
-            : 0,
+          value: columnAutoNumber ? 0 - gridInfo.marginLeft - droppedRect.width : 0,
           unit: marginRightUnit
         },
         bottom: {
-          value: rowAutoNumber
-            ? 0 - gridInfo.marginTop - droppedRect.height
-            : 0,
+          value: rowAutoNumber ? 0 - gridInfo.marginTop - droppedRect.height : 0,
           unit: marginBottomUnit
         }
       },
@@ -406,10 +374,7 @@ export class GridChildUtils {
         })
       }
     };
-    droppedInfo.rect = gridMapping.getGridChildRect(
-      droppedInfo,
-      gridItemRectList
-    );
+    droppedInfo.rect = gridMapping.getGridChildRect(droppedInfo, gridItemRectList);
     gridMapping.childInfoList.push(droppedInfo);
     return {
       info: droppedInfo,
