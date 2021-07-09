@@ -49,7 +49,7 @@ export class GridChildUtils {
       } else {
         marginRight = {
           value: 0,
-          unit: params.childInfo.margin.right.unit
+          unit: SizeUnit.Unset
         };
       }
       params.childInfo.margin.left = marginLeft;
@@ -59,12 +59,12 @@ export class GridChildUtils {
     }
     if (params.childInfo.placeSelf.alignSelf) {
       params.childInfo.margin.top = UnsetUnit;
-      params.childInfo.margin.top = UnsetUnit;
+      params.childInfo.margin.bottom = UnsetUnit;
     } else {
       const marginTop = UISizeUtils.convertNumberToUISize({
         valueNumber: params.margin.marginTop,
         unit: params.childInfo.margin.top.unit,
-        maxValue: params.childGridRect.height
+        maxValue: params.childGridRect.width
       });
       const rowAutoNumber = GridUtils.getGridAreaAutoNumber({
         start: params.gridArea.rowStart - 1,
@@ -78,12 +78,12 @@ export class GridChildUtils {
         marginBottom = UISizeUtils.convertNumberToUISize({
           valueNumber: bottomValueNumber,
           unit: params.childInfo.margin.bottom.unit,
-          maxValue: params.childGridRect.height
+          maxValue: params.childGridRect.width
         });
       } else {
         marginBottom = {
           value: 0,
-          unit: params.childInfo.margin.bottom.unit
+          unit: SizeUnit.Unset
         };
       }
       params.childInfo.margin.top = marginTop;
@@ -223,7 +223,16 @@ export class GridChildUtils {
     const childIndex = gridMapping.childInfoList.findIndex(
       childInfo => childInfo.id === dropped.id
     );
+    let marginLeftUnit: SizeUnit = SizeUnit.PX;
+    let marginRightUnit: SizeUnit = SizeUnit.PX;
+    let marginTopUnit: SizeUnit = SizeUnit.PX;
+    let marginBottomUnit: SizeUnit = SizeUnit.PX;
     if (childIndex !== -1) {
+      const margin = gridMapping.childInfoList[childIndex].margin;
+      marginLeftUnit = margin.left.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
+      marginRightUnit = margin.right.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
+      marginTopUnit = margin.top.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
+      marginBottomUnit = margin.bottom.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
       gridMapping.childInfoList.splice(childIndex, 1);
     }
     const gridItemRectList = gridMapping.getGridItemRectList();
@@ -274,10 +283,6 @@ export class GridChildUtils {
     });
     let justifySelf = '';
     let alignSelf = '';
-    let marginLeftUnit: SizeUnit = SizeUnit.PX;
-    let marginRightUnit: SizeUnit = SizeUnit.PX;
-    let marginTopUnit: SizeUnit = SizeUnit.PX;
-    let marginBottomUnit: SizeUnit = SizeUnit.PX;
     if (
       NumberUtils.parseViewNumber(droppedRect.x) ===
       NumberUtils.parseViewNumber(droppedParentRect.x)
@@ -326,16 +331,30 @@ export class GridChildUtils {
       id: dropped.id,
       gridArea: gridInfo.gridArea,
       margin: {
-        top: { value: gridInfo.marginTop, unit: marginTopUnit },
-        left: { value: gridInfo.marginLeft, unit: marginLeftUnit },
-        right: {
-          value: columnAutoNumber ? 0 - gridInfo.marginLeft - droppedRect.width : 0,
-          unit: marginRightUnit
-        },
-        bottom: {
-          value: rowAutoNumber ? 0 - gridInfo.marginTop - droppedRect.height : 0,
-          unit: marginBottomUnit
-        }
+        top: UISizeUtils.convertNumberToUISize({
+          valueNumber: gridInfo.marginTop,
+          unit: marginTopUnit,
+          maxValue: droppedParentRect.width
+        }),
+        left: UISizeUtils.convertNumberToUISize({
+          valueNumber: gridInfo.marginLeft,
+          unit: marginLeftUnit,
+          maxValue: droppedParentRect.width
+        }),
+        right: columnAutoNumber
+          ? UISizeUtils.convertNumberToUISize({
+              valueNumber: 0 - gridInfo.marginLeft - droppedRect.width,
+              unit: marginRightUnit,
+              maxValue: droppedParentRect.width
+            })
+          : { value: 0, unit: SizeUnit.Unset },
+        bottom: rowAutoNumber
+          ? UISizeUtils.convertNumberToUISize({
+              valueNumber: 0 - gridInfo.marginTop - droppedRect.height,
+              unit: marginBottomUnit,
+              maxValue: droppedParentRect.width
+            })
+          : { value: 0, unit: SizeUnit.Unset }
       },
       placeSelf: {
         justifySelf,

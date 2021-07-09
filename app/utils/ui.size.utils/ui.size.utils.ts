@@ -84,29 +84,25 @@ export class UISizeUtils {
     maxValue?: number;
   }): UISize {
     let value = params.valueNumber;
-    let unit = params.unit;
     if (params.unit === SizeUnit.Percent) {
       value = parseFloat(((params.valueNumber / (params.maxValue ?? 1)) * 100).toFixed(2));
       if (value > 99.85 && value < 100.15) {
         value = 100;
       }
-      unit = SizeUnit.Percent;
     }
     if (
-      params.unit === SizeUnit.PX ||
-      params.unit === SizeUnit.Auto ||
-      params.unit === SizeUnit.Unset
+      params.unit === SizeUnit.Unset ||
+      params.unit === SizeUnit.Fit ||
+      params.unit === SizeUnit.Auto
     ) {
-      value = NumberUtils.parseViewNumber(value);
-      unit = SizeUnit.PX;
+      value = 0;
     }
-    if (params.unit === SizeUnit.Fit) {
+    if (params.unit === SizeUnit.PX) {
       value = NumberUtils.parseViewNumber(value);
-      unit = SizeUnit.Fit;
     }
     return {
       value,
-      unit
+      unit: params.unit
     };
   }
 

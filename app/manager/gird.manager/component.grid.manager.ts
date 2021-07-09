@@ -325,7 +325,13 @@ export class ComponentGridManager {
     movingRect.y += alignLineInfo.offset.y;
     const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns(
       movingRect,
-      this.#gridMapping
+      this.#gridMapping,
+      {
+        top: moveChild.margin.top.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX,
+        bottom: moveChild.margin.bottom.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX,
+        left: moveChild.margin.left.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX,
+        right: moveChild.margin.right.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX
+      }
     );
     return GridLineUtils.convertAlignAndAssistLineInfo({
       alignLineInfo,
