@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/12/14 16:43
  */
-import { GridArea, SizeUnit } from 'towify-editor-common-values';
+import { GridArea, SizeUnit } from '@towify/common-values';
 import { GridChildInfo, RectInfo, SizeInfo, UnsetUnit } from '../../type/common.type';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 import { UISizeUtils } from '../ui.size.utils/ui.size.utils';

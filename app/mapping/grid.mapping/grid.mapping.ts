@@ -9,7 +9,7 @@ import {
   SizeUnit,
   SpacingPadding,
   UISize
-} from 'towify-editor-common-values';
+} from '@towify/common-values';
 import { GridChildInfo, PaddingInfo, RectInfo, UnsetUnit } from '../../type/common.type';
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
 import { UISizeUtils } from '../../utils/ui.size.utils/ui.size.utils';

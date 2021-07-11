@@ -2,22 +2,21 @@
  * @author allen
  * @data 2021/1/22 11:37
  */
-import { SizeUnit, UISize } from 'towify-editor-common-values';
+import { SizeUnit, UISize } from '@towify/common-values';
 import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';
 
 export class UISizeUtils {
+  private static number: number;
+
   static getValidRenderSizeByComparing(params: {
     min: UISize;
     max: UISize;
     origin: UISize;
     parentSizeValue?: number;
   }): UISize {
-    const originValue = UISizeUtils.convertUISizeToNumber(
-      params.origin,
-      params.parentSizeValue,
-      false
-    );
+    this.number = UISizeUtils.convertUISizeToNumber(params.origin, params.parentSizeValue, false);
+    const originValue = this.number;
     if (
       params.min.unit !== SizeUnit.Auto &&
       params.min.unit !== SizeUnit.Unset &&

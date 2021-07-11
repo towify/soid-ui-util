@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/11/18 12:12
  */
-import { GridArea, SizeUnit, SpacingPadding, UISize } from 'towify-editor-common-values';
+import { GridArea, SizeUnit, SpacingPadding, UISize } from '@towify/common-values';
 import { PaddingInfo, RectInfo } from '../../type/common.type';
 import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';

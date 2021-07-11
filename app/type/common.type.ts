@@ -2,12 +2,7 @@
  *  @Author KaySaith
  *  @Date 10/31/20
  */
-import {
-  GridArea,
-  SizeUnit,
-  SpacingMargin,
-  UISize
-} from 'towify-editor-common-values';
+import { GridArea, SizeUnit, SpacingMargin, UISize } from '@towify/common-values';
 
 type Rgba = {
   red: number;

@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/12/14 17:04
  */
-import { SizeUnit } from 'towify-editor-common-values';
+import { SizeUnit } from '@towify/common-values';
 import { LineInfo, RectInfo } from '../../type/common.type';
 import { SignInfo } from '../../type/interact.type';
 import { NumberUtils } from '../number.utils/number.utils';
