@@ -244,18 +244,24 @@ export class GridChildUtils {
         gridItemRectList
       });
     }
-    const rectWidth = gridMapping.convertSizeInfoToNumber({
-      value: dropped.size.width,
-      max: dropped.size.maxWidth,
-      min: dropped.size.minWidth,
-      maxValue: droppedOldParentRect?.width
-    });
-    const rectHeight = gridMapping.convertSizeInfoToNumber({
-      value: dropped.size.height,
-      max: dropped.size.maxHeight,
-      min: dropped.size.minHeight,
-      maxValue: droppedOldParentRect?.height
-    });
+    const rectWidth = UISizeUtils.convertUISizeToNumber(
+      UISizeUtils.getValidRenderSizeByComparing({
+        origin: dropped.size.width,
+        max: dropped.size.maxWidth,
+        min: dropped.size.minWidth,
+        parentSizeValue: droppedOldParentRect?.width
+      }),
+      droppedOldParentRect?.width
+    );
+    const rectHeight = UISizeUtils.convertUISizeToNumber(
+      UISizeUtils.getValidRenderSizeByComparing({
+        origin: dropped.size.height,
+        max: dropped.size.maxHeight,
+        min: dropped.size.minHeight,
+        parentSizeValue: droppedOldParentRect?.height
+      }),
+      droppedOldParentRect?.height
+    );
     const droppedRect = {
       x: dropped.x,
       y: dropped.y,

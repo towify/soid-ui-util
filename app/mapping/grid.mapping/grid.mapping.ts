@@ -110,21 +110,6 @@ export class GridMapping {
     return gridRowInfo;
   }
 
-  convertSizeInfoToNumber(params: {
-    value: UISize;
-    max: UISize;
-    min: UISize;
-    maxValue?: number;
-  }): number {
-    const sizeInfo = UISizeUtils.getValidRenderSizeByComparing({
-      origin: params.value,
-      max: params.max,
-      min: params.min,
-      parentSizeValue: params.maxValue
-    });
-    return UISizeUtils.convertUISizeToNumber(sizeInfo, params.maxValue);
-  }
-
   setChildrenInfo(childrenInfo: GridChildInfo[]): GridMapping {
     this.childInfoList.splice(0, this.childInfoList.length);
     childrenInfo.forEach(child => {
@@ -216,18 +201,24 @@ export class GridMapping {
       gridRect: this.gridActiveRect,
       gridItemRectList
     });
-    const childWidth = this.convertSizeInfoToNumber({
-      value: child.size.width,
-      max: child.size.maxWidth,
-      min: child.size.minWidth,
-      maxValue: childGridRect.width
-    });
-    const childHeight = this.convertSizeInfoToNumber({
-      value: child.size.height,
-      max: child.size.maxHeight,
-      min: child.size.minHeight,
-      maxValue: childGridRect.height
-    });
+    const childWidth = UISizeUtils.convertUISizeToNumber(
+      UISizeUtils.getValidRenderSizeByComparing({
+        origin: child.size.width,
+        max: child.size.maxWidth,
+        min: child.size.minWidth,
+        parentSizeValue: childGridRect.width
+      }),
+      childGridRect.width
+    );
+    const childHeight = UISizeUtils.convertUISizeToNumber(
+      UISizeUtils.getValidRenderSizeByComparing({
+        origin: child.size.height,
+        max: child.size.maxHeight,
+        min: child.size.minHeight,
+        parentSizeValue: childGridRect.height
+      }),
+      childGridRect.height
+    );
     const marginLeftValue = UISizeUtils.convertUISizeToNumber(
       child.margin.left,
       childGridRect.width
