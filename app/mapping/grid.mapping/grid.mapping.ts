@@ -10,6 +10,7 @@ import {
   SpacingPadding,
   UISize
 } from '@towify/common-values';
+import type { DslType } from '@towify-types/dsl';
 import { GridChildInfo, PaddingInfo, RectInfo, UnsetUnit } from '../../type/common.type';
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
 import { UISizeUtils } from '../../utils/ui.size.utils/ui.size.utils';
@@ -32,7 +33,7 @@ export class GridMapping {
   constructor(
     public gap: GridGap,
     public padding: SpacingPadding,
-    public border: SpacingPadding,
+    public border: DslType.BorderInfo,
     public columnCount: number,
     public rowCount: number,
     public customGrid?: CustomGrid,
@@ -44,11 +45,11 @@ export class GridMapping {
   }
 
   set gridRect(value: RectInfo) {
-    this.#gridRect = value;
-    this.childInfoList.forEach(child => {
-      child.rect = this.getGridChildRect(child);
-      this.childInfoList.push(child);
-    });
+    this.#gridRect.x = value.x;
+    this.#gridRect.y = value.y;
+    this.#gridRect.width = value.width;
+    this.#gridRect.height = value.height;
+    this.updateChildrenRect();
   }
 
   get gridRect(): RectInfo {
@@ -68,7 +69,12 @@ export class GridMapping {
   }
 
   get borderInfo(): PaddingInfo {
-    return GridUtils.convertOffsetValue(this.border);
+    return GridUtils.convertOffsetValue({
+      left: this.border.left.width,
+      right: this.border.right.width,
+      top: this.border.top.width,
+      bottom: this.border.bottom.width
+    });
   }
 
   get rowGap(): number {
@@ -110,6 +116,12 @@ export class GridMapping {
     return gridRowInfo;
   }
 
+  updateChildrenRect() {
+    this.childInfoList.forEach(child => {
+      child.rect = this.getGridChildRect(child);
+    });
+  }
+
   setChildrenInfo(childrenInfo: GridChildInfo[]): GridMapping {
     this.childInfoList.splice(0, this.childInfoList.length);
     childrenInfo.forEach(child => {
@@ -129,30 +141,30 @@ export class GridMapping {
       columnAutoOffsetList = this.getAutoOffsetList(gridColumnInfo, false);
       rowAutoOffsetList = this.getAutoOffsetList(gridRowInfo, true);
     }
-    const gridWidth = this.gridActiveRect.width - (gridColumnInfo.length - 1) * this.columnGap;
-    const gridHeight = this.gridActiveRect.height - (gridRowInfo.length - 1) * this.rowGap;
+    const maxWidth = this.gridActiveRect.width - (gridColumnInfo.length - 1) * this.columnGap;
+    const maxHeight = this.gridActiveRect.height - (gridRowInfo.length - 1) * this.rowGap;
     const columnsNumberArray = GridUtils.getGridRowOrColumnItemValues({
       sizeInfoList: gridColumnInfo,
-      maxValue: gridWidth,
+      maxValue: maxWidth,
       autoOffsetList: columnAutoOffsetList
     });
     const rowsNumberArray = GridUtils.getGridRowOrColumnItemValues({
       sizeInfoList: gridRowInfo,
-      maxValue: gridHeight,
+      maxValue: maxHeight,
       autoOffsetList: rowAutoOffsetList
     });
     let rowIndex = 0;
     let rowLength = rowsNumberArray.length;
     if (rowLength === 0) {
       rowLength = 1;
-      rowsNumberArray.push(gridHeight);
+      rowsNumberArray.push(maxHeight);
     }
     let columnIndex = 0;
     const itemRectList: RectInfo[][] = [];
     let columnLength = columnsNumberArray.length;
     if (columnLength === 0) {
       columnLength = 1;
-      columnsNumberArray.push(gridWidth);
+      columnsNumberArray.push(maxWidth);
     }
     let rowY = this.gridActiveRect.y;
     let rowHeight = 0;
@@ -198,7 +210,6 @@ export class GridMapping {
     const gridItemRectList = itemRectList ?? this.getGridItemRectList();
     const childGridRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: child.gridArea,
-      gridRect: this.gridActiveRect,
       gridItemRectList
     });
     const childWidth = UISizeUtils.convertUISizeToNumber(

@@ -183,7 +183,6 @@ export class GridUtils {
   static convertChildSizeInfoToNumber(params: {
     gridArea: GridArea;
     gridItemRectList: RectInfo[][];
-    gridRect: RectInfo;
   }): RectInfo {
     const rowStart = params.gridArea.rowStart - 1;
     const columnStart = params.gridArea.columnStart - 1;
@@ -214,10 +213,7 @@ export class GridUtils {
     } else {
       childGridRect.x = params.gridItemRectList[0][columnStart].x;
     }
-    if (rowEnd === params.gridItemRectList.length) {
-      const maxRowItem = params.gridItemRectList[params.gridItemRectList.length - 1];
-      childGridRect.height = maxRowItem[0].y + maxRowItem[0].height - childGridRect.y;
-    } else if (rowEnd < params.gridItemRectList.length) {
+    if (rowEnd < params.gridItemRectList.length) {
       let rowIndex = rowEnd - 1;
       if (rowIndex < 0) {
         rowIndex = 0;
@@ -227,12 +223,10 @@ export class GridUtils {
         params.gridItemRectList[rowIndex][0].height -
         childGridRect.y;
     } else {
-      childGridRect.height = params.gridRect.y + params.gridRect.height - childGridRect.y;
+      const maxRowItem = params.gridItemRectList[params.gridItemRectList.length - 1];
+      childGridRect.height = maxRowItem[0].y + maxRowItem[0].height - childGridRect.y;
     }
-    if (columnEnd === params.gridItemRectList[0].length) {
-      const maxColumnItem = params.gridItemRectList[0][params.gridItemRectList[0].length - 1];
-      childGridRect.width = maxColumnItem.x + maxColumnItem.width - childGridRect.x;
-    } else if (columnEnd < params.gridItemRectList[0].length) {
+    if (columnEnd < params.gridItemRectList[0].length) {
       let columnIndex = columnEnd - 1;
       if (columnEnd <= 0) {
         columnIndex = 0;
@@ -242,7 +236,8 @@ export class GridUtils {
         params.gridItemRectList[0][columnIndex].width -
         childGridRect.x;
     } else {
-      childGridRect.width = params.gridRect.x + params.gridRect.width - childGridRect.x;
+      const maxColumnItem = params.gridItemRectList[0][params.gridItemRectList[0].length - 1];
+      childGridRect.width = maxColumnItem.x + maxColumnItem.width - childGridRect.x;
     }
     if (childGridRect.height < 0) {
       childGridRect.height = 0;
@@ -361,25 +356,17 @@ export class GridUtils {
     rect: RectInfo;
     gridArea: GridArea;
     gridItemRectList: RectInfo[][];
-    rowGap: number;
-    columnGap: number;
   }): {
     marginLeft: number;
     marginTop: number;
   } {
-    const rowStart = params.gridArea.rowStart - 1;
-    const columnStart = params.gridArea.columnStart - 1;
-    let marginLeft = params.rect.x;
-    let marginTop = params.rect.y;
-    if (rowStart < params.gridItemRectList.length) {
-      marginTop = params.rect.y - params.gridItemRectList[rowStart > 0 ? rowStart : 0][0].y;
-    }
-    if (columnStart < params.gridItemRectList[0].length) {
-      marginLeft = params.rect.x - params.gridItemRectList[0][columnStart > 0 ? columnStart : 0].x;
-    }
+    const childRectRect = GridUtils.convertChildSizeInfoToNumber({
+      gridArea: params.gridArea,
+      gridItemRectList: params.gridItemRectList
+    });
     return {
-      marginLeft: NumberUtils.parseViewNumber(marginLeft),
-      marginTop: NumberUtils.parseViewNumber(marginTop)
+      marginLeft: NumberUtils.parseViewNumber(params.rect.x - childRectRect.x),
+      marginTop: NumberUtils.parseViewNumber(params.rect.y - childRectRect.y)
     };
   }
 

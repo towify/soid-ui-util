@@ -142,13 +142,10 @@ export class GridChildUtils {
       margin = GridUtils.getChildGridMarginInfoByRect({
         rect: childInfo.rect,
         gridArea: childInfo.gridArea,
-        columnGap: gridMapping.columnGap,
-        rowGap: gridMapping.rowGap,
         gridItemRectList
       });
       childGridRect = GridUtils.convertChildSizeInfoToNumber({
         gridArea: childInfo.gridArea,
-        gridRect: gridMapping.gridActiveRect,
         gridItemRectList
       });
       const bottomOffset =
@@ -171,7 +168,10 @@ export class GridChildUtils {
     });
   }
 
-  static adjustChildrenAndResetAutoGridInfo(gridMapping: GridMapping): GridChildInfo[] {
+  static adjustChildrenAndResetAutoGridInfo(
+    gridMapping: GridMapping,
+    resetPlaceSelf = false
+  ): GridChildInfo[] {
     const gridItemRectList = gridMapping.getGridItemRectList(false);
     let areaInfo: {
       gridArea: GridArea;
@@ -186,13 +186,22 @@ export class GridChildUtils {
     };
     return gridMapping.childInfoList.map(childInfo => {
       if (!childInfo.rect || childInfo.isFullParent) return childInfo;
+      if (resetPlaceSelf) {
+        if (childInfo.placeSelf.alignSelf) {
+          childInfo.placeSelf.alignSelf = '';
+          childInfo.margin.top.unit = SizeUnit.PX;
+        }
+        if (childInfo.placeSelf.justifySelf) {
+          childInfo.placeSelf.justifySelf = '';
+          childInfo.margin.left.unit = SizeUnit.PX;
+        }
+      }
       areaInfo = gridMapping.getChildGridAreaInfoByRect({
         rect: childInfo.rect,
         gridItemRectList
       });
       childGridRect = GridUtils.convertChildSizeInfoToNumber({
         gridArea: areaInfo.gridArea,
-        gridRect: gridMapping.gridActiveRect,
         gridItemRectList
       });
       return GridChildUtils.adjustChildGridInfo({
@@ -213,6 +222,7 @@ export class GridChildUtils {
       x: number;
       y: number;
       size: SizeInfo;
+      droppedOldParentRect?: RectInfo;
       gridArea?: GridArea;
     },
     gridMapping: GridMapping
@@ -236,11 +246,10 @@ export class GridChildUtils {
       gridMapping.childInfoList.splice(childIndex, 1);
     }
     const gridItemRectList = gridMapping.getGridItemRectList();
-    let droppedOldParentRect: RectInfo | undefined;
+    let droppedOldParentRect = dropped.droppedOldParentRect;
     if (dropped.gridArea) {
       droppedOldParentRect = GridUtils.convertChildSizeInfoToNumber({
         gridArea: dropped.gridArea,
-        gridRect: gridMapping.gridActiveRect,
         gridItemRectList
       });
     }
@@ -274,7 +283,6 @@ export class GridChildUtils {
     });
     const droppedParentRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: gridInfo.gridArea,
-      gridRect: gridMapping.gridActiveRect,
       gridItemRectList
     });
     const rowAutoNumber = GridUtils.getGridAreaAutoNumber({

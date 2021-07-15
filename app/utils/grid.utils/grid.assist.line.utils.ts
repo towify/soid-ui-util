@@ -129,7 +129,7 @@ export class GridAssistLineUtils {
 
   static getAssistLinesAndSigns(
     movingRect: RectInfo,
-    gridManager: GridMapping,
+    gridMapping: GridMapping,
     marginUnits?: {
       left: SizeUnit.PX | SizeUnit.Percent;
       right: SizeUnit.PX | SizeUnit.Percent;
@@ -140,15 +140,14 @@ export class GridAssistLineUtils {
     lines: LineInfo[];
     signs: SignInfo[];
   } {
-    const gridItemRectList = gridManager.getGridItemRectList();
-    const activeAreaInfo = gridManager.getChildGridAreaInfoByRect({
+    const gridItemRectList = gridMapping.getGridItemRectList();
+    const activeAreaInfo = gridMapping.getChildGridAreaInfoByRect({
       rect: movingRect,
       gridItemRectList
     });
     const activeGridItemRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: activeAreaInfo.gridArea,
-      gridRect: gridManager.gridActiveRect,
-      gridItemRectList: gridManager.getGridItemRectList()
+      gridItemRectList: gridMapping.getGridItemRectList()
     });
     if (activeGridItemRect) {
       return GridAssistLineUtils.getAssistLinesAndSignsByActivePoint(

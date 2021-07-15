@@ -10,6 +10,7 @@ import {
   SpacingPadding,
   UISize
 } from '@towify/common-values';
+import { DslType } from '@towify-types/dsl';
 import { GridChildInfo, LineInfo, RectInfo, SizeInfo } from '../../type/common.type';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
@@ -40,7 +41,7 @@ export class ComponentGridManager {
   constructor(
     public readonly gap: GridGap,
     public readonly padding: SpacingPadding,
-    public readonly border: SpacingPadding
+    public readonly border: DslType.BorderInfo
   ) {
     this.#gridMapping = new GridMapping(gap, padding, border, 1, 1);
   }
@@ -80,6 +81,10 @@ export class ComponentGridManager {
     return this;
   }
 
+  updateChildrenRect() {
+    this.#gridMapping.updateChildrenRect();
+  }
+
   setChildrenGridInfo(childrenInfo: GridChildInfo[]): ComponentGridManager {
     this.#gridMapping.setChildrenInfo(childrenInfo);
     return this;
@@ -90,6 +95,7 @@ export class ComponentGridManager {
     x: number;
     y: number;
     size: SizeInfo;
+    droppedOldParentRect?: RectInfo;
     gridArea?: GridArea;
   }): {
     info: GridChildInfo;
@@ -123,11 +129,17 @@ export class ComponentGridManager {
     return this.#gridMapping.needUpdateGridChildren();
   }
 
-  adjustChildrenAndResetAutoGridInfo(ignoreGridArea = false): GridChildInfo[] {
+  adjustChildrenAndResetAutoGridInfo(
+    ignoreGridArea = false,
+    resetPlaceSelf = false
+  ): GridChildInfo[] {
     if (!this.#gridMapping.childInfoList.length) {
       return [];
     }
-    const gridChildList = GridChildUtils.adjustChildrenAndResetAutoGridInfo(this.#gridMapping);
+    const gridChildList = GridChildUtils.adjustChildrenAndResetAutoGridInfo(
+      this.#gridMapping,
+      resetPlaceSelf
+    );
     if (ignoreGridArea) {
       gridChildList.forEach(gridChild => {
         gridChild.gridArea.rowStart = 0;
@@ -158,7 +170,6 @@ export class ComponentGridManager {
   getChildGridRect(gridArea: GridArea) {
     const childRectRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea,
-      gridRect: this.#gridMapping.gridActiveRect,
       gridItemRectList: this.#gridMapping.getGridItemRectList()
     });
     childRectRect.x += this.gridRect.x;
