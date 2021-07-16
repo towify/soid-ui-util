@@ -39,18 +39,14 @@ export class GridUtils {
   }): number {
     let totalValue = 0;
     const autoNumber = GridUtils.getGridAreaAutoNumber(params);
-    totalValue += UISizeUtils.convertUISizeToNumber(params.sizeValue);
-    totalValue += UISizeUtils.convertUISizeToNumber(params.marginMin);
-    totalValue += UISizeUtils.convertUISizeToNumber(params.marginMax);
+    totalValue += params.sizeValue.unit === SizeUnit.PX ? params.sizeValue.value : 0;
+    totalValue += params.marginMin.unit === SizeUnit.PX ? params.marginMin.value : 0;
+    totalValue += params.marginMax.unit === SizeUnit.PX ? params.marginMax.value : 0;
     let startIndex = params.start;
     for (startIndex; startIndex < params.end; startIndex += 1) {
       if (startIndex < params.sizeInfoList.length && startIndex >= 0) {
-        if (
-          params.sizeInfoList[startIndex].unit !== SizeUnit.Auto &&
-          params.sizeInfoList[startIndex].unit !== SizeUnit.Unset &&
-          params.sizeInfoList[startIndex].unit !== SizeUnit.Fit
-        ) {
-          totalValue -= UISizeUtils.convertUISizeToNumber(params.sizeInfoList[startIndex]);
+        if (params.sizeInfoList[startIndex].unit === SizeUnit.PX) {
+          totalValue -= params.sizeInfoList[startIndex].value;
         }
       }
     }
