@@ -343,7 +343,6 @@ export class GridUtils {
         }
       });
     });
-    console.log('haha = ', { rowStart, columnStart, rowEnd, columnEnd });
     return {
       gridArea: { rowStart, columnStart, rowEnd, columnEnd },
       marginLeft: NumberUtils.parseViewNumber(marginLeft),
