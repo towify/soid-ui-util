@@ -193,14 +193,14 @@ export class GridMapping {
     return itemRectList;
   }
 
-  getChildGridAreaInfoByRect(params: { rect: RectInfo; gridItemRectList: RectInfo[][] }): {
+  getChildGridAreaInfoByRect(rect: RectInfo): {
     gridArea: GridArea;
     marginLeft: number;
     marginTop: number;
   } {
     return GridUtils.getChildGridAreaInfoByRect({
-      rect: params.rect,
-      gridItemRectList: params.gridItemRectList,
+      rect,
+      gridItemRectList: this.getGridItemRectList(),
       rowGap: this.rowGap,
       columnGap: this.columnGap
     });

@@ -101,7 +101,10 @@ export class ComponentGridManager {
     info: GridChildInfo;
     needUpdateGridChildren: boolean;
   } {
-    return GridChildUtils.setDroppedInfo(dropped, this.#gridMapping);
+    return {
+      info: GridChildUtils.setDroppedInfo(dropped, this.#gridMapping),
+      needUpdateGridChildren: this.#gridMapping.needUpdateGridChildren()
+    };
   }
 
   deleteChildByIdAndGetParentGridChildrenUpdateStatus(childId: string): boolean {

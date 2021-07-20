@@ -196,10 +196,7 @@ export class GridChildUtils {
           childInfo.margin.left.unit = SizeUnit.PX;
         }
       }
-      areaInfo = gridMapping.getChildGridAreaInfoByRect({
-        rect: childInfo.rect,
-        gridItemRectList
-      });
+      areaInfo = gridMapping.getChildGridAreaInfoByRect(childInfo.rect);
       childGridRect = GridUtils.convertChildSizeInfoToNumber({
         gridArea: areaInfo.gridArea,
         gridItemRectList
@@ -226,10 +223,7 @@ export class GridChildUtils {
       gridArea?: GridArea;
     },
     gridMapping: GridMapping
-  ): {
-    info: GridChildInfo;
-    needUpdateGridChildren: boolean;
-  } {
+  ): GridChildInfo {
     const gridItemRectList = gridMapping.getGridItemRectList();
     const childIndex = gridMapping.childInfoList.findIndex(
       childInfo => childInfo.id === dropped.id
@@ -239,14 +233,17 @@ export class GridChildUtils {
     let marginTopUnit: SizeUnit = SizeUnit.PX;
     let marginBottomUnit: SizeUnit = SizeUnit.PX;
     let droppedOldParentRect = dropped.droppedOldParentRect;
+    let child;
     if (childIndex !== -1) {
-      const margin = gridMapping.childInfoList[childIndex].margin;
-      marginLeftUnit = margin.left.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
-      marginRightUnit = margin.right.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
-      marginTopUnit = margin.top.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
-      marginBottomUnit = margin.bottom.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
+      child = gridMapping.childInfoList[childIndex];
+      marginLeftUnit = child.margin.left.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
+      marginRightUnit =
+        child.margin.right.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
+      marginTopUnit = child.margin.top.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
+      marginBottomUnit =
+        child.margin.bottom.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
       droppedOldParentRect = GridUtils.convertChildSizeInfoToNumber({
-        gridArea: gridMapping.childInfoList[childIndex].gridArea,
+        gridArea: child.gridArea,
         gridItemRectList
       });
     }
@@ -274,10 +271,7 @@ export class GridChildUtils {
       width: rectWidth,
       height: rectHeight
     };
-    const gridInfo = gridMapping.getChildGridAreaInfoByRect({
-      rect: droppedRect,
-      gridItemRectList
-    });
+    const gridInfo = gridMapping.getChildGridAreaInfoByRect(droppedRect);
     const droppedParentRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: gridInfo.gridArea,
       gridItemRectList
@@ -402,7 +396,8 @@ export class GridChildUtils {
           oldParentValue: droppedOldParentRect?.height ?? 0,
           newParentValue: droppedParentRect.height
         })
-      }
+      },
+      isFullParent: child?.isFullParent
     };
     droppedInfo.rect = gridMapping.getGridChildRect(droppedInfo, gridItemRectList);
     if (childIndex === -1) {
@@ -410,9 +405,6 @@ export class GridChildUtils {
     } else {
       gridMapping.childInfoList.splice(childIndex, 1, droppedInfo);
     }
-    return {
-      info: droppedInfo,
-      needUpdateGridChildren: gridMapping.needUpdateGridChildren()
-    };
+    return droppedInfo;
   }
 }

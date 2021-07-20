@@ -140,11 +140,7 @@ export class GridAssistLineUtils {
     lines: LineInfo[];
     signs: SignInfo[];
   } {
-    const gridItemRectList = gridMapping.getGridItemRectList();
-    const activeAreaInfo = gridMapping.getChildGridAreaInfoByRect({
-      rect: movingRect,
-      gridItemRectList
-    });
+    const activeAreaInfo = gridMapping.getChildGridAreaInfoByRect(movingRect);
     const activeGridItemRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: activeAreaInfo.gridArea,
       gridItemRectList: gridMapping.getGridItemRectList()

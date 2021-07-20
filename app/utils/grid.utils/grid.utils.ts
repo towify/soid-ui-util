@@ -268,10 +268,12 @@ export class GridUtils {
       x: params.gridItemRectList[0][0].x,
       y: params.gridItemRectList[0][0].y,
       width:
-        params.gridItemRectList[0][columnLength - 1].x +
+        params.gridItemRectList[0][columnLength - 1].x -
+        params.gridItemRectList[0][0].x +
         params.gridItemRectList[0][columnLength - 1].width,
       height:
-        params.gridItemRectList[rowLength - 1][0].y +
+        params.gridItemRectList[rowLength - 1][0].y -
+        params.gridItemRectList[0][0].y +
         params.gridItemRectList[rowLength - 1][0].height
     };
     if (!GridUtils.checkPointIsInRect({ x: params.rect.x, y: gridAreaRect.y }, gridAreaRect)) {
@@ -341,6 +343,7 @@ export class GridUtils {
         }
       });
     });
+    console.log('haha = ', { rowStart, columnStart, rowEnd, columnEnd });
     return {
       gridArea: { rowStart, columnStart, rowEnd, columnEnd },
       marginLeft: NumberUtils.parseViewNumber(marginLeft),
