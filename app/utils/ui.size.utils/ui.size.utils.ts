@@ -7,16 +7,17 @@ import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';
 
 export class UISizeUtils {
-  private static number: number;
-
   static getValidRenderSizeByComparing(params: {
     min: UISize;
     max: UISize;
     origin: UISize;
     parentSizeValue?: number;
   }): UISize {
-    this.number = UISizeUtils.convertUISizeToNumber(params.origin, params.parentSizeValue, false);
-    const originValue = this.number;
+    const originValue = UISizeUtils.convertUISizeToNumber(
+      params.origin,
+      params.parentSizeValue,
+      false
+    );
     if (
       params.min.unit !== SizeUnit.Auto &&
       params.min.unit !== SizeUnit.Unset &&
@@ -63,9 +64,6 @@ export class UISizeUtils {
       return 0;
     }
     if (sizeInfo.unit === SizeUnit.Unset) {
-      return 0;
-    }
-    if (sizeInfo.unit === SizeUnit.Fit) {
       return 0;
     }
     if (sizeInfo.unit === SizeUnit.Percent) {
@@ -164,6 +162,6 @@ export class UISizeUtils {
 
   static checkSizeInfoIsAuto(sizeInfo?: UISize): boolean {
     if (!sizeInfo) return false;
-    return sizeInfo.unit === SizeUnit.Auto || sizeInfo.unit === SizeUnit.Fit;
+    return sizeInfo.unit === SizeUnit.Auto;
   }
 }

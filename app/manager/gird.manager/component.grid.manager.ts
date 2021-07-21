@@ -327,6 +327,7 @@ export class ComponentGridManager {
       height: childRect.height
     };
     const alignLineInfo = GridAlignLineUtils.getAlignLineByMoveRect({
+      moveChild,
       rect: movingRect,
       middleList: this.#layerMiddleList,
       centerList: this.#layerCenterList,
@@ -337,16 +338,11 @@ export class ComponentGridManager {
     });
     movingRect.x += alignLineInfo.offset.x;
     movingRect.y += alignLineInfo.offset.y;
-    const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns(
+    const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns({
+      moveChild,
       movingRect,
-      this.#gridMapping,
-      {
-        top: moveChild.margin.top.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX,
-        bottom: moveChild.margin.bottom.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX,
-        left: moveChild.margin.left.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX,
-        right: moveChild.margin.right.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX
-      }
-    );
+      gridMapping: this.#gridMapping
+    });
     return GridLineUtils.convertAlignAndAssistLineInfo({
       alignLineInfo,
       assistLineInfo,
@@ -412,15 +408,15 @@ export class ComponentGridManager {
       offset: maxActiveLength,
       gridActiveRect: this.#gridMapping.gridActiveRect
     });
-    const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns(
-      {
+    const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns({
+      movingRect: {
         x: droppedRect.x + alignLineInfo.offset.x,
         y: droppedRect.y + alignLineInfo.offset.y,
         width: droppedRect.width,
         height: droppedRect.height
       },
-      this.#gridMapping
-    );
+      gridMapping: this.#gridMapping
+    });
     return GridLineUtils.convertAlignAndAssistLineInfo({
       alignLineInfo,
       assistLineInfo,

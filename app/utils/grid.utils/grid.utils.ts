@@ -18,10 +18,7 @@ export class GridUtils {
     let autoNumber = 0;
     for (startIndex; startIndex < params.end; startIndex += 1) {
       if (startIndex < params.sizeInfoList.length && startIndex >= 0) {
-        if (
-          params.sizeInfoList[startIndex].unit === SizeUnit.Auto ||
-          params.sizeInfoList[startIndex].unit === SizeUnit.Fit
-        ) {
+        if (params.sizeInfoList[startIndex].unit === SizeUnit.Auto) {
           autoNumber += 1;
         }
       }
@@ -76,7 +73,7 @@ export class GridUtils {
     let isAuto = false;
     const valueList: number[] = new Array(params.sizeInfoList.length);
     params.sizeInfoList.forEach((value, index) => {
-      isAuto = value.unit === SizeUnit.Auto || value.unit === SizeUnit.Fit;
+      isAuto = value.unit === SizeUnit.Auto;
       if (isAuto) {
         valueList[index] = 0;
         autoNumber += 1;
@@ -94,7 +91,7 @@ export class GridUtils {
         }
         const autoValue = spareValue / autoNumber;
         params.sizeInfoList.forEach((value, index) => {
-          isAuto = value.unit === SizeUnit.Auto || value.unit === SizeUnit.Fit;
+          isAuto = value.unit === SizeUnit.Auto;
           if (isAuto) {
             valueList[index] = autoValue;
           }
@@ -253,6 +250,8 @@ export class GridUtils {
     gridArea: GridArea;
     marginLeft: number;
     marginTop: number;
+    marginRight: number;
+    marginBottom: number;
   } {
     const maxWidth = params.rect.x + params.rect.width;
     const maxHeight = params.rect.y + params.rect.height;
@@ -261,9 +260,9 @@ export class GridUtils {
     let marginLeft = params.rect.x;
     let marginTop = params.rect.y;
     let rowStart = 1;
-    let rowEnd = rowLength + 1;
+    let rowEnd = 2;
     let columnStart = 1;
-    let columnEnd = columnLength + 1;
+    let columnEnd = 2;
     const gridAreaRect = {
       x: params.gridItemRectList[0][0].x,
       y: params.gridItemRectList[0][0].y,
@@ -285,6 +284,7 @@ export class GridUtils {
         columnStart = columnLength;
         marginLeft = params.rect.x - params.gridItemRectList[0][columnLength - 1].x;
       }
+      columnEnd = columnStart + 1;
     }
     if (!GridUtils.checkPointIsInRect({ x: maxWidth, y: gridAreaRect.y }, gridAreaRect)) {
       if (maxWidth < gridAreaRect.x) {
@@ -303,6 +303,7 @@ export class GridUtils {
         rowStart = rowLength;
         marginTop = params.rect.y - params.gridItemRectList[rowLength - 1][0].y;
       }
+      rowEnd = rowStart + 1;
     }
     if (!GridUtils.checkPointIsInRect({ x: gridAreaRect.x, y: maxHeight }, gridAreaRect)) {
       if (maxHeight < gridAreaRect.y) {
@@ -343,10 +344,28 @@ export class GridUtils {
         }
       });
     });
+    const columnEndIndex =
+      columnEnd - 2 > params.gridItemRectList[0].length - 1
+        ? params.gridItemRectList[0].length - 1
+        : columnEnd - 2;
+    const marginRight =
+      params.gridItemRectList[0][columnEndIndex < 0 ? 0 : columnEndIndex].x +
+      params.gridItemRectList[0][columnEndIndex < 0 ? 0 : columnEndIndex].width -
+      (params.rect.x + params.rect.width);
+    const rowEndIndex =
+      rowEnd - 2 > params.gridItemRectList.length - 1
+        ? params.gridItemRectList.length - 1
+        : rowEnd - 2;
+    const marginBottom =
+      params.gridItemRectList[rowEndIndex < 0 ? 0 : rowEndIndex][0].y +
+      params.gridItemRectList[rowEndIndex < 0 ? 0 : rowEndIndex][0].height -
+      (params.rect.y + params.rect.height);
     return {
       gridArea: { rowStart, columnStart, rowEnd, columnEnd },
       marginLeft: NumberUtils.parseViewNumber(marginLeft),
-      marginTop: NumberUtils.parseViewNumber(marginTop)
+      marginTop: NumberUtils.parseViewNumber(marginTop),
+      marginRight: NumberUtils.parseViewNumber(marginRight),
+      marginBottom: NumberUtils.parseViewNumber(marginBottom)
     };
   }
 

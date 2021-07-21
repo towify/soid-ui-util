@@ -3,7 +3,7 @@
  * @data 2020/12/14 17:04
  */
 import { SizeUnit } from '@towify/common-values';
-import { LineInfo, RectInfo } from '../../type/common.type';
+import { GridChildInfo, LineInfo, RectInfo } from '../../type/common.type';
 import { SignInfo } from '../../type/interact.type';
 import { NumberUtils } from '../number.utils/number.utils';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
@@ -40,7 +40,7 @@ export class GridAssistLineUtils {
           ? parseFloat((((rect.x - activeBorder.left) * 100) / maxValue).toFixed(2))
           : NumberUtils.parseViewNumber(rect.x - activeBorder.left);
       const leftY = rect.y + rect.height / 2;
-      if (offLeft >= 0 && leftY < activeBorder.bottom && leftY > activeBorder.top) {
+      if (offLeft >= 0 && leftY > activeBorder.top) {
         lines.push({
           fromX: rect.x,
           toX: activeBorder.left,
@@ -54,13 +54,13 @@ export class GridAssistLineUtils {
         });
       }
     }
-    if (activeBorder.right !== Number.MIN_VALUE) {
+    if (activeBorder.right !== Number.MIN_VALUE && rect.width > 0) {
       const offRight =
         marginUnits?.right === SizeUnit.Percent
           ? parseFloat((((activeBorder.right - (rect.x + rect.width)) * 100) / maxValue).toFixed(2))
           : NumberUtils.parseViewNumber(activeBorder.right - (rect.x + rect.width));
       const rightY = rect.y + rect.height / 2;
-      if (offRight >= 0 && rightY < activeBorder.bottom && rightY > activeBorder.top) {
+      if (offRight >= 0 && rightY > activeBorder.top) {
         lines.push({
           fromX: rect.x + rect.width,
           toX: activeBorder.right,
@@ -82,7 +82,7 @@ export class GridAssistLineUtils {
           ? parseFloat((((rect.y - activeBorder.top) * 100) / maxValue).toFixed(2))
           : NumberUtils.parseViewNumber(rect.y - activeBorder.top);
       const topX = rect.x + rect.width / 2;
-      if (offTop >= 0 && topX < activeBorder.right && topX > activeBorder.left) {
+      if (offTop >= 0 && topX > activeBorder.left) {
         lines.push({
           fromX: topX,
           toX: topX,
@@ -96,7 +96,7 @@ export class GridAssistLineUtils {
         });
       }
     }
-    if (activeBorder.bottom !== Number.MIN_VALUE) {
+    if (activeBorder.bottom !== Number.MIN_VALUE && rect.height > 0) {
       const offBottom =
         marginUnits?.bottom === SizeUnit.Percent
           ? parseFloat(
@@ -104,7 +104,7 @@ export class GridAssistLineUtils {
             )
           : NumberUtils.parseViewNumber(activeBorder.bottom - (rect.y + rect.height));
       const bottomX = rect.x + rect.width / 2;
-      if (offBottom >= 0 && bottomX < activeBorder.right && bottomX > activeBorder.left) {
+      if (offBottom >= 0 && bottomX > activeBorder.left) {
         lines.push({
           fromX: bottomX,
           toX: bottomX,
@@ -127,37 +127,47 @@ export class GridAssistLineUtils {
     };
   }
 
-  static getAssistLinesAndSigns(
-    movingRect: RectInfo,
-    gridMapping: GridMapping,
-    marginUnits?: {
-      left: SizeUnit.PX | SizeUnit.Percent;
-      right: SizeUnit.PX | SizeUnit.Percent;
-      top: SizeUnit.PX | SizeUnit.Percent;
-      bottom: SizeUnit.PX | SizeUnit.Percent;
-    }
-  ): {
+  static getAssistLinesAndSigns(params: {
+    movingRect: RectInfo;
+    gridMapping: GridMapping;
+    moveChild?: GridChildInfo;
+  }): {
     lines: LineInfo[];
     signs: SignInfo[];
   } {
-    const activeAreaInfo = gridMapping.getChildGridAreaInfoByRect(movingRect);
+    const activeAreaInfo = params.gridMapping.getChildGridAreaInfoByRect(params.movingRect);
     const activeGridItemRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: activeAreaInfo.gridArea,
-      gridItemRectList: gridMapping.getGridItemRectList()
+      gridItemRectList: params.gridMapping.getGridItemRectList()
     });
     if (activeGridItemRect) {
       return GridAssistLineUtils.getAssistLinesAndSignsByActivePoint(
-        movingRect,
+        params.movingRect,
         {
           left: activeGridItemRect.x,
           top: activeGridItemRect.y,
           right: activeGridItemRect.x + activeGridItemRect.width,
           bottom: activeGridItemRect.y + activeGridItemRect.height
         },
-        marginUnits
+        {
+          top:
+            params.moveChild?.margin.top.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX,
+          bottom:
+            params.moveChild?.margin.bottom.unit === SizeUnit.Percent
+              ? SizeUnit.Percent
+              : SizeUnit.PX,
+          left:
+            params.moveChild?.margin.left.unit === SizeUnit.Percent
+              ? SizeUnit.Percent
+              : SizeUnit.PX,
+          right:
+            params.moveChild?.margin.right.unit === SizeUnit.Percent
+              ? SizeUnit.Percent
+              : SizeUnit.PX
+        }
       );
     }
-    return GridAssistLineUtils.getAssistLinesAndSignsByActivePoint(movingRect, {
+    return GridAssistLineUtils.getAssistLinesAndSignsByActivePoint(params.movingRect, {
       left: 0,
       top: 0,
       right: Number.MIN_VALUE,

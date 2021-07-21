@@ -55,11 +55,12 @@ export class GridLineUtils {
         }
       });
       result.push({
-        canDrag: !(
-          gridMapping.isMoreAutoSizeInRow() &&
-          (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row]) ||
-            UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row + 1]))
-        ),
+        canDrag:
+          !(
+            gridMapping.isMoreAutoSizeInRow() &&
+            (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row]) ||
+              UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row + 1]))
+          ) && row !== gridItemRectList.length - 1,
         direction: 'bottom',
         position,
         line: {
@@ -97,11 +98,12 @@ export class GridLineUtils {
         }
       });
       result.push({
-        canDrag: !(
-          gridMapping.isMoreAutoSizeInColumn() &&
-          (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column]) ||
-            UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column + 1]))
-        ),
+        canDrag:
+          !(
+            gridMapping.isMoreAutoSizeInColumn() &&
+            (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column]) ||
+              UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column + 1]))
+          ) && column !== gridItemRectList[0].length - 1,
         direction: 'right',
         position,
         line: {

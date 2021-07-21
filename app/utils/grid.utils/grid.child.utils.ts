@@ -224,7 +224,6 @@ export class GridChildUtils {
     },
     gridMapping: GridMapping
   ): GridChildInfo {
-    const gridItemRectList = gridMapping.getGridItemRectList();
     const childIndex = gridMapping.childInfoList.findIndex(
       childInfo => childInfo.id === dropped.id
     );
@@ -234,6 +233,7 @@ export class GridChildUtils {
     let marginBottomUnit: SizeUnit = SizeUnit.PX;
     let droppedOldParentRect = dropped.droppedOldParentRect;
     let child;
+    let childRect;
     if (childIndex !== -1) {
       child = gridMapping.childInfoList[childIndex];
       marginLeftUnit = child.margin.left.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
@@ -244,33 +244,46 @@ export class GridChildUtils {
         child.margin.bottom.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX;
       droppedOldParentRect = GridUtils.convertChildSizeInfoToNumber({
         gridArea: child.gridArea,
-        gridItemRectList
+        gridItemRectList: gridMapping.getGridItemRectList()
       });
+      childRect = gridMapping.getGridChildRect(child);
+      gridMapping.childInfoList.splice(childIndex, 1);
     }
-    const rectWidth = UISizeUtils.convertUISizeToNumber(
-      UISizeUtils.getValidRenderSizeByComparing({
-        origin: dropped.size.width,
-        max: dropped.size.maxWidth,
-        min: dropped.size.minWidth,
-        parentSizeValue: droppedOldParentRect?.width
-      }),
-      droppedOldParentRect?.width
-    );
-    const rectHeight = UISizeUtils.convertUISizeToNumber(
-      UISizeUtils.getValidRenderSizeByComparing({
-        origin: dropped.size.height,
-        max: dropped.size.maxHeight,
-        min: dropped.size.minHeight,
-        parentSizeValue: droppedOldParentRect?.height
-      }),
-      droppedOldParentRect?.height
-    );
-    const droppedRect = {
-      x: dropped.x,
-      y: dropped.y,
-      width: rectWidth,
-      height: rectHeight
-    };
+    const gridItemRectList = gridMapping.getGridItemRectList();
+    let droppedRect;
+    if (childRect) {
+      droppedRect = {
+        x: dropped.x,
+        y: dropped.y,
+        width: childRect.width,
+        height: childRect.height
+      };
+    } else {
+      const rectWidth = UISizeUtils.convertUISizeToNumber(
+        UISizeUtils.getValidRenderSizeByComparing({
+          origin: dropped.size.width,
+          max: dropped.size.maxWidth,
+          min: dropped.size.minWidth,
+          parentSizeValue: droppedOldParentRect?.width
+        }),
+        droppedOldParentRect?.width
+      );
+      const rectHeight = UISizeUtils.convertUISizeToNumber(
+        UISizeUtils.getValidRenderSizeByComparing({
+          origin: dropped.size.height,
+          max: dropped.size.maxHeight,
+          min: dropped.size.minHeight,
+          parentSizeValue: droppedOldParentRect?.height
+        }),
+        droppedOldParentRect?.height
+      );
+      droppedRect = {
+        x: dropped.x,
+        y: dropped.y,
+        width: rectWidth,
+        height: rectHeight
+      };
+    }
     const gridInfo = gridMapping.getChildGridAreaInfoByRect(droppedRect);
     const droppedParentRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: gridInfo.gridArea,
@@ -289,48 +302,60 @@ export class GridChildUtils {
     let justifySelf = '';
     let alignSelf = '';
     if (
-      NumberUtils.parseViewNumber(droppedRect.x) ===
-      NumberUtils.parseViewNumber(droppedParentRect.x)
+      rowAutoNumber === 0 &&
+      child?.size.height.unit !== SizeUnit.Auto &&
+      child?.size.height.unit !== SizeUnit.Fit
     ) {
-      justifySelf = 'start';
-      marginLeftUnit = SizeUnit.Unset;
-      marginRightUnit = SizeUnit.Unset;
-    } else if (
-      NumberUtils.parseViewNumber(droppedRect.x + droppedRect.width / 2) ===
-      NumberUtils.parseViewNumber(droppedParentRect.x + droppedParentRect.width / 2)
-    ) {
-      justifySelf = 'center';
-      marginLeftUnit = SizeUnit.Unset;
-      marginRightUnit = SizeUnit.Unset;
-    } else if (
-      NumberUtils.parseViewNumber(droppedRect.x + droppedRect.width) ===
-      NumberUtils.parseViewNumber(droppedParentRect.x + droppedParentRect.width)
-    ) {
-      justifySelf = 'end';
-      marginLeftUnit = SizeUnit.Unset;
-      marginRightUnit = SizeUnit.Unset;
+      if (
+        NumberUtils.parseViewNumber(droppedRect.y) ===
+        NumberUtils.parseViewNumber(droppedParentRect.y)
+      ) {
+        alignSelf = 'start';
+        marginTopUnit = SizeUnit.Unset;
+        marginBottomUnit = SizeUnit.Unset;
+      } else if (
+        NumberUtils.parseViewNumber(droppedRect.y + droppedRect.height / 2) ===
+        NumberUtils.parseViewNumber(droppedParentRect.y + droppedParentRect.height / 2)
+      ) {
+        alignSelf = 'center';
+        marginTopUnit = SizeUnit.Unset;
+        marginBottomUnit = SizeUnit.Unset;
+      } else if (
+        NumberUtils.parseViewNumber(droppedRect.y + droppedRect.height) ===
+        NumberUtils.parseViewNumber(droppedParentRect.y + droppedParentRect.height)
+      ) {
+        alignSelf = 'end';
+        marginTopUnit = SizeUnit.Unset;
+        marginBottomUnit = SizeUnit.Unset;
+      }
     }
     if (
-      NumberUtils.parseViewNumber(droppedRect.y) ===
-      NumberUtils.parseViewNumber(droppedParentRect.y)
+      columnAutoNumber === 0 &&
+      child?.size.width.unit !== SizeUnit.Auto &&
+      child?.size.width.unit !== SizeUnit.Fit
     ) {
-      alignSelf = 'start';
-      marginTopUnit = SizeUnit.Unset;
-      marginBottomUnit = SizeUnit.Unset;
-    } else if (
-      NumberUtils.parseViewNumber(droppedRect.y + droppedRect.height / 2) ===
-      NumberUtils.parseViewNumber(droppedParentRect.y + droppedParentRect.height / 2)
-    ) {
-      alignSelf = 'center';
-      marginTopUnit = SizeUnit.Unset;
-      marginBottomUnit = SizeUnit.Unset;
-    } else if (
-      NumberUtils.parseViewNumber(droppedRect.y + droppedRect.height) ===
-      NumberUtils.parseViewNumber(droppedParentRect.y + droppedParentRect.height)
-    ) {
-      alignSelf = 'end';
-      marginTopUnit = SizeUnit.Unset;
-      marginBottomUnit = SizeUnit.Unset;
+      if (
+        NumberUtils.parseViewNumber(droppedRect.x) ===
+        NumberUtils.parseViewNumber(droppedParentRect.x)
+      ) {
+        justifySelf = 'start';
+        marginLeftUnit = SizeUnit.Unset;
+        marginRightUnit = SizeUnit.Unset;
+      } else if (
+        NumberUtils.parseViewNumber(droppedRect.x + droppedRect.width / 2) ===
+        NumberUtils.parseViewNumber(droppedParentRect.x + droppedParentRect.width / 2)
+      ) {
+        justifySelf = 'center';
+        marginLeftUnit = SizeUnit.Unset;
+        marginRightUnit = SizeUnit.Unset;
+      } else if (
+        NumberUtils.parseViewNumber(droppedRect.x + droppedRect.width) ===
+        NumberUtils.parseViewNumber(droppedParentRect.x + droppedParentRect.width)
+      ) {
+        justifySelf = 'end';
+        marginLeftUnit = SizeUnit.Unset;
+        marginRightUnit = SizeUnit.Unset;
+      }
     }
     const droppedInfo: GridChildInfo = {
       id: dropped.id,
@@ -352,14 +377,22 @@ export class GridChildUtils {
               unit: marginRightUnit,
               maxValue: droppedParentRect.width
             })
-          : { value: 0, unit: SizeUnit.Unset },
+          : UISizeUtils.convertNumberToUISize({
+              valueNumber: gridInfo.marginRight,
+              unit: marginRightUnit,
+              maxValue: droppedParentRect.width
+            }),
         bottom: rowAutoNumber
           ? UISizeUtils.convertNumberToUISize({
               valueNumber: 0 - gridInfo.marginTop - droppedRect.height,
               unit: marginBottomUnit,
               maxValue: droppedParentRect.width
             })
-          : { value: 0, unit: SizeUnit.Unset }
+          : UISizeUtils.convertNumberToUISize({
+              valueNumber: gridInfo.marginBottom,
+              unit: marginBottomUnit,
+              maxValue: droppedParentRect.width
+            })
       },
       placeSelf: {
         justifySelf,
@@ -403,7 +436,7 @@ export class GridChildUtils {
     if (childIndex === -1) {
       gridMapping.childInfoList.push(droppedInfo);
     } else {
-      gridMapping.childInfoList.splice(childIndex, 1, droppedInfo);
+      gridMapping.childInfoList.splice(childIndex, 0, droppedInfo);
     }
     return droppedInfo;
   }

@@ -197,6 +197,8 @@ export class GridMapping {
     gridArea: GridArea;
     marginLeft: number;
     marginTop: number;
+    marginRight: number;
+    marginBottom: number;
   } {
     return GridUtils.getChildGridAreaInfoByRect({
       rect,
@@ -212,29 +214,90 @@ export class GridMapping {
       gridArea: child.gridArea,
       gridItemRectList
     });
-    const childWidth = UISizeUtils.convertUISizeToNumber(
-      UISizeUtils.getValidRenderSizeByComparing({
-        origin: child.size.width,
-        max: child.size.maxWidth,
-        min: child.size.minWidth,
-        parentSizeValue: childGridRect.width
-      }),
-      childGridRect.width
-    );
-    const childHeight = UISizeUtils.convertUISizeToNumber(
-      UISizeUtils.getValidRenderSizeByComparing({
-        origin: child.size.height,
-        max: child.size.maxHeight,
-        min: child.size.minHeight,
-        parentSizeValue: childGridRect.height
-      }),
-      childGridRect.height
-    );
-    const marginLeftValue = UISizeUtils.convertUISizeToNumber(
-      child.margin.left,
-      childGridRect.width
-    );
-    const marginTopValue = UISizeUtils.convertUISizeToNumber(child.margin.top, childGridRect.width);
+    let childWidth;
+    let childHeight;
+    let marginLeftValue;
+    let marginTopValue;
+    if (child.size.width.unit === SizeUnit.Auto || child.size.width.unit === SizeUnit.Fit) {
+      childWidth =
+        childGridRect.width -
+        UISizeUtils.convertUISizeToNumber(child.margin.left) -
+        UISizeUtils.convertUISizeToNumber(child.margin.right);
+      childWidth = UISizeUtils.convertUISizeToNumber(
+        UISizeUtils.getValidRenderSizeByComparing({
+          origin: { value: childWidth, unit: SizeUnit.PX },
+          max: child.size.maxWidth,
+          min: child.size.minWidth,
+          parentSizeValue: childGridRect.width
+        }),
+        childGridRect.width
+      );
+    } else {
+      childWidth = UISizeUtils.convertUISizeToNumber(
+        UISizeUtils.getValidRenderSizeByComparing({
+          origin: child.size.width,
+          max: child.size.maxWidth,
+          min: child.size.minWidth,
+          parentSizeValue: childGridRect.width
+        }),
+        childGridRect.width
+      );
+    }
+    if (child.size.height.unit === SizeUnit.Auto) {
+      childHeight =
+        childGridRect.height -
+        UISizeUtils.convertUISizeToNumber(child.margin.top) -
+        UISizeUtils.convertUISizeToNumber(child.margin.bottom);
+      childHeight = UISizeUtils.convertUISizeToNumber(
+        UISizeUtils.getValidRenderSizeByComparing({
+          origin: { value: childHeight, unit: SizeUnit.PX },
+          max: child.size.maxHeight,
+          min: child.size.minHeight,
+          parentSizeValue: childGridRect.height
+        }),
+        childGridRect.height
+      );
+    } else {
+      childHeight = UISizeUtils.convertUISizeToNumber(
+        UISizeUtils.getValidRenderSizeByComparing({
+          origin: child.size.height,
+          max: child.size.maxHeight,
+          min: child.size.minHeight,
+          parentSizeValue: childGridRect.height
+        }),
+        childGridRect.height
+      );
+    }
+    if (child.margin.left.unit === SizeUnit.Auto) {
+      if (child.margin.right.unit === SizeUnit.Auto) {
+        marginLeftValue = (childGridRect.width - childWidth) / 2;
+      } else {
+        marginLeftValue =
+          childGridRect.width -
+          childWidth -
+          UISizeUtils.convertUISizeToNumber(child.margin.right, childGridRect.width);
+        if (marginLeftValue < 0) {
+          marginLeftValue = 0;
+        }
+      }
+    } else {
+      marginLeftValue = UISizeUtils.convertUISizeToNumber(child.margin.left, childGridRect.width);
+    }
+    if (child.margin.top.unit === SizeUnit.Auto) {
+      if (child.margin.bottom.unit === SizeUnit.Auto) {
+        marginTopValue = (childGridRect.height - childHeight) / 2;
+      } else {
+        marginTopValue =
+          childGridRect.height -
+          childHeight -
+          UISizeUtils.convertUISizeToNumber(child.margin.bottom, childGridRect.width);
+        if (marginTopValue < 0) {
+          marginTopValue = 0;
+        }
+      }
+    } else {
+      marginTopValue = UISizeUtils.convertUISizeToNumber(child.margin.top, childGridRect.width);
+    }
     let childX = childGridRect.x + marginLeftValue;
     let childY = childGridRect.y + marginTopValue;
     if (child.placeSelf.justifySelf) {
@@ -311,7 +374,7 @@ export class GridMapping {
     plusOffset: number;
   }[] {
     return list.map((size, index) => {
-      if (size.unit === SizeUnit.Auto || size.unit === SizeUnit.Fit) {
+      if (size.unit === SizeUnit.Auto) {
         return this.getGridAutoOffsetValueByIndex({
           index,
           sizeInfoList: list,

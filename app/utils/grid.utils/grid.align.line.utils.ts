@@ -2,7 +2,7 @@
  * @author allen
  * @data 2020/12/14 17:22
  */
-import { LineInfo, RectInfo } from '../../type/common.type';
+import { GridChildInfo, LineInfo, RectInfo } from '../../type/common.type';
 import { AlignOffsetInfo } from '../../type/interact.type';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 
@@ -12,9 +12,7 @@ export class GridAlignLineUtils {
     list: number[];
     offset: number;
   }): number | undefined {
-    const checkNumber = params.list.find(
-      item => Math.abs(item - params.value) < params.offset
-    );
+    const checkNumber = params.list.find(item => Math.abs(item - params.value) < params.offset);
     if (checkNumber !== undefined) {
       if (checkNumber === params.value) {
         return 0;
@@ -25,6 +23,7 @@ export class GridAlignLineUtils {
   }
 
   static getAlignLineByMoveRect(params: {
+    moveChild?: GridChildInfo;
     rect: RectInfo;
     xList: number[];
     yList: number[];
@@ -150,18 +149,14 @@ export class GridAlignLineUtils {
     const layerYList: number[] = [];
     const canvasMinLeft = params.gridMapping.gridActiveRect.x;
     const canvasMaxRight =
-      params.gridMapping.gridActiveRect.x +
-      params.gridMapping.gridActiveRect.width;
+      params.gridMapping.gridActiveRect.x + params.gridMapping.gridActiveRect.width;
     const canvasMinTop = params.gridMapping.gridActiveRect.y;
     const canvasMaxBottom =
-      params.gridMapping.gridActiveRect.y +
-      params.gridMapping.gridActiveRect.height;
+      params.gridMapping.gridActiveRect.y + params.gridMapping.gridActiveRect.height;
     const canvasCenterX =
-      params.gridMapping.gridActiveRect.x +
-      params.gridMapping.gridActiveRect.width / 2;
+      params.gridMapping.gridActiveRect.x + params.gridMapping.gridActiveRect.width / 2;
     const canvasCenterY =
-      params.gridMapping.gridActiveRect.y +
-      params.gridMapping.gridActiveRect.height / 2;
+      params.gridMapping.gridActiveRect.y + params.gridMapping.gridActiveRect.height / 2;
     if (params.isNeedMiddle) {
       layerCenterList.push(canvasCenterX);
       layerMiddleList.push(canvasCenterY);
