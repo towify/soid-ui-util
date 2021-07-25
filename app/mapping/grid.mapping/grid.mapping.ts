@@ -268,69 +268,87 @@ export class GridMapping {
         childGridRect.height
       );
     }
-    if (child.margin.left.unit === SizeUnit.Auto) {
-      if (child.margin.right.unit === SizeUnit.Auto) {
+    marginLeftValue = UISizeUtils.convertUISizeToNumber(child.margin.left, childGridRect.width);
+    const marginRightValue = UISizeUtils.convertUISizeToNumber(
+      child.margin.right,
+      childGridRect.width
+    );
+    let childX;
+    if (child.margin.left.unit === SizeUnit.Auto || child.margin.right.unit === SizeUnit.Auto) {
+      if (child.margin.left.unit === SizeUnit.Auto && child.margin.right.unit === SizeUnit.Auto) {
         marginLeftValue = (childGridRect.width - childWidth) / 2;
-      } else {
-        marginLeftValue =
-          childGridRect.width -
-          childWidth -
-          UISizeUtils.convertUISizeToNumber(child.margin.right, childGridRect.width);
+      } else if (child.margin.left.unit === SizeUnit.Auto) {
+        marginLeftValue = childGridRect.width - childWidth - marginRightValue;
         if (marginLeftValue < 0) {
           marginLeftValue = 0;
         }
       }
+      childX = childGridRect.x + marginLeftValue;
+    } else if (child.placeSelf.justifySelf) {
+      switch (child.placeSelf.justifySelf) {
+        case 'center': {
+          childX =
+            childGridRect.x +
+            (childGridRect.width - childWidth) / 2 +
+            (marginLeftValue - marginRightValue) / 2;
+          break;
+        }
+        case 'end': {
+          childX = childGridRect.x + (childGridRect.width - childWidth) - marginRightValue;
+          break;
+        }
+        case 'start': {
+          childX = childGridRect.x + marginLeftValue;
+          break;
+        }
+        default: {
+          childX = 0;
+          break;
+        }
+      }
     } else {
-      marginLeftValue = UISizeUtils.convertUISizeToNumber(child.margin.left, childGridRect.width);
+      childX = childGridRect.x + marginLeftValue;
     }
-    if (child.margin.top.unit === SizeUnit.Auto) {
-      if (child.margin.bottom.unit === SizeUnit.Auto) {
+    let childY;
+    marginTopValue = UISizeUtils.convertUISizeToNumber(child.margin.top, childGridRect.width);
+    const marginBottomValue = UISizeUtils.convertUISizeToNumber(
+      child.margin.bottom,
+      childGridRect.width
+    );
+    if (child.margin.top.unit === SizeUnit.Auto || child.margin.bottom.unit === SizeUnit.Auto) {
+      if (child.margin.top.unit === SizeUnit.Auto && child.margin.bottom.unit === SizeUnit.Auto) {
         marginTopValue = (childGridRect.height - childHeight) / 2;
-      } else {
-        marginTopValue =
-          childGridRect.height -
-          childHeight -
-          UISizeUtils.convertUISizeToNumber(child.margin.bottom, childGridRect.width);
+      } else if (child.margin.top.unit === SizeUnit.Auto) {
+        marginTopValue = childGridRect.height - childHeight - marginBottomValue;
         if (marginTopValue < 0) {
           marginTopValue = 0;
         }
       }
-    } else {
-      marginTopValue = UISizeUtils.convertUISizeToNumber(child.margin.top, childGridRect.width);
-    }
-    let childX = childGridRect.x + marginLeftValue;
-    let childY = childGridRect.y + marginTopValue;
-    if (child.placeSelf.justifySelf) {
-      switch (child.placeSelf.justifySelf) {
-        case 'center': {
-          childX = childGridRect.x + (childGridRect.width - childWidth) / 2 + marginLeftValue / 2;
-          break;
-        }
-        case 'end': {
-          childX = childGridRect.x + (childGridRect.width - childWidth);
-          break;
-        }
-        default: {
-          childX = childGridRect.x + marginLeftValue;
-          break;
-        }
-      }
-    }
-    if (child.placeSelf.alignSelf) {
+      childY = childGridRect.y + marginTopValue;
+    } else if (child.placeSelf.alignSelf) {
       switch (child.placeSelf.alignSelf) {
         case 'center': {
-          childY = childGridRect.y + (childGridRect.height - childHeight) / 2 + marginTopValue / 2;
+          childY =
+            childGridRect.y +
+            (childGridRect.height - childHeight) / 2 +
+            (marginTopValue - marginBottomValue) / 2;
           break;
         }
         case 'end': {
-          childY = childGridRect.y + (childGridRect.height - childHeight);
+          childY = childGridRect.y + (childGridRect.height - childHeight) - marginBottomValue;
           break;
         }
-        default: {
+        case 'start': {
           childY = childGridRect.y + marginTopValue;
           break;
         }
+        default: {
+          childY = 0;
+          break;
+        }
       }
+    } else {
+      childX = childGridRect.x + marginTopValue;
     }
     child.parentRect = childGridRect;
     return {
