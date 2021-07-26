@@ -9,13 +9,9 @@ import {
   SizeUnit,
   SpacingPadding,
   UISize
-} from 'towify-editor-common-values';
-import {
-  GridChildInfo,
-  PaddingInfo,
-  RectInfo,
-  UnsetUnit
-} from '../../type/common.type';
+} from '@towify/common-values';
+import type { DslType } from '@towify-types/dsl';
+import { GridChildInfo, PaddingInfo, RectInfo, UnsetUnit } from '../../type/common.type';
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
 import { UISizeUtils } from '../../utils/ui.size.utils/ui.size.utils';
 
@@ -27,22 +23,33 @@ export class GridMapping {
     height: 0
   };
 
+  #parentRect = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0
+  };
+
   constructor(
     public gap: GridGap,
     public padding: SpacingPadding,
-    public border: SpacingPadding,
+    public border: DslType.BorderInfo,
     public columnCount: number,
     public rowCount: number,
     public customGrid?: CustomGrid,
     public readonly childInfoList: GridChildInfo[] = []
   ) {}
 
+  set parentRect(value: RectInfo) {
+    this.#parentRect = value;
+  }
+
   set gridRect(value: RectInfo) {
-    this.#gridRect = value;
-    this.childInfoList.forEach(child => {
-      child.rect = this.getGridChildRect(child);
-      this.childInfoList.push(child);
-    });
+    this.#gridRect.x = value.x;
+    this.#gridRect.y = value.y;
+    this.#gridRect.width = value.width;
+    this.#gridRect.height = value.height;
+    this.updateChildrenRect();
   }
 
   get gridRect(): RectInfo {
@@ -58,25 +65,24 @@ export class GridMapping {
   }
 
   get paddingInfo(): PaddingInfo {
-    return GridUtils.convertOffsetValue(this.padding, this.gridRect);
+    return GridUtils.convertOffsetValue(this.padding, this.#parentRect.width);
   }
 
   get borderInfo(): PaddingInfo {
-    return GridUtils.convertOffsetValue(this.border, this.gridRect);
+    return GridUtils.convertOffsetValue({
+      left: this.border.left.width,
+      right: this.border.right.width,
+      top: this.border.top.width,
+      bottom: this.border.bottom.width
+    });
   }
 
   get rowGap(): number {
-    return UISizeUtils.convertUISizeToNumber(
-      this.gap.row,
-      this.gridActiveRect.height
-    );
+    return UISizeUtils.convertUISizeToNumber(this.gap.row, this.gridActiveRect.height);
   }
 
   get columnGap(): number {
-    return UISizeUtils.convertUISizeToNumber(
-      this.gap.column,
-      this.gridActiveRect.width
-    );
+    return UISizeUtils.convertUISizeToNumber(this.gap.column, this.gridActiveRect.width);
   }
 
   get gridColumnInfo(): UISize[] {
@@ -88,9 +94,7 @@ export class GridMapping {
     for (columnIndex; columnIndex < this.columnCount; columnIndex += 1) {
       gridColumnInfo.push({
         value:
-          (this.gridActiveRect.width -
-            this.columnGap * (this.columnCount - 1)) /
-          this.columnCount,
+          (this.gridActiveRect.width - this.columnGap * (this.columnCount - 1)) / this.columnCount,
         unit: SizeUnit.PX
       });
     }
@@ -105,28 +109,17 @@ export class GridMapping {
     const gridRowInfo = [];
     for (rowIndex; rowIndex < this.rowCount; rowIndex += 1) {
       gridRowInfo.push({
-        value:
-          (this.gridActiveRect.height - this.rowGap * (this.rowCount - 1)) /
-          this.rowCount,
+        value: (this.gridActiveRect.height - this.rowGap * (this.rowCount - 1)) / this.rowCount,
         unit: SizeUnit.PX
       });
     }
     return gridRowInfo;
   }
 
-  convertSizeInfoToNumber(params: {
-    value: UISize;
-    max: UISize;
-    min: UISize;
-    maxValue?: number;
-  }): number {
-    const sizeInfo = UISizeUtils.getValidRenderSizeByComparing({
-      origin: params.value,
-      max: params.max,
-      min: params.min,
-      parentSizeValue: params.maxValue
+  updateChildrenRect() {
+    this.childInfoList.forEach(child => {
+      child.rect = this.getGridChildRect(child);
     });
-    return UISizeUtils.convertUISizeToNumber(sizeInfo, params.maxValue);
   }
 
   setChildrenInfo(childrenInfo: GridChildInfo[]): GridMapping {
@@ -148,32 +141,30 @@ export class GridMapping {
       columnAutoOffsetList = this.getAutoOffsetList(gridColumnInfo, false);
       rowAutoOffsetList = this.getAutoOffsetList(gridRowInfo, true);
     }
-    const gridWidth =
-      this.gridActiveRect.width - (gridColumnInfo.length - 1) * this.columnGap;
-    const gridHeight =
-      this.gridActiveRect.height - (gridRowInfo.length - 1) * this.rowGap;
+    const maxWidth = this.gridActiveRect.width - (gridColumnInfo.length - 1) * this.columnGap;
+    const maxHeight = this.gridActiveRect.height - (gridRowInfo.length - 1) * this.rowGap;
     const columnsNumberArray = GridUtils.getGridRowOrColumnItemValues({
       sizeInfoList: gridColumnInfo,
-      maxValue: gridWidth,
+      maxValue: maxWidth,
       autoOffsetList: columnAutoOffsetList
     });
     const rowsNumberArray = GridUtils.getGridRowOrColumnItemValues({
       sizeInfoList: gridRowInfo,
-      maxValue: gridHeight,
+      maxValue: maxHeight,
       autoOffsetList: rowAutoOffsetList
     });
     let rowIndex = 0;
     let rowLength = rowsNumberArray.length;
     if (rowLength === 0) {
       rowLength = 1;
-      rowsNumberArray.push(gridHeight);
+      rowsNumberArray.push(maxHeight);
     }
     let columnIndex = 0;
     const itemRectList: RectInfo[][] = [];
     let columnLength = columnsNumberArray.length;
     if (columnLength === 0) {
       columnLength = 1;
-      columnsNumberArray.push(gridWidth);
+      columnsNumberArray.push(maxWidth);
     }
     let rowY = this.gridActiveRect.y;
     let rowHeight = 0;
@@ -202,91 +193,162 @@ export class GridMapping {
     return itemRectList;
   }
 
-  getChildGridAreaInfoByRect(params: {
-    rect: RectInfo;
-    gridItemRectList: RectInfo[][];
-  }): {
+  getChildGridAreaInfoByRect(rect: RectInfo): {
     gridArea: GridArea;
     marginLeft: number;
     marginTop: number;
+    marginRight: number;
+    marginBottom: number;
   } {
     return GridUtils.getChildGridAreaInfoByRect({
-      rect: params.rect,
-      gridItemRectList: params.gridItemRectList,
+      rect,
+      gridItemRectList: this.getGridItemRectList(),
       rowGap: this.rowGap,
       columnGap: this.columnGap
     });
   }
 
-  getGridChildRect(
-    child: GridChildInfo,
-    itemRectList?: RectInfo[][]
-  ): RectInfo {
+  getGridChildRect(child: GridChildInfo, itemRectList?: RectInfo[][]): RectInfo {
     const gridItemRectList = itemRectList ?? this.getGridItemRectList();
     const childGridRect = GridUtils.convertChildSizeInfoToNumber({
       gridArea: child.gridArea,
-      gridRect: this.gridActiveRect,
       gridItemRectList
     });
-    const childWidth = this.convertSizeInfoToNumber({
-      value: child.size.width,
-      max: child.size.maxWidth,
-      min: child.size.minWidth,
-      maxValue: childGridRect.width
-    });
-    const childHeight = this.convertSizeInfoToNumber({
-      value: child.size.height,
-      max: child.size.maxHeight,
-      min: child.size.minHeight,
-      maxValue: childGridRect.height
-    });
-    const marginLeftValue = UISizeUtils.convertUISizeToNumber(
-      child.margin.left,
+    let childWidth;
+    let childHeight;
+    let marginLeftValue;
+    let marginTopValue;
+    if (child.size.width.unit === SizeUnit.Auto || child.size.width.unit === SizeUnit.Fit) {
+      childWidth =
+        childGridRect.width -
+        UISizeUtils.convertUISizeToNumber(child.margin.left) -
+        UISizeUtils.convertUISizeToNumber(child.margin.right);
+      childWidth = UISizeUtils.convertUISizeToNumber(
+        UISizeUtils.getValidRenderSizeByComparing({
+          origin: { value: childWidth, unit: SizeUnit.PX },
+          max: child.size.maxWidth,
+          min: child.size.minWidth,
+          parentSizeValue: childGridRect.width
+        }),
+        childGridRect.width
+      );
+    } else {
+      childWidth = UISizeUtils.convertUISizeToNumber(
+        UISizeUtils.getValidRenderSizeByComparing({
+          origin: child.size.width,
+          max: child.size.maxWidth,
+          min: child.size.minWidth,
+          parentSizeValue: childGridRect.width
+        }),
+        childGridRect.width
+      );
+    }
+    if (child.size.height.unit === SizeUnit.Auto) {
+      childHeight =
+        childGridRect.height -
+        UISizeUtils.convertUISizeToNumber(child.margin.top) -
+        UISizeUtils.convertUISizeToNumber(child.margin.bottom);
+      childHeight = UISizeUtils.convertUISizeToNumber(
+        UISizeUtils.getValidRenderSizeByComparing({
+          origin: { value: childHeight, unit: SizeUnit.PX },
+          max: child.size.maxHeight,
+          min: child.size.minHeight,
+          parentSizeValue: childGridRect.height
+        }),
+        childGridRect.height
+      );
+    } else {
+      childHeight = UISizeUtils.convertUISizeToNumber(
+        UISizeUtils.getValidRenderSizeByComparing({
+          origin: child.size.height,
+          max: child.size.maxHeight,
+          min: child.size.minHeight,
+          parentSizeValue: childGridRect.height
+        }),
+        childGridRect.height
+      );
+    }
+    marginLeftValue = UISizeUtils.convertUISizeToNumber(child.margin.left, childGridRect.width);
+    const marginRightValue = UISizeUtils.convertUISizeToNumber(
+      child.margin.right,
       childGridRect.width
     );
-    const marginTopValue = UISizeUtils.convertUISizeToNumber(
-      child.margin.top,
-      childGridRect.height
-    );
-    let childX = childGridRect.x + marginLeftValue;
-    let childY = childGridRect.y + marginTopValue;
-    if (child.placeSelf.justifySelf) {
+    let childX;
+    if (child.margin.left.unit === SizeUnit.Auto || child.margin.right.unit === SizeUnit.Auto) {
+      if (child.margin.left.unit === SizeUnit.Auto && child.margin.right.unit === SizeUnit.Auto) {
+        marginLeftValue = (childGridRect.width - childWidth) / 2;
+      } else if (child.margin.left.unit === SizeUnit.Auto) {
+        marginLeftValue = childGridRect.width - childWidth - marginRightValue;
+        if (marginLeftValue < 0) {
+          marginLeftValue = 0;
+        }
+      }
+      childX = childGridRect.x + marginLeftValue;
+    } else if (child.placeSelf.justifySelf) {
       switch (child.placeSelf.justifySelf) {
         case 'center': {
           childX =
             childGridRect.x +
             (childGridRect.width - childWidth) / 2 +
-            marginLeftValue / 2;
+            (marginLeftValue - marginRightValue) / 2;
           break;
         }
         case 'end': {
-          childX = childGridRect.x + (childGridRect.width - childWidth);
+          childX = childGridRect.x + (childGridRect.width - childWidth) - marginRightValue;
           break;
         }
-        default: {
+        case 'start': {
           childX = childGridRect.x + marginLeftValue;
           break;
         }
+        default: {
+          childX = childGridRect.x;
+          break;
+        }
       }
+    } else {
+      childX = childGridRect.x + marginLeftValue;
     }
-    if (child.placeSelf.alignSelf) {
+    let childY;
+    marginTopValue = UISizeUtils.convertUISizeToNumber(child.margin.top, childGridRect.width);
+    const marginBottomValue = UISizeUtils.convertUISizeToNumber(
+      child.margin.bottom,
+      childGridRect.width
+    );
+    if (child.margin.top.unit === SizeUnit.Auto || child.margin.bottom.unit === SizeUnit.Auto) {
+      if (child.margin.top.unit === SizeUnit.Auto && child.margin.bottom.unit === SizeUnit.Auto) {
+        marginTopValue = (childGridRect.height - childHeight) / 2;
+      } else if (child.margin.top.unit === SizeUnit.Auto) {
+        marginTopValue = childGridRect.height - childHeight - marginBottomValue;
+        if (marginTopValue < 0) {
+          marginTopValue = 0;
+        }
+      }
+      childY = childGridRect.y + marginTopValue;
+    } else if (child.placeSelf.alignSelf) {
       switch (child.placeSelf.alignSelf) {
         case 'center': {
           childY =
             childGridRect.y +
             (childGridRect.height - childHeight) / 2 +
-            marginTopValue / 2;
+            (marginTopValue - marginBottomValue) / 2;
           break;
         }
         case 'end': {
-          childY = childGridRect.y + (childGridRect.height - childHeight);
+          childY = childGridRect.y + (childGridRect.height - childHeight) - marginBottomValue;
           break;
         }
-        default: {
+        case 'start': {
           childY = childGridRect.y + marginTopValue;
           break;
         }
+        default: {
+          childY = childGridRect.y;
+          break;
+        }
       }
+    } else {
+      childY = childGridRect.y + marginTopValue;
     }
     child.parentRect = childGridRect;
     return {
@@ -330,7 +392,7 @@ export class GridMapping {
     plusOffset: number;
   }[] {
     return list.map((size, index) => {
-      if (size.unit === SizeUnit.Auto || size.unit === SizeUnit.Fit) {
+      if (size.unit === SizeUnit.Auto) {
         return this.getGridAutoOffsetValueByIndex({
           index,
           sizeInfoList: list,

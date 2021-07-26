@@ -2,11 +2,12 @@
  * @author allen
  * @data 2020/12/14 17:04
  */
-import { SizeUnit } from 'towify-editor-common-values';
-import { LineInfo, RectInfo } from '../../type/common.type';
+import { SizeUnit } from '@towify/common-values';
+import { GridChildInfo, LineInfo, RectInfo } from '../../type/common.type';
 import { SignInfo } from '../../type/interact.type';
 import { NumberUtils } from '../number.utils/number.utils';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
+import { GridUtils } from './grid.utils';
 
 export class GridAssistLineUtils {
   static getAssistLinesAndSignsByActivePoint(
@@ -16,6 +17,12 @@ export class GridAssistLineUtils {
       top: number;
       right: number;
       bottom: number;
+    },
+    marginUnits?: {
+      left: SizeUnit.PX | SizeUnit.Percent;
+      right: SizeUnit.PX | SizeUnit.Percent;
+      top: SizeUnit.PX | SizeUnit.Percent;
+      bottom: SizeUnit.PX | SizeUnit.Percent;
     }
   ): {
     lines: LineInfo[];
@@ -23,14 +30,17 @@ export class GridAssistLineUtils {
   } {
     const lines: LineInfo[] = [];
     const signs: SignInfo[] = [];
+    const maxValue =
+      activeBorder.left !== Number.MIN_VALUE && activeBorder.right !== Number.MIN_VALUE
+        ? activeBorder.right - activeBorder.left
+        : 1;
     if (activeBorder.left !== Number.MIN_VALUE) {
-      const offLeft = NumberUtils.parseViewNumber(rect.x - activeBorder.left);
+      const offLeft =
+        marginUnits?.left === SizeUnit.Percent
+          ? parseFloat((((rect.x - activeBorder.left) * 100) / maxValue).toFixed(2))
+          : NumberUtils.parseViewNumber(rect.x - activeBorder.left);
       const leftY = rect.y + rect.height / 2;
-      if (
-        offLeft >= 0 &&
-        leftY < activeBorder.bottom &&
-        leftY > activeBorder.top
-      ) {
+      if (offLeft >= 0 && leftY > activeBorder.top) {
         lines.push({
           fromX: rect.x,
           toX: activeBorder.left,
@@ -38,22 +48,19 @@ export class GridAssistLineUtils {
           toY: leftY
         });
         signs.push({
-          x: activeBorder.left + offLeft / 2,
+          x: activeBorder.left + NumberUtils.parseViewNumber(rect.x - activeBorder.left) / 2,
           y: leftY - 16,
-          sign: `${offLeft} ${SizeUnit.PX}`
+          sign: `${offLeft} ${marginUnits?.left ?? SizeUnit.PX}`
         });
       }
     }
-    if (activeBorder.right !== Number.MIN_VALUE) {
-      const offRight = NumberUtils.parseViewNumber(
-        activeBorder.right - (rect.x + rect.width)
-      );
+    if (activeBorder.right !== Number.MIN_VALUE && rect.width > 0) {
+      const offRight =
+        marginUnits?.right === SizeUnit.Percent
+          ? parseFloat((((activeBorder.right - (rect.x + rect.width)) * 100) / maxValue).toFixed(2))
+          : NumberUtils.parseViewNumber(activeBorder.right - (rect.x + rect.width));
       const rightY = rect.y + rect.height / 2;
-      if (
-        offRight >= 0 &&
-        rightY < activeBorder.bottom &&
-        rightY > activeBorder.top
-      ) {
+      if (offRight >= 0 && rightY > activeBorder.top) {
         lines.push({
           fromX: rect.x + rect.width,
           toX: activeBorder.right,
@@ -61,20 +68,21 @@ export class GridAssistLineUtils {
           toY: rightY
         });
         signs.push({
-          x: activeBorder.right - offRight / 2,
+          x:
+            activeBorder.right -
+            NumberUtils.parseViewNumber(activeBorder.right - (rect.x + rect.width)) / 2,
           y: rightY - 16,
-          sign: `${offRight} ${SizeUnit.PX}`
+          sign: `${offRight} ${marginUnits?.right ?? SizeUnit.PX}`
         });
       }
     }
     if (activeBorder.top !== Number.MIN_VALUE) {
-      const offTop = NumberUtils.parseViewNumber(rect.y - activeBorder.top);
+      const offTop =
+        marginUnits?.top === SizeUnit.Percent
+          ? parseFloat((((rect.y - activeBorder.top) * 100) / maxValue).toFixed(2))
+          : NumberUtils.parseViewNumber(rect.y - activeBorder.top);
       const topX = rect.x + rect.width / 2;
-      if (
-        offTop >= 0 &&
-        topX < activeBorder.right &&
-        topX > activeBorder.left
-      ) {
+      if (offTop >= 0 && topX > activeBorder.left) {
         lines.push({
           fromX: topX,
           toX: topX,
@@ -83,21 +91,20 @@ export class GridAssistLineUtils {
         });
         signs.push({
           x: topX + 25 + offTop.toString().length * 3,
-          y: activeBorder.top + offTop / 2 + 6,
-          sign: `${offTop} ${SizeUnit.PX}`
+          y: activeBorder.top + NumberUtils.parseViewNumber(rect.y - activeBorder.top) / 2 + 6,
+          sign: `${offTop} ${marginUnits?.top ?? SizeUnit.PX}`
         });
       }
     }
-    if (activeBorder.bottom !== Number.MIN_VALUE) {
-      const offBottom = NumberUtils.parseViewNumber(
-        activeBorder.bottom - (rect.y + rect.height)
-      );
+    if (activeBorder.bottom !== Number.MIN_VALUE && rect.height > 0) {
+      const offBottom =
+        marginUnits?.bottom === SizeUnit.Percent
+          ? parseFloat(
+              (((activeBorder.bottom - (rect.y + rect.height)) * 100) / maxValue).toFixed(2)
+            )
+          : NumberUtils.parseViewNumber(activeBorder.bottom - (rect.y + rect.height));
       const bottomX = rect.x + rect.width / 2;
-      if (
-        offBottom >= 0 &&
-        bottomX < activeBorder.right &&
-        bottomX > activeBorder.left
-      ) {
+      if (offBottom >= 0 && bottomX > activeBorder.left) {
         lines.push({
           fromX: bottomX,
           toX: bottomX,
@@ -106,8 +113,11 @@ export class GridAssistLineUtils {
         });
         signs.push({
           x: bottomX + 25 + offBottom.toString().length * 3,
-          y: activeBorder.bottom - offBottom / 2 + 6,
-          sign: `${offBottom} ${SizeUnit.PX}`
+          y:
+            activeBorder.bottom -
+            NumberUtils.parseViewNumber(activeBorder.bottom - (rect.y + rect.height)) / 2 +
+            6,
+          sign: `${offBottom} ${marginUnits?.bottom ?? SizeUnit.PX}`
         });
       }
     }
@@ -117,34 +127,47 @@ export class GridAssistLineUtils {
     };
   }
 
-  static getAssistLinesAndSigns(
-    movingRect: RectInfo,
-    gridManager: GridMapping
-  ): {
+  static getAssistLinesAndSigns(params: {
+    movingRect: RectInfo;
+    gridMapping: GridMapping;
+    moveChild?: GridChildInfo;
+  }): {
     lines: LineInfo[];
     signs: SignInfo[];
   } {
-    const gridItemRectList = gridManager.getGridItemRectList();
-    const activeAreaInfo = gridManager.getChildGridAreaInfoByRect({
-      rect: movingRect,
-      gridItemRectList
+    const activeAreaInfo = params.gridMapping.getChildGridAreaInfoByRect(params.movingRect);
+    const activeGridItemRect = GridUtils.convertChildSizeInfoToNumber({
+      gridArea: activeAreaInfo.gridArea,
+      gridItemRectList: params.gridMapping.getGridItemRectList()
     });
-    const activeGridItemRect =
-      gridItemRectList[activeAreaInfo.gridArea.rowStart - 1][
-        activeAreaInfo.gridArea.columnStart - 1
-      ];
     if (activeGridItemRect) {
       return GridAssistLineUtils.getAssistLinesAndSignsByActivePoint(
-        movingRect,
+        params.movingRect,
         {
           left: activeGridItemRect.x,
           top: activeGridItemRect.y,
           right: activeGridItemRect.x + activeGridItemRect.width,
           bottom: activeGridItemRect.y + activeGridItemRect.height
+        },
+        {
+          top:
+            params.moveChild?.margin.top.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX,
+          bottom:
+            params.moveChild?.margin.bottom.unit === SizeUnit.Percent
+              ? SizeUnit.Percent
+              : SizeUnit.PX,
+          left:
+            params.moveChild?.margin.left.unit === SizeUnit.Percent
+              ? SizeUnit.Percent
+              : SizeUnit.PX,
+          right:
+            params.moveChild?.margin.right.unit === SizeUnit.Percent
+              ? SizeUnit.Percent
+              : SizeUnit.PX
         }
       );
     }
-    return GridAssistLineUtils.getAssistLinesAndSignsByActivePoint(movingRect, {
+    return GridAssistLineUtils.getAssistLinesAndSignsByActivePoint(params.movingRect, {
       left: 0,
       top: 0,
       right: Number.MIN_VALUE,

@@ -39,33 +39,33 @@ export class GridLineUtils {
         toColumn: rowItem.length - 1
       };
       result.push({
-        canDrag: !(
-          gridMapping.isMoreAutoSizeInRow() &&
-          (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row]) ||
-            UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row - 1]))
-        ),
+        canDrag:
+          !(
+            gridMapping.isMoreAutoSizeInRow() &&
+            (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row]) ||
+              UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row - 1]))
+          ) && row !== 0,
         direction: 'top',
         position,
         line: {
           fromX: rowItem[0].x,
-          toX:
-            rowItem[rowItem.length - 1].x + rowItem[rowItem.length - 1].width,
+          toX: rowItem[rowItem.length - 1].x + rowItem[rowItem.length - 1].width,
           fromY: rowItem[0].y,
           toY: rowItem[0].y
         }
       });
       result.push({
-        canDrag: !(
-          gridMapping.isMoreAutoSizeInRow() &&
-          (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row]) ||
-            UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row + 1]))
-        ),
+        canDrag:
+          !(
+            gridMapping.isMoreAutoSizeInRow() &&
+            (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row]) ||
+              UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridRowInfo[row + 1]))
+          ) && row !== gridItemRectList.length - 1,
         direction: 'bottom',
         position,
         line: {
           fromX: rowItem[0].x,
-          toX:
-            rowItem[rowItem.length - 1].x + rowItem[rowItem.length - 1].width,
+          toX: rowItem[rowItem.length - 1].x + rowItem[rowItem.length - 1].width,
           fromY: rowItem[0].y + rowItem[0].height,
           toY: rowItem[0].y + rowItem[0].height
         }
@@ -82,15 +82,12 @@ export class GridLineUtils {
         toColumn: column
       };
       result.push({
-        canDrag: !(
-          gridMapping.isMoreAutoSizeInColumn() &&
-          (UISizeUtils.checkSizeInfoIsAuto(
-            gridMapping.gridColumnInfo[column]
-          ) ||
-            UISizeUtils.checkSizeInfoIsAuto(
-              gridMapping.gridColumnInfo[column - 1]
-            ))
-        ),
+        canDrag:
+          !(
+            gridMapping.isMoreAutoSizeInColumn() &&
+            (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column]) ||
+              UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column - 1]))
+          ) && column !== 0,
         direction: 'left',
         position,
         line: {
@@ -101,15 +98,12 @@ export class GridLineUtils {
         }
       });
       result.push({
-        canDrag: !(
-          gridMapping.isMoreAutoSizeInColumn() &&
-          (UISizeUtils.checkSizeInfoIsAuto(
-            gridMapping.gridColumnInfo[column]
-          ) ||
-            UISizeUtils.checkSizeInfoIsAuto(
-              gridMapping.gridColumnInfo[column + 1]
-            ))
-        ),
+        canDrag:
+          !(
+            gridMapping.isMoreAutoSizeInColumn() &&
+            (UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column]) ||
+              UISizeUtils.checkSizeInfoIsAuto(gridMapping.gridColumnInfo[column + 1]))
+          ) && column !== gridItemRectList[0].length - 1,
         direction: 'right',
         position,
         line: {
@@ -121,24 +115,12 @@ export class GridLineUtils {
       });
     });
     result.sort((a, b) => {
-      const aType =
-        a.line.fromY === a.line.toY
-          ? GridLineType.Horizontal
-          : GridLineType.Vertical;
-      const bType =
-        b.line.fromY === b.line.toY
-          ? GridLineType.Horizontal
-          : GridLineType.Vertical;
-      if (
-        aType === GridLineType.Horizontal &&
-        bType === GridLineType.Vertical
-      ) {
+      const aType = a.line.fromY === a.line.toY ? GridLineType.Horizontal : GridLineType.Vertical;
+      const bType = b.line.fromY === b.line.toY ? GridLineType.Horizontal : GridLineType.Vertical;
+      if (aType === GridLineType.Horizontal && bType === GridLineType.Vertical) {
         return -1;
       }
-      if (
-        aType === GridLineType.Vertical &&
-        bType === GridLineType.Horizontal
-      ) {
+      if (aType === GridLineType.Vertical && bType === GridLineType.Horizontal) {
         return 1;
       }
       if (aType === bType) {
@@ -240,12 +222,8 @@ export class GridLineUtils {
         height: currentRect.y - preRect.y - preRect.height
       });
     }
-    columnGapArea = columnGapArea.filter(
-      rect => !(rect.width <= 0 || rect.height <= 0)
-    );
-    rowGapArea = rowGapArea.filter(
-      rect => !(rect.width <= 0 || rect.height <= 0)
-    );
+    columnGapArea = columnGapArea.filter(rect => !(rect.width <= 0 || rect.height <= 0));
+    rowGapArea = rowGapArea.filter(rect => !(rect.width <= 0 || rect.height <= 0));
     const columnResult = columnGapArea.map<{
       rect: RectInfo;
       slashLines: LineInfo[];
@@ -300,20 +278,15 @@ export class GridLineUtils {
         x: params.border.left,
         y: params.border.top,
         width: params.gridPadding.left,
-        height:
-          params.gridSize.height - params.border.top - params.border.bottom
+        height: params.gridSize.height - params.border.top - params.border.bottom
       });
     }
     if (params.gridPadding.right > 0) {
       columnPaddingArea.push({
-        x:
-          params.gridSize.width -
-          params.gridPadding.right -
-          params.border.right,
+        x: params.gridSize.width - params.gridPadding.right - params.border.right,
         y: params.border.top,
         width: params.gridPadding.right,
-        height:
-          params.gridSize.height - params.border.top - params.border.bottom
+        height: params.gridSize.height - params.border.top - params.border.bottom
       });
     }
     if (params.gridPadding.top) {
@@ -327,20 +300,13 @@ export class GridLineUtils {
     if (params.gridPadding.bottom) {
       rowPaddingArea.push({
         x: params.border.left,
-        y:
-          params.gridSize.height -
-          params.gridPadding.bottom -
-          params.border.bottom,
+        y: params.gridSize.height - params.gridPadding.bottom - params.border.bottom,
         width: params.gridSize.width - params.border.left - params.border.right,
         height: params.gridPadding.bottom
       });
     }
-    rowPaddingArea = rowPaddingArea.filter(
-      rect => !(rect.width <= 0 || rect.height <= 0)
-    );
-    columnPaddingArea = columnPaddingArea.filter(
-      rect => !(rect.width <= 0 || rect.height <= 0)
-    );
+    rowPaddingArea = rowPaddingArea.filter(rect => !(rect.width <= 0 || rect.height <= 0));
+    columnPaddingArea = columnPaddingArea.filter(rect => !(rect.width <= 0 || rect.height <= 0));
     const columnResult = columnPaddingArea.map<{
       rect: RectInfo;
       slashLines: LineInfo[];

@@ -2,7 +2,7 @@
  * @author allen
  * @data 2021/1/22 11:37
  */
-import { SizeUnit, UISize } from 'towify-editor-common-values';
+import { SizeUnit, UISize } from '@towify/common-values';
 import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';
 
@@ -13,64 +13,29 @@ export class UISizeUtils {
     origin: UISize;
     parentSizeValue?: number;
   }): UISize {
-    const originValue = UISizeUtils.convertUISizeToNumber(
+    let originValue = UISizeUtils.convertUISizeToNumber(
       params.origin,
       params.parentSizeValue,
       false
     );
-    if (
-      params.min.unit !== SizeUnit.Auto &&
-      params.min.unit !== SizeUnit.Unset &&
-      params.min.unit !== SizeUnit.Fit
-    ) {
-      const minValue = UISizeUtils.convertUISizeToNumber(
-        params.min,
-        params.parentSizeValue,
-        false
-      );
-      if (originValue > minValue) {
-        if (
-          params.max.unit !== SizeUnit.Unset &&
-          params.max.unit !== SizeUnit.Auto &&
-          params.max.unit !== SizeUnit.Fit
-        ) {
-          const maxValue = UISizeUtils.convertUISizeToNumber(
-            params.max,
-            params.parentSizeValue,
-            false
-          );
-          if (maxValue < minValue || originValue < maxValue) {
-            return params.origin;
-          }
-          return params.max;
-        }
-        return params.origin;
-      }
-      return params.min;
-    }
-    if (
-      params.max.unit !== SizeUnit.Unset &&
-      params.max.unit !== SizeUnit.Auto &&
-      params.max.unit !== SizeUnit.Fit
-    ) {
-      const maxValue = UISizeUtils.convertUISizeToNumber(
-        params.max,
-        params.parentSizeValue,
-        false
-      );
-      if (originValue < maxValue) {
-        return params.origin;
-      }
-      return params.max;
-    }
-    return params.origin;
+    originValue = originValue < 0 ? 0 : originValue;
+    const minValue =
+      params.max.unit === SizeUnit.Unset ||
+      params.max.unit === SizeUnit.Auto ||
+      params.max.unit === SizeUnit.Fit
+        ? Number.MIN_VALUE
+        : UISizeUtils.convertUISizeToNumber(params.min, params.parentSizeValue, false);
+    const maxValue =
+      params.max.unit === SizeUnit.Unset ||
+      params.max.unit === SizeUnit.Auto ||
+      params.max.unit === SizeUnit.Fit
+        ? Number.MAX_VALUE
+        : UISizeUtils.convertUISizeToNumber(params.max, params.parentSizeValue, false);
+    if (originValue < minValue) return params.min;
+    return originValue < maxValue ? params.origin : params.max;
   }
 
-  static convertUISizeToNumber(
-    sizeInfo: UISize,
-    maxValue?: number,
-    isAlert = true
-  ): number {
+  static convertUISizeToNumber(sizeInfo: UISize, maxValue?: number, isAlert = true): number {
     let valueNumber = sizeInfo.value;
     if (sizeInfo.unit === SizeUnit.Auto) {
       return 0;
@@ -79,14 +44,12 @@ export class UISizeUtils {
       return 0;
     }
     if (sizeInfo.unit === SizeUnit.Fit) {
-      return 0;
+      return valueNumber;
     }
     if (sizeInfo.unit === SizeUnit.Percent) {
       valueNumber = ((maxValue ?? 0) * valueNumber) / 100;
       if (!maxValue && isAlert) {
-        ErrorUtils.GridError(
-          'Value unit is percent and parent value is undefined'
-        );
+        ErrorUtils.GridError('Value unit is percent and parent value is undefined');
       }
     }
     return valueNumber;
@@ -98,31 +61,25 @@ export class UISizeUtils {
     maxValue?: number;
   }): UISize {
     let value = params.valueNumber;
-    let unit = params.unit;
     if (params.unit === SizeUnit.Percent) {
-      value = parseFloat(
-        ((params.valueNumber / (params.maxValue ?? 1)) * 100).toFixed(1)
-      );
+      value = parseFloat(((params.valueNumber / (params.maxValue ?? 1)) * 100).toFixed(2));
       if (value > 99.85 && value < 100.15) {
         value = 100;
       }
-      unit = SizeUnit.Percent;
     }
     if (
-      params.unit === SizeUnit.PX ||
-      params.unit === SizeUnit.Auto ||
-      params.unit === SizeUnit.Unset
+      params.unit === SizeUnit.Unset ||
+      params.unit === SizeUnit.Fit ||
+      params.unit === SizeUnit.Auto
     ) {
-      value = NumberUtils.parseViewNumber(value);
-      unit = SizeUnit.PX;
+      value = 0;
     }
-    if (params.unit === SizeUnit.Fit) {
+    if (params.unit === SizeUnit.PX) {
       value = NumberUtils.parseViewNumber(value);
-      unit = SizeUnit.Fit;
     }
     return {
       value,
-      unit
+      unit: params.unit
     };
   }
 
@@ -141,10 +98,7 @@ export class UISizeUtils {
     let value = params.sizeInfo.value;
     if (params.sizeInfo.unit === SizeUnit.Percent) {
       value = parseFloat(
-        (
-          (params.oldParentValue * params.sizeInfo.value) /
-          params.newParentValue
-        ).toFixed(1)
+        ((params.oldParentValue * params.sizeInfo.value) / params.newParentValue).toFixed(2)
       );
       if (value > 99.85 && value < 100.15) {
         value = 100;
@@ -177,10 +131,7 @@ export class UISizeUtils {
     }
     if (params.oldSizeInfo.unit === SizeUnit.Percent) {
       value = parseFloat(
-        (
-          (params.oldSizeInfo.value * params.newValue) /
-          params.oldValue
-        ).toFixed(4)
+        ((params.oldSizeInfo.value * params.newValue) / params.oldValue).toFixed(2)
       );
     }
     return {
@@ -191,6 +142,6 @@ export class UISizeUtils {
 
   static checkSizeInfoIsAuto(sizeInfo?: UISize): boolean {
     if (!sizeInfo) return false;
-    return sizeInfo.unit === SizeUnit.Auto || sizeInfo.unit === SizeUnit.Fit;
+    return sizeInfo.unit === SizeUnit.Auto;
   }
 }

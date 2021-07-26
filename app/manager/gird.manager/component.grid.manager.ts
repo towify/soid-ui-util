@@ -6,25 +6,20 @@ import {
   CustomGrid,
   GridArea,
   GridGap,
-  SpacingPadding
-} from 'towify-editor-common-values';
-import {
-  GridChildInfo,
-  LineInfo,
-  RectInfo,
-  SizeInfo
-} from '../../type/common.type';
+  SizeUnit,
+  SpacingPadding,
+  UISize
+} from '@towify/common-values';
+import { DslType } from '@towify-types/dsl';
+import { GridChildInfo, LineInfo, RectInfo, SizeInfo } from '../../type/common.type';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
 import { ErrorUtils } from '../../utils/error.utils/error.utils';
 import { GridChildUtils } from '../../utils/grid.utils/grid.child.utils';
-import {
-  AlignDefaultOffset,
-  AlignOffsetInfo,
-  SignInfo
-} from '../../type/interact.type';
+import { AlignDefaultOffset, AlignOffsetInfo, SignInfo } from '../../type/interact.type';
 import { GridAssistLineUtils } from '../../utils/grid.utils/grid.assist.line.utils';
 import { GridAlignLineUtils } from '../../utils/grid.utils/grid.align.line.utils';
+import { GridUtils } from '../../utils/grid.utils/grid.utils';
 
 export class ComponentGridManager {
   #movingLayerId = '';
@@ -41,27 +36,18 @@ export class ComponentGridManager {
 
   #layerMiddleList: number[] = [];
 
-  #gridRect?: RectInfo;
-
-  #gridMapping: GridMapping;
+  readonly #gridMapping: GridMapping;
 
   constructor(
     public readonly gap: GridGap,
     public readonly padding: SpacingPadding,
-    public readonly border: SpacingPadding
+    public readonly border: DslType.BorderInfo
   ) {
     this.#gridMapping = new GridMapping(gap, padding, border, 1, 1);
   }
 
   get gridRect(): RectInfo {
-    return (
-      this.#gridRect ?? {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0
-      }
-    );
+    return this.#gridMapping.gridRect;
   }
 
   get gridActiveRect(): RectInfo {
@@ -83,10 +69,20 @@ export class ComponentGridManager {
     return this;
   }
 
+  setGridParentRect(rect?: RectInfo): ComponentGridManager {
+    if (rect) {
+      this.#gridMapping.parentRect = rect;
+    }
+    return this;
+  }
+
   setGridRect(rect: RectInfo): ComponentGridManager {
-    this.#gridRect = rect;
     this.#gridMapping.gridRect = rect;
     return this;
+  }
+
+  updateChildrenRect() {
+    this.#gridMapping.updateChildrenRect();
   }
 
   setChildrenGridInfo(childrenInfo: GridChildInfo[]): ComponentGridManager {
@@ -99,17 +95,19 @@ export class ComponentGridManager {
     x: number;
     y: number;
     size: SizeInfo;
+    droppedOldParentRect?: RectInfo;
     gridArea?: GridArea;
   }): {
     info: GridChildInfo;
     needUpdateGridChildren: boolean;
   } {
-    return GridChildUtils.setDroppedInfo(dropped, this.#gridMapping);
+    return {
+      info: GridChildUtils.setDroppedInfo(dropped, this.#gridMapping),
+      needUpdateGridChildren: this.#gridMapping.needUpdateGridChildren()
+    };
   }
 
-  deleteChildByIdAndGetParentGridChildrenUpdateStatus(
-    childId: string
-  ): boolean {
+  deleteChildByIdAndGetParentGridChildrenUpdateStatus(childId: string): boolean {
     const childIndex = this.#gridMapping.childInfoList.findIndex(
       childInfo => childInfo.id === childId
     );
@@ -119,9 +117,7 @@ export class ComponentGridManager {
     return this.#gridMapping.needUpdateGridChildren();
   }
 
-  updateChildInfoAndGetParentGridChildrenUpdateStatus(
-    child: GridChildInfo
-  ): boolean {
+  updateChildInfoAndGetParentGridChildrenUpdateStatus(child: GridChildInfo): boolean {
     const updateChildInfo = this.#gridMapping.childInfoList.find(
       childInfo => childInfo.id === child.id
     );
@@ -131,18 +127,21 @@ export class ComponentGridManager {
       updateChildInfo.margin = child.margin;
       updateChildInfo.size = child.size;
       updateChildInfo.placeSelf = child.placeSelf;
-      updateChildInfo.rect =
-        this.#gridMapping.getGridChildRect(updateChildInfo);
+      updateChildInfo.rect = this.#gridMapping.getGridChildRect(updateChildInfo);
     }
     return this.#gridMapping.needUpdateGridChildren();
   }
 
-  adjustChildrenAndResetAutoGridInfo(ignoreGridArea = false): GridChildInfo[] {
+  adjustChildrenAndResetAutoGridInfo(
+    ignoreGridArea = false,
+    resetPlaceSelf = false
+  ): GridChildInfo[] {
     if (!this.#gridMapping.childInfoList.length) {
       return [];
     }
     const gridChildList = GridChildUtils.adjustChildrenAndResetAutoGridInfo(
-      this.#gridMapping
+      this.#gridMapping,
+      resetPlaceSelf
     );
     if (ignoreGridArea) {
       gridChildList.forEach(gridChild => {
@@ -159,9 +158,7 @@ export class ComponentGridManager {
     if (!this.#gridMapping.childInfoList.length) {
       return [];
     }
-    const gridChildList = GridChildUtils.getModifiedChildrenGirdInfo(
-      this.#gridMapping
-    );
+    const gridChildList = GridChildUtils.getModifiedChildrenGirdInfo(this.#gridMapping);
     if (ignoreGridArea) {
       gridChildList.forEach(gridChild => {
         gridChild.gridArea.rowStart = 0;
@@ -171,6 +168,52 @@ export class ComponentGridManager {
       });
     }
     return gridChildList;
+  }
+
+  getChildGridRect(gridArea: GridArea) {
+    const childRectRect = GridUtils.convertChildSizeInfoToNumber({
+      gridArea,
+      gridItemRectList: this.#gridMapping.getGridItemRectList()
+    });
+    childRectRect.x += this.gridRect.x;
+    childRectRect.y += this.gridRect.y;
+    return childRectRect;
+  }
+
+  convertChildPxValueToPercentSizeInfo(params: {
+    gridArea: GridArea;
+    pxValue: number;
+    compareType: 'width' | 'height';
+  }): UISize {
+    const childGridRect = this.getChildGridRect(params.gridArea);
+    let value = 0;
+    if (params.compareType === 'width') {
+      value = (params.pxValue / childGridRect.width) * 100;
+    } else if (params.compareType === 'height') {
+      value = (params.pxValue / childGridRect.height) * 100;
+    }
+    return {
+      value: parseFloat(value.toFixed(2)),
+      unit: SizeUnit.Percent
+    };
+  }
+
+  convertChildPercentValueToNumberSizeInfo(params: {
+    gridArea: GridArea;
+    percentValue: number;
+    compareType: 'width' | 'height';
+  }): UISize {
+    const childGridRect = this.getChildGridRect(params.gridArea);
+    let value = 0;
+    if (params.compareType === 'width') {
+      value = (params.percentValue * childGridRect.width) / 100;
+    } else if (params.compareType === 'height') {
+      value = (params.percentValue * childGridRect.height) / 100;
+    }
+    return {
+      value: parseFloat(value.toFixed(1)),
+      unit: SizeUnit.PX
+    };
   }
 
   getGridLineInfos(needBorder = false): {
@@ -284,6 +327,7 @@ export class ComponentGridManager {
       height: childRect.height
     };
     const alignLineInfo = GridAlignLineUtils.getAlignLineByMoveRect({
+      moveChild,
       rect: movingRect,
       middleList: this.#layerMiddleList,
       centerList: this.#layerCenterList,
@@ -294,10 +338,11 @@ export class ComponentGridManager {
     });
     movingRect.x += alignLineInfo.offset.x;
     movingRect.y += alignLineInfo.offset.y;
-    const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns(
+    const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns({
+      moveChild,
       movingRect,
-      this.#gridMapping
-    );
+      gridMapping: this.#gridMapping
+    });
     return GridLineUtils.convertAlignAndAssistLineInfo({
       alignLineInfo,
       assistLineInfo,
@@ -363,15 +408,15 @@ export class ComponentGridManager {
       offset: maxActiveLength,
       gridActiveRect: this.#gridMapping.gridActiveRect
     });
-    const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns(
-      {
+    const assistLineInfo = GridAssistLineUtils.getAssistLinesAndSigns({
+      movingRect: {
         x: droppedRect.x + alignLineInfo.offset.x,
         y: droppedRect.y + alignLineInfo.offset.y,
         width: droppedRect.width,
         height: droppedRect.height
       },
-      this.#gridMapping
-    );
+      gridMapping: this.#gridMapping
+    });
     return GridLineUtils.convertAlignAndAssistLineInfo({
       alignLineInfo,
       assistLineInfo,

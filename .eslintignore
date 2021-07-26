@@ -6,3 +6,4 @@ dist
 # don't lint nyc coverage output
 main.js
 e2e
+npm-publish-cli.js
