@@ -13,49 +13,26 @@ export class UISizeUtils {
     origin: UISize;
     parentSizeValue?: number;
   }): UISize {
-    const originValue = UISizeUtils.convertUISizeToNumber(
+    let originValue = UISizeUtils.convertUISizeToNumber(
       params.origin,
       params.parentSizeValue,
       false
     );
-    if (
-      params.min.unit !== SizeUnit.Auto &&
-      params.min.unit !== SizeUnit.Unset &&
-      params.min.unit !== SizeUnit.Fit
-    ) {
-      const minValue = UISizeUtils.convertUISizeToNumber(params.min, params.parentSizeValue, false);
-      if (originValue > minValue) {
-        if (
-          params.max.unit !== SizeUnit.Unset &&
-          params.max.unit !== SizeUnit.Auto &&
-          params.max.unit !== SizeUnit.Fit
-        ) {
-          const maxValue = UISizeUtils.convertUISizeToNumber(
-            params.max,
-            params.parentSizeValue,
-            false
-          );
-          if (maxValue < minValue || originValue < maxValue) {
-            return params.origin;
-          }
-          return params.max;
-        }
-        return params.origin;
-      }
-      return params.min;
-    }
-    if (
-      params.max.unit !== SizeUnit.Unset &&
-      params.max.unit !== SizeUnit.Auto &&
-      params.max.unit !== SizeUnit.Fit
-    ) {
-      const maxValue = UISizeUtils.convertUISizeToNumber(params.max, params.parentSizeValue, false);
-      if (originValue < maxValue) {
-        return params.origin;
-      }
-      return params.max;
-    }
-    return params.origin;
+    originValue = originValue < 0 ? 0 : originValue;
+    const minValue =
+      params.max.unit === SizeUnit.Unset ||
+      params.max.unit === SizeUnit.Auto ||
+      params.max.unit === SizeUnit.Fit
+        ? Number.MIN_VALUE
+        : UISizeUtils.convertUISizeToNumber(params.min, params.parentSizeValue, false);
+    const maxValue =
+      params.max.unit === SizeUnit.Unset ||
+      params.max.unit === SizeUnit.Auto ||
+      params.max.unit === SizeUnit.Fit
+        ? Number.MAX_VALUE
+        : UISizeUtils.convertUISizeToNumber(params.max, params.parentSizeValue, false);
+    if (originValue < minValue) return params.min;
+    return originValue < maxValue ? params.origin : params.max;
   }
 
   static convertUISizeToNumber(sizeInfo: UISize, maxValue?: number, isAlert = true): number {
@@ -65,6 +42,9 @@ export class UISizeUtils {
     }
     if (sizeInfo.unit === SizeUnit.Unset) {
       return 0;
+    }
+    if (sizeInfo.unit === SizeUnit.Fit) {
+      return valueNumber;
     }
     if (sizeInfo.unit === SizeUnit.Percent) {
       valueNumber = ((maxValue ?? 0) * valueNumber) / 100;

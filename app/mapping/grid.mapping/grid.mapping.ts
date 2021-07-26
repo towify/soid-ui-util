@@ -302,7 +302,7 @@ export class GridMapping {
           break;
         }
         default: {
-          childX = 0;
+          childX = childGridRect.x;
           break;
         }
       }
@@ -343,12 +343,12 @@ export class GridMapping {
           break;
         }
         default: {
-          childY = 0;
+          childY = childGridRect.y;
           break;
         }
       }
     } else {
-      childX = childGridRect.x + marginTopValue;
+      childY = childGridRect.y + marginTopValue;
     }
     child.parentRect = childGridRect;
     return {
