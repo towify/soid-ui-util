@@ -132,7 +132,7 @@ export class GridMapping {
   }
 
   // 获取 grid 布局下每个 item 的 rect
-  getGridItemRectList(autoActive: boolean = true): RectInfo[][] {
+  getGridItemRectList(autoActive = true): RectInfo[][] {
     const gridColumnInfo = this.gridColumnInfo ?? [];
     const gridRowInfo = this.gridRowInfo ?? [];
     let columnAutoOffsetList;
