@@ -144,4 +144,36 @@ export class UISizeUtils {
     if (!sizeInfo) return false;
     return sizeInfo.unit === SizeUnit.Auto;
   }
+
+  static increaseUISizeValue(params: {
+    sizeInfo: UISize;
+    increaseValue: number;
+    origin?: number;
+    maxValue?: number;
+  }): UISize {
+    if (
+      params.sizeInfo.unit === SizeUnit.Auto ||
+      params.sizeInfo.unit === SizeUnit.Unset ||
+      params.sizeInfo.unit === SizeUnit.Fit
+    ) {
+      if (params.origin === undefined) return params.sizeInfo;
+      return {
+        value: parseFloat((params.origin + params.increaseValue).toFixed(1)),
+        unit: SizeUnit.PX
+      };
+    }
+    const changeSizeInfo = UISizeUtils.convertNumberToUISize({
+      valueNumber: params.increaseValue,
+      unit: params.sizeInfo.unit,
+      maxValue: params.maxValue
+    });
+    return {
+      value: parseFloat(
+        (params.sizeInfo.value + changeSizeInfo.value).toFixed(
+          params.sizeInfo.unit === SizeUnit.PX ? 1 : 2
+        )
+      ),
+      unit: params.sizeInfo.unit
+    };
+  }
 }
