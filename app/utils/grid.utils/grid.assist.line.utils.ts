@@ -12,12 +12,7 @@ import { GridUtils } from './grid.utils';
 export class GridAssistLineUtils {
   static getAssistLinesAndSignsByActivePoint(
     rect: RectInfo,
-    activeBorder: {
-      left: number;
-      top: number;
-      right: number;
-      bottom: number;
-    },
+    gridRect?: RectInfo,
     marginUnits?: {
       left: SizeUnit.PX | SizeUnit.Percent;
       right: SizeUnit.PX | SizeUnit.Percent;
@@ -30,17 +25,27 @@ export class GridAssistLineUtils {
   } {
     const lines: LineInfo[] = [];
     const signs: SignInfo[] = [];
-    const maxValue =
-      activeBorder.left !== Number.MIN_VALUE && activeBorder.right !== Number.MIN_VALUE
-        ? activeBorder.right - activeBorder.left
-        : 1;
+    const activeBorder = gridRect
+      ? {
+          left: gridRect.x,
+          top: gridRect.y,
+          right: gridRect.x + gridRect.width,
+          bottom: gridRect.y + gridRect.height
+        }
+      : {
+          left: 0,
+          top: 0,
+          right: Number.MIN_VALUE,
+          bottom: Number.MIN_VALUE
+        };
+    const maxValue = gridRect ? gridRect.width : 1;
     if (activeBorder.left !== Number.MIN_VALUE) {
       const offLeft =
         marginUnits?.left === SizeUnit.Percent
           ? parseFloat((((rect.x - activeBorder.left) * 100) / maxValue).toFixed(2))
           : NumberUtils.parseViewNumber(rect.x - activeBorder.left);
       const leftY = rect.y + rect.height / 2;
-      if (offLeft >= 0 && leftY > activeBorder.top) {
+      if (offLeft >= 0 && leftY > activeBorder.top && leftY < activeBorder.bottom) {
         lines.push({
           fromX: rect.x,
           toX: activeBorder.left,
@@ -60,7 +65,7 @@ export class GridAssistLineUtils {
           ? parseFloat((((activeBorder.right - (rect.x + rect.width)) * 100) / maxValue).toFixed(2))
           : NumberUtils.parseViewNumber(activeBorder.right - (rect.x + rect.width));
       const rightY = rect.y + rect.height / 2;
-      if (offRight >= 0 && rightY > activeBorder.top) {
+      if (offRight >= 0 && rightY > activeBorder.top && rightY < activeBorder.bottom) {
         lines.push({
           fromX: rect.x + rect.width,
           toX: activeBorder.right,
@@ -82,7 +87,7 @@ export class GridAssistLineUtils {
           ? parseFloat((((rect.y - activeBorder.top) * 100) / maxValue).toFixed(2))
           : NumberUtils.parseViewNumber(rect.y - activeBorder.top);
       const topX = rect.x + rect.width / 2;
-      if (offTop >= 0 && topX > activeBorder.left) {
+      if (offTop >= 0 && topX > activeBorder.left && topX < activeBorder.right) {
         lines.push({
           fromX: topX,
           toX: topX,
@@ -104,7 +109,7 @@ export class GridAssistLineUtils {
             )
           : NumberUtils.parseViewNumber(activeBorder.bottom - (rect.y + rect.height));
       const bottomX = rect.x + rect.width / 2;
-      if (offBottom >= 0 && bottomX > activeBorder.left) {
+      if (offBottom >= 0 && bottomX > activeBorder.left && bottomX < activeBorder.right) {
         lines.push({
           fromX: bottomX,
           toX: bottomX,
@@ -143,12 +148,7 @@ export class GridAssistLineUtils {
     if (activeGridItemRect) {
       return GridAssistLineUtils.getAssistLinesAndSignsByActivePoint(
         params.movingRect,
-        {
-          left: activeGridItemRect.x,
-          top: activeGridItemRect.y,
-          right: activeGridItemRect.x + activeGridItemRect.width,
-          bottom: activeGridItemRect.y + activeGridItemRect.height
-        },
+        activeGridItemRect,
         {
           top:
             params.moveChild?.margin.top.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX,
@@ -167,11 +167,6 @@ export class GridAssistLineUtils {
         }
       );
     }
-    return GridAssistLineUtils.getAssistLinesAndSignsByActivePoint(params.movingRect, {
-      left: 0,
-      top: 0,
-      right: Number.MIN_VALUE,
-      bottom: Number.MIN_VALUE
-    });
+    return GridAssistLineUtils.getAssistLinesAndSignsByActivePoint(params.movingRect);
   }
 }

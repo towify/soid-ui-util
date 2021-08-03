@@ -11,7 +11,14 @@ import {
   UISize
 } from '@towify/common-values';
 import { DslType } from '@towify-types/dsl';
-import { GridChildInfo, LineInfo, RectInfo, SizeInfo } from '../../type/common.type';
+import {
+  ComponentResizeType,
+  GridChildInfo,
+  LineInfo,
+  PlaceSelfInfo,
+  RectInfo,
+  SizeInfo
+} from '../../type/common.type';
 import { GridMapping } from '../../mapping/grid.mapping/grid.mapping';
 import { GridLineUtils } from '../../utils/grid.utils/grid.line.utils';
 import { ErrorUtils } from '../../utils/error.utils/error.utils';
@@ -22,7 +29,7 @@ import { GridAlignLineUtils } from '../../utils/grid.utils/grid.align.line.utils
 import { GridUtils } from '../../utils/grid.utils/grid.utils';
 
 export class ComponentGridManager {
-  #movingLayerId = '';
+  #activeLayerId = '';
 
   #movingOffsetX = 0;
 
@@ -281,7 +288,7 @@ export class ComponentGridManager {
   }
 
   startMovingChildById(id: string): ComponentGridManager {
-    this.#movingLayerId = id;
+    this.#activeLayerId = id;
     this.#movingOffsetX = 0;
     this.#movingOffsetY = 0;
     this.prepareAlignLine();
@@ -295,9 +302,10 @@ export class ComponentGridManager {
   }
 
   stopMovingChild(): ComponentGridManager {
-    this.#movingLayerId = '';
+    this.#activeLayerId = '';
     this.#movingOffsetX = 0;
     this.#movingOffsetY = 0;
+    this.resetAlignLine();
     return this;
   }
 
@@ -308,7 +316,7 @@ export class ComponentGridManager {
     offset: AlignOffsetInfo;
   } {
     const moveChild = this.#gridMapping.childInfoList.find(
-      child => child.id === this.#movingLayerId
+      child => child.id === this.#activeLayerId
     );
     if (!moveChild) {
       ErrorUtils.InteractError('Moving layer is not find');
@@ -327,7 +335,6 @@ export class ComponentGridManager {
       height: childRect.height
     };
     const alignLineInfo = GridAlignLineUtils.getAlignLineByMoveRect({
-      moveChild,
       rect: movingRect,
       middleList: this.#layerMiddleList,
       centerList: this.#layerCenterList,
@@ -351,12 +358,12 @@ export class ComponentGridManager {
   }
 
   private prepareAlignLine(isNeedMiddle = true): void {
-    if (!this.#movingLayerId) return;
+    if (!this.#activeLayerId) return;
     this.resetAlignLine();
     const layerLinesInfo = GridAlignLineUtils.prepareAlignLine({
       isNeedMiddle,
       gridMapping: this.#gridMapping,
-      movingLayerId: this.#movingLayerId
+      activeId: this.#activeLayerId
     });
     this.#layerCenterList = layerLinesInfo.layerCenterList;
     this.#layerMiddleList = layerLinesInfo.layerMiddleList;
@@ -378,6 +385,47 @@ export class ComponentGridManager {
       line.toY -= this.#gridMapping.borderInfo.top;
       line.toX -= this.#gridMapping.borderInfo.left;
       return line;
+    });
+  }
+
+  startResizingChildById(id: string): ComponentGridManager {
+    this.#activeLayerId = id;
+    this.prepareAlignLine();
+    return this;
+  }
+
+  stopResizingChild(): ComponentGridManager {
+    this.#activeLayerId = '';
+    this.#movingOffsetX = 0;
+    this.#movingOffsetY = 0;
+    this.resetAlignLine();
+    return this;
+  }
+
+  getResizeAlignAndAssistLineInfo(param: {
+    rect: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+    resizeType: ComponentResizeType;
+    placeSelf: PlaceSelfInfo;
+    maxActiveLength?: number;
+  }): {
+    rect: RectInfo;
+    xAlignLine: LineInfo | undefined;
+    yAlignLine: LineInfo | undefined;
+  } {
+    const maxActiveLength = param.maxActiveLength ?? 4;
+    return GridAlignLineUtils.getAlignLineByResizeRect({
+      rect: param.rect,
+      resizeType: param.resizeType,
+      xList: this.#layerXList.concat(this.#layerCenterList),
+      yList: this.#layerYList.concat(this.#layerMiddleList),
+      offset: maxActiveLength,
+      gridActiveRect: this.#gridMapping.gridActiveRect,
+      placeSelf: param.placeSelf
     });
   }
 
