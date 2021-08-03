@@ -402,7 +402,7 @@ export class ComponentGridManager {
     return this;
   }
 
-  getResizeAlignAndAssistLineInfo(param: {
+  getAlignInfoOnResizing(param: {
     rect: {
       x: number;
       y: number;
