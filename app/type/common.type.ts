@@ -65,6 +65,17 @@ type PaddingInfo = {
   bottom: number;
 };
 
+type ComponentResizeType =
+  | 'left'
+  | 'right'
+  | 'top'
+  | 'bottom'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'auto';
+
 export {
   Rgba,
   RectInfo,
@@ -73,7 +84,8 @@ export {
   PlaceSelfInfo,
   RegionInfo,
   LineInfo,
-  PaddingInfo
+  PaddingInfo,
+  ComponentResizeType
 };
 
 export type RadialColorGradientSizeType =
