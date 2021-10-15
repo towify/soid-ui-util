@@ -2,41 +2,11 @@
  *  @Author KaySaith
  *  @Date 10/31/20
  */
-import { GridArea, SizeUnit, SpacingMargin, UISize } from '@towify/common-values';
-
 type Rgba = {
   red: number;
   green: number;
   blue: number;
   alpha: number;
-};
-
-type SizeInfo = {
-  [key: string]: UISize;
-  width: UISize;
-  minWidth: UISize;
-  maxWidth: UISize;
-  height: UISize;
-  minHeight: UISize;
-  maxHeight: UISize;
-};
-
-type PlaceSelfInfo = {
-  // 水平
-  justifySelf: string;
-  // 垂直
-  alignSelf: string;
-};
-
-type GridChildInfo = {
-  id: string;
-  gridArea: GridArea;
-  margin: SpacingMargin;
-  placeSelf: PlaceSelfInfo;
-  size: SizeInfo;
-  rect?: RectInfo;
-  parentRect?: RectInfo;
-  isFullParent?: boolean;
 };
 
 type RectInfo = {
@@ -51,20 +21,6 @@ type RegionInfo = {
   to: number;
 };
 
-type LineInfo = {
-  fromX: number;
-  fromY: number;
-  toX: number;
-  toY: number;
-};
-
-type PaddingInfo = {
-  left: number;
-  right: number;
-  top: number;
-  bottom: number;
-};
-
 type ComponentResizeType =
   | 'left'
   | 'right'
@@ -76,17 +32,7 @@ type ComponentResizeType =
   | 'bottom-right'
   | 'auto';
 
-export {
-  Rgba,
-  RectInfo,
-  GridChildInfo,
-  SizeInfo,
-  PlaceSelfInfo,
-  RegionInfo,
-  LineInfo,
-  PaddingInfo,
-  ComponentResizeType
-};
+export { Rgba, RectInfo, RegionInfo, ComponentResizeType };
 
 export type RadialColorGradientSizeType =
   | 'closest-side'
@@ -105,15 +51,17 @@ export type ColorGradientType = {
   };
   shared: {
     repeat: boolean;
-    colors: {
-      // hex eg: #ff00ff
-      hex: string;
-      // opacity eg: 50
-      opacity: number;
-      // proportion eg: 51
-      percent: number;
-    }[];
+    colors: ColorType[];
   };
+};
+
+export type ColorType = {
+  // hex eg: #ff00ff
+  hex: string;
+  // opacity eg: 50
+  opacity: number;
+  // proportion eg: 51
+  percent: number;
 };
 
 export const DefaultRect = {
@@ -122,13 +70,3 @@ export const DefaultRect = {
   width: 0,
   height: 0
 };
-
-export const UnsetUnit = {
-  value: 0,
-  unit: SizeUnit.Unset
-};
-
-export enum GridLineType {
-  Horizontal = 'horizontal',
-  Vertical = 'vertical'
-}
