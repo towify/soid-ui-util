@@ -43,11 +43,7 @@ export class ColorManager implements IColorManager {
    * @description 转换颜色值
    */
   get filter(): string {
-    const baseColor = new Color(
-      this.#rgba.red,
-      this.#rgba.green,
-      this.#rgba.blue
-    );
+    const baseColor = new Color(this.#rgba.red, this.#rgba.green, this.#rgba.blue);
     const solver = new Solver(baseColor);
     const result = solver.solve();
     return result.filter;
@@ -64,7 +60,13 @@ export class ColorManager implements IColorManager {
    * @description 通过十六进制形式的颜色值构建 ColorManager 实例
    */
   static fromHex(hex: string, alpha = 1) {
-    return new ColorManager({ hex, alpha });
+    let colorHex = hex;
+    let colorAlpha = alpha;
+    if (hex === 'transparent') {
+      colorHex = '#FFFFFF';
+      colorAlpha = 0;
+    }
+    return new ColorManager({ hex: colorHex, alpha: colorAlpha });
   }
 
   private rgbToHex(rgba: Rgba) {
@@ -73,13 +75,15 @@ export class ColorManager implements IColorManager {
       return hex.length === 1 ? `0${hex}` : hex;
     };
     this.#alpha = rgba.alpha;
-    return `#${colorNumberToHex(rgba.red)}${colorNumberToHex(
-      rgba.green
-    )}${colorNumberToHex(rgba.blue)}`;
+    return `#${colorNumberToHex(rgba.red)}${colorNumberToHex(rgba.green)}${colorNumberToHex(
+      rgba.blue
+    )}`;
   }
 
   private hexToRgba(): Rgba | undefined {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(this.#hex);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(
+      this.#hex === 'transparent' ? '#FFFFFF' : this.#hex
+    );
     return result
       ? {
           red: parseInt(result[1], 16),
