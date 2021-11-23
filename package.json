@@ -1,5 +1,5 @@
 {
-  "name": "soid-ui-util",
+  "name": "@towify/ui-util",
   "description": "soid ui utils",
   "license": "ISC",
   "main": "dist/index.js",
