@@ -20,9 +20,9 @@ export class UISizeUtils {
     );
     originValue = originValue < 0 ? 0 : originValue;
     const minValue =
-      params.max.unit === SizeUnit.Unset ||
-      params.max.unit === SizeUnit.Auto ||
-      params.max.unit === SizeUnit.Fit
+      params.min.unit === SizeUnit.Unset ||
+      params.min.unit === SizeUnit.Auto ||
+      params.min.unit === SizeUnit.Fit
         ? Number.MIN_VALUE
         : UISizeUtils.convertUISizeToNumber(params.min, params.parentSizeValue, false);
     const maxValue =

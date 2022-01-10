@@ -4,29 +4,19 @@
     "target": "es6",
     "lib": ["es2017", "es7", "es6", "dom"],
     "moduleResolution": "node",
+    "module": "commonjs",
     "declaration": true,
     "noImplicitAny": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "sourceMap": false,
     "outDir": "dist",
-    "typeRoots": [
-      "node_modules/@types",
-      "types"
-    ],
+    "typeRoots": ["node_modules/@types", "types"],
     "baseUrl": ".",
     "paths": {
-      "*": [
-        "node_modules/*"
-      ]
+      "*": ["node_modules/*"]
     }
   },
-  "include": [
-    "app/**/*.ts"
-  ],
-  "exclude": [
-    "../app",
-    "dist",
-    "node_modules/*"
-  ]
+  "include": ["app/**/*.ts"],
+  "exclude": ["../app", "dist", "node_modules/*"]
 }
