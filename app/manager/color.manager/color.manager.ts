@@ -14,9 +14,9 @@ export class ColorManager implements IColorManager {
 
   /**
    * @description 初始化
-   * @param hex 十六进制颜色值
-   * @param rgba RGBA格式颜色值
-   * @param alpha 颜色透明度
+   * @param.hex 十六进制颜色值
+   * @param.rgba RGBA格式颜色值
+   * @param.alpha 颜色透明度
    */
   private constructor(params: { hex?: string; rgba?: Rgba; alpha?: number }) {
     if (params.hex) {
