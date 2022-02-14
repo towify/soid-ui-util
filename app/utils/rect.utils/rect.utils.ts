@@ -104,4 +104,24 @@ export class RectUtils {
       y: rect.y + rect.height / 2 - rectHeight / 2
     };
   }
+
+  public static getTransformRect(rect: RectInfo, rotated: number) {
+    const rotatedValue = (rotated * Math.PI) / 180;
+    const sinValue = Math.abs(Math.sin(rotatedValue));
+    const cosValue = Math.abs(Math.cos(rotatedValue));
+    const tanValue = Math.abs(Math.tan(rotatedValue));
+    if (Math.abs(tanValue - 1) > 0.01) {
+      const rectWidth =
+        (rect.width * cosValue - rect.height * sinValue) / (cosValue ** 2 - sinValue ** 2);
+      const rectHeight =
+        (rect.width * sinValue - rect.height * cosValue) / (sinValue ** 2 - cosValue ** 2);
+      return {
+        width: rectWidth,
+        height: rectHeight,
+        x: rect.x + rect.width / 2 - rectWidth / 2,
+        y: rect.y + rect.height / 2 - rectHeight / 2
+      };
+    }
+    return undefined;
+  }
 }
