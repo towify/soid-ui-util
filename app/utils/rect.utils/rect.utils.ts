@@ -112,9 +112,11 @@ export class RectUtils {
     const tanValue = Math.abs(Math.tan(rotatedValue));
     if (Math.abs(tanValue - 1) > 0.01) {
       const rectWidth =
-        (rect.width * cosValue - rect.height * sinValue) / (cosValue ** 2 - sinValue ** 2);
+        (rect.width * cosValue - rect.height * sinValue) /
+        (cosValue * cosValue - sinValue * sinValue);
       const rectHeight =
-        (rect.width * sinValue - rect.height * cosValue) / (sinValue ** 2 - cosValue ** 2);
+        (rect.width * sinValue - rect.height * cosValue) /
+        (sinValue * sinValue - cosValue * cosValue);
       return {
         width: rectWidth,
         height: rectHeight,
