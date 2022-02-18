@@ -12,11 +12,17 @@ export class UISizeUtils {
     max: UISize;
     origin: UISize;
     parentSizeValue?: number;
+    windowSize?: {
+      width: number;
+      height: number;
+    };
+    offset?: number;
   }): UISize {
     let originValue = UISizeUtils.convertUISizeToNumber(
       params.origin,
-      params.parentSizeValue,
-      false
+      UISizeUtils.getUISizeMaxValue(params.origin, params.parentSizeValue, params.windowSize),
+      false,
+      params.offset
     );
     originValue = originValue < 0 ? 0 : originValue;
     const minValue =
@@ -24,21 +30,48 @@ export class UISizeUtils {
       params.min.unit === SizeUnit.Auto ||
       params.min.unit === SizeUnit.Fit
         ? Number.MIN_VALUE
-        : UISizeUtils.convertUISizeToNumber(params.min, params.parentSizeValue, false);
+        : UISizeUtils.convertUISizeToNumber(
+            params.min,
+            UISizeUtils.getUISizeMaxValue(params.min, params.parentSizeValue, params.windowSize),
+            false
+          );
     const maxValue =
       params.max.unit === SizeUnit.Unset ||
       params.max.unit === SizeUnit.Auto ||
       params.max.unit === SizeUnit.Fit
         ? Number.MAX_VALUE
-        : UISizeUtils.convertUISizeToNumber(params.max, params.parentSizeValue, false);
+        : UISizeUtils.convertUISizeToNumber(
+            params.max,
+            UISizeUtils.getUISizeMaxValue(params.max, params.parentSizeValue, params.windowSize),
+            false
+          );
     if (originValue < minValue) return params.min;
     return originValue < maxValue ? params.origin : params.max;
   }
 
-  static convertUISizeToNumber(sizeInfo: UISize, maxValue?: number, isAlert = true): number {
+  static getUISizeMaxValue(
+    value: UISize,
+    parentSizeValue?: number,
+    windowSize?: {
+      width: number;
+      height: number;
+    }
+  ): number | undefined {
+    if (value.unit === SizeUnit.VH || value.unit === SizeUnit.VW) {
+      return value.unit === SizeUnit.VH ? windowSize?.height : windowSize?.width;
+    }
+    return parentSizeValue;
+  }
+
+  static convertUISizeToNumber(
+    sizeInfo: UISize,
+    maxValue?: number,
+    isAlert = true,
+    offset?: number
+  ): number {
     let valueNumber = sizeInfo.value;
     if (sizeInfo.unit === SizeUnit.Auto) {
-      return 0;
+      return maxValue && offset ? maxValue - offset : 1;
     }
     if (sizeInfo.unit === SizeUnit.Unset) {
       return 0;
@@ -46,7 +79,11 @@ export class UISizeUtils {
     if (sizeInfo.unit === SizeUnit.Fit) {
       return valueNumber;
     }
-    if (sizeInfo.unit === SizeUnit.Percent) {
+    if (
+      sizeInfo.unit === SizeUnit.Percent ||
+      sizeInfo.unit === SizeUnit.VW ||
+      sizeInfo.unit === SizeUnit.VH
+    ) {
       valueNumber = ((maxValue ?? 0) * valueNumber) / 100;
       if (!maxValue && isAlert) {
         ErrorUtils.GridError('Value unit is percent and parent value is undefined');
