@@ -72,8 +72,8 @@ export class OperatorUtils {
       }
     });
     return {
-      from: from - OperatorUtils.Gap,
-      to: to + OperatorUtils.Gap
+      from: from !== Number.MIN_VALUE ? from - OperatorUtils.Gap : from,
+      to: to !== Number.MIN_VALUE ? to + OperatorUtils.Gap : to
     };
   }
 

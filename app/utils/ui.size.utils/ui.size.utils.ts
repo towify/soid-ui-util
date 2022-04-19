@@ -98,7 +98,11 @@ export class UISizeUtils {
     maxValue?: number;
   }): UISize {
     let value = params.valueNumber;
-    if (params.unit === SizeUnit.Percent) {
+    if (
+      params.unit === SizeUnit.Percent ||
+      params.unit === SizeUnit.VW ||
+      params.unit === SizeUnit.VH
+    ) {
       value = parseFloat(((params.valueNumber / (params.maxValue ?? 1)) * 100).toFixed(2));
       if (value > 99.85 && value < 100.15) {
         value = 100;
