@@ -7,6 +7,15 @@ import { ErrorUtils } from '../error.utils/error.utils';
 import { NumberUtils } from '../number.utils/number.utils';
 
 export class UISizeUtils {
+  static clone(sizeInfo: UISize): UISize {
+    return {
+      value: sizeInfo.value,
+      unit: sizeInfo.unit,
+      locked: sizeInfo.locked,
+      dynamic: sizeInfo.dynamic
+    };
+  }
+
   static getValidRenderSizeByComparing(params: {
     min: UISize;
     max: UISize;
