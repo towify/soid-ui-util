@@ -80,7 +80,7 @@ export class UISizeUtils {
   ): number {
     let valueNumber = sizeInfo.value;
     if (sizeInfo.unit === SizeUnit.Auto) {
-      return maxValue && offset ? maxValue - offset : 1;
+      return maxValue && offset !== undefined ? maxValue - offset : 1;
     }
     if (sizeInfo.unit === SizeUnit.Unset) {
       return 0;
