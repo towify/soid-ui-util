@@ -30,11 +30,11 @@
   "bundleDependencies": false,
   "peerDependencies": {
     "@towify-types/dsl": ">=0.9.68",
-    "@towify/common-values": ">=0.1.12"
+    "@towify/common-values": ">=0.1.15"
   },
   "dependencies": {
     "@towify-types/dsl": ">=0.9.68",
-    "@towify/common-values": ">=0.1.12"
+    "@towify/common-values": "0.1.15"
   },
   "devDependencies": {
     "@babel/core": "^7.17.0",

@@ -110,7 +110,15 @@ export class OperatorService implements OperatorServiceInterface {
                   from: current.y,
                   to: current.y + current.height
                 },
-                this.#parentRect!
+                {
+                  x: this.#parentRect!.x,
+                  y: this.#parentRect!.y,
+                  height:
+                    this.#size!.height > this.#parentRect!.height
+                      ? this.#size!.height
+                      : this.#parentRect!.height,
+                  width: this.#parentRect!.width
+                }
               )
             ) {
               return previous.concat(current);
@@ -170,7 +178,15 @@ export class OperatorService implements OperatorServiceInterface {
             if (
               OperatorUtils.checkY(
                 { from: current.y, to: current.y + current.height },
-                this.#parentRect!
+                {
+                  x: this.#parentRect!.x,
+                  y: this.#parentRect!.y,
+                  height:
+                    this.#size!.height > this.#parentRect!.height
+                      ? this.#size!.height
+                      : this.#parentRect!.height,
+                  width: this.#parentRect!.width
+                }
               )
             ) {
               return previous.concat(current);
@@ -226,7 +242,15 @@ export class OperatorService implements OperatorServiceInterface {
             if (
               OperatorUtils.checkX(
                 { from: current.x, to: current.x + current.width },
-                this.#parentRect!
+                {
+                  x: this.#parentRect!.x,
+                  y: this.#parentRect!.y,
+                  height: this.#parentRect!.height,
+                  width:
+                    this.#size!.width > this.#parentRect!.width
+                      ? this.#size!.width
+                      : this.#parentRect!.width
+                }
               )
             ) {
               return previous.concat(current);
@@ -256,8 +280,7 @@ export class OperatorService implements OperatorServiceInterface {
         rect: DefaultRect,
         distance: -1
       };
-    let start =
-      this.#parentRect.y + this.#parentRect.height + this.#minDistance;
+    let start = this.#parentRect.y + this.#parentRect.height + this.#minDistance;
     let rect;
     let yInfo;
     let range;
@@ -283,7 +306,15 @@ export class OperatorService implements OperatorServiceInterface {
             if (
               OperatorUtils.checkX(
                 { from: current.x, to: current.x + current.width },
-                this.#parentRect!
+                {
+                  x: this.#parentRect!.x,
+                  y: this.#parentRect!.y,
+                  height: this.#parentRect!.height,
+                  width:
+                    this.#size!.width > this.#parentRect!.width
+                      ? this.#size!.width
+                      : this.#parentRect!.width
+                }
               )
             ) {
               return previous.concat(current);
@@ -355,14 +386,8 @@ export class OperatorService implements OperatorServiceInterface {
       width: this.#size.width,
       height: this.#size.height
     };
-    const negativeDistance = OperatorUtils.getRectDistance(
-      negativeRect,
-      this.#parentRect
-    );
-    const positiveDistance = OperatorUtils.getRectDistance(
-      positiveRect,
-      this.#parentRect
-    );
+    const negativeDistance = OperatorUtils.getRectDistance(negativeRect, this.#parentRect);
+    const positiveDistance = OperatorUtils.getRectDistance(positiveRect, this.#parentRect);
     const xRange = OperatorUtils.getXRangeInRectList(params.rectList);
     let maxDistance;
     if (params.positive) {
@@ -379,10 +404,7 @@ export class OperatorService implements OperatorServiceInterface {
     return undefined;
   }
 
-  private findHorizonRect(
-    yStart: number,
-    rectList: RectInfo[]
-  ): RectInfo | undefined {
+  private findHorizonRect(yStart: number, rectList: RectInfo[]): RectInfo | undefined {
     if (!this.#size || !this.#parentRect) return undefined;
     let positiveX;
     let positiveInfo;
@@ -411,11 +433,7 @@ export class OperatorService implements OperatorServiceInterface {
     return undefined;
   }
 
-  private findMinXPosition(params: {
-    start: number;
-    rectList: RectInfo[];
-    positive: boolean;
-  }): {
+  private findMinXPosition(params: { start: number; rectList: RectInfo[]; positive: boolean }): {
     x: number;
     mergeList: RectInfo[];
   } {
@@ -446,11 +464,7 @@ export class OperatorService implements OperatorServiceInterface {
     };
   }
 
-  private findMinYPosition(params: {
-    start: number;
-    rectList: RectInfo[];
-    positive: boolean;
-  }): {
+  private findMinYPosition(params: { start: number; rectList: RectInfo[]; positive: boolean }): {
     y: number;
     mergeList: RectInfo[];
   } {
