@@ -50,7 +50,7 @@ export class AnimationManager {
       };
       this.run(() => {
         callBack();
-      });
+      }).then();
     };
     return run();
   }
