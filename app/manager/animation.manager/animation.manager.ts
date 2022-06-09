@@ -16,6 +16,12 @@ export class AnimationManager {
   #hasDelay = false;
   #executedTimes = 0;
   #observeAnimationKeyFrameTransform?: (keyFrame?: AnimationKeyFrameTransform) => void;
+  #startTime: number | undefined;
+  #percent = 0;
+  #animationFrame: number | undefined;
+  #isPlaying = false;
+  #isPause = false;
+  #delayTimes = 0;
 
   constructor(
     private readonly animation: DslAnimationType,
@@ -36,7 +42,7 @@ export class AnimationManager {
     this.#observeAnimationKeyFrameTransform = hold;
   }
 
-  public execute(callback: () => void) {
+  public execute(complete: () => void) {
     const run = () => {
       this.#executedTimes += 1;
       if (this.#executedTimes > this.#times) {
@@ -44,7 +50,8 @@ export class AnimationManager {
       }
       const callBack = () => {
         if (this.#executedTimes === this.#times) {
-          callback();
+          complete();
+          this.#isPlaying = false;
         }
         return run();
       };
@@ -52,31 +59,116 @@ export class AnimationManager {
         callBack();
       }).then();
     };
+    if (!this.#isPause) {
+      this.#executedTimes = 0;
+    }
+    if (this.#isPlaying) {
+      this.stop();
+    }
+    if (!this.#isPause) {
+      this.#hasDelay = false;
+    }
     return run();
+  }
+
+  public stop() {
+    this.#isPlaying = false;
+    this.#isPause = false;
+    if (this.#animationFrame) {
+      window.cancelAnimationFrame(this.#animationFrame);
+      this.#animationFrame = undefined;
+    }
+    this.#percent = 0;
+    this.#observeAnimationKeyFrameTransform && this.#observeAnimationKeyFrameTransform(undefined);
+    this.#startTime = undefined;
+  }
+
+  public pause() {
+    this.#isPause = true;
+    this.#isPlaying = false;
+    if (this.#animationFrame) {
+      window.cancelAnimationFrame(this.#animationFrame);
+      this.#animationFrame = undefined;
+    }
   }
 
   private async run(callback?: () => void) {
     let stop = false;
     let isExecutingReverse = false;
-    let start: number | undefined;
-    let animationFrame: number;
-    let percent: number;
+    const duration = this.#duration / (this.isReverseFill ? 2 : 1);
+    this.#isPlaying = true;
+    const draw = (now: number) => {
+      if (now - this.#startTime! >= duration) {
+        stop = true;
+        this.#percent = 1;
+      } else {
+        this.#percent = (now - this.#startTime!) / duration;
+      }
+      this.runAnimationKeyFrame(isExecutingReverse);
+      if (!this.#isPlaying) {
+        return;
+      }
+      if (stop) {
+        if (isExecutingReverse || this.isBothFill) {
+          if (this.#animationFrame) {
+            window.cancelAnimationFrame(this.#animationFrame);
+            this.#animationFrame = undefined;
+          }
+          callback && callback();
+        } else {
+          stop = false;
+          isExecutingReverse = true;
+          this.#animationFrame = window.requestAnimationFrame(time => {
+            this.#startTime = time;
+            draw(time);
+          });
+        }
+      } else {
+        this.#animationFrame = window.requestAnimationFrame(draw);
+      }
+    };
+    if (!this.#hasDelay && this.#delayDuration > 0) {
+      this.#delayTimes += 1;
+      await Performance.delay(this.#delayDuration);
+      this.#delayTimes -= 1;
+      this.#hasDelay = true;
+      if (this.#delayTimes > 0 || !this.#isPlaying) {
+        return;
+      }
+    }
+    const startAnimation = (timeStamp: number) => {
+      if (!this.#isPause) {
+        this.#startTime = timeStamp;
+      } else {
+        this.#startTime = timeStamp - this.#percent * duration;
+      }
+      this.#isPause = false;
+      draw(timeStamp);
+    };
+    startAnimation(window.performance.now());
+  }
+
+  private runAnimationKeyFrame(isExecutingReverse: boolean) {
     let easingPercent: number;
     let transform: AnimationKeyFrameTransform | undefined;
     let animationKeyFrames: AnimationKeyFrames | undefined;
-    const duration = this.#duration / (this.isReverseFill ? 2 : 1);
-    const draw = (now: number) => {
-      if (now - start! >= duration) {
-        stop = true;
-        percent = 1;
+    if (this.animation.type === 'group') {
+      easingPercent = easingFunction[(this.animation.content as AnimationGroupType).function](
+        isExecutingReverse ? 1 - this.#percent : this.#percent
+      );
+      animationKeyFrames = AnimationUtils.getAnimationGroupKeyframes(this.animation);
+      if (animationKeyFrames) {
+        transform = AnimationUtils.getAnimationKeyFrameTransform(animationKeyFrames, easingPercent);
       } else {
-        percent = (now - start!) / duration;
+        transform = undefined;
       }
-      if (this.animation.type === 'group') {
-        easingPercent = easingFunction[(this.animation.content as AnimationGroupType).function](
-          isExecutingReverse ? 1 - percent : percent
+      this.#observeAnimationKeyFrameTransform && this.#observeAnimationKeyFrameTransform(transform);
+    } else if (Array.isArray(this.animation.content)) {
+      this.animation.content.forEach(item => {
+        easingPercent = easingFunction[item.effect](
+          isExecutingReverse ? 1 - this.#percent : this.#percent
         );
-        animationKeyFrames = AnimationUtils.getAnimationGroupKeyframes(this.animation);
+        animationKeyFrames = AnimationUtils.getAnimationContentKeyFrames(item);
         if (animationKeyFrames) {
           transform = AnimationUtils.getAnimationKeyFrameTransform(
             animationKeyFrames,
@@ -87,46 +179,7 @@ export class AnimationManager {
         }
         this.#observeAnimationKeyFrameTransform &&
           this.#observeAnimationKeyFrameTransform(transform);
-      } else if (Array.isArray(this.animation.content)) {
-        this.animation.content.forEach(item => {
-          easingPercent = easingFunction[item.effect](isExecutingReverse ? 1 - percent : percent);
-          animationKeyFrames = AnimationUtils.getAnimationContentKeyFrames(item);
-          if (animationKeyFrames) {
-            transform = AnimationUtils.getAnimationKeyFrameTransform(
-              animationKeyFrames,
-              easingPercent
-            );
-          } else {
-            transform = undefined;
-          }
-          this.#observeAnimationKeyFrameTransform &&
-            this.#observeAnimationKeyFrameTransform(transform);
-        });
-      }
-      if (stop) {
-        if (isExecutingReverse || this.isBothFill) {
-          window.cancelAnimationFrame(animationFrame);
-          callback && callback();
-        } else {
-          stop = false;
-          isExecutingReverse = true;
-          animationFrame = window.requestAnimationFrame(time => {
-            start = time;
-            draw(time);
-          });
-        }
-      } else {
-        animationFrame = window.requestAnimationFrame(draw);
-      }
-    };
-    if (!this.#hasDelay && this.#delayDuration > 0) {
-      await Performance.delay(this.#delayDuration);
-      this.#hasDelay = true;
+      });
     }
-    const startAnimation = (timeStamp: number) => {
-      start = timeStamp;
-      draw(timeStamp);
-    };
-    startAnimation(window.performance.now());
   }
 }

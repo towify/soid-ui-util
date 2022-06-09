@@ -5,12 +5,14 @@
 
 import { AnimationContentType, AnimationGroupType } from '@towify-types/dsl/dsl.type';
 import { AnimationEnum } from '@towify-types/dsl/animation.enum';
+import { Performance } from 'soid-data';
 import { AnimationKeyFrameTransform, AnimationKeyFrames } from '../../type/animation.type';
 import { easingFunction } from '../../type/animation.function';
 import { AnimationUtils } from '../../utils/animation.utils/animation.utils';
 
 export class AnimationPreviewManager {
-  #isStopAnimation: boolean = false;
+  #isStopAnimation = false;
+  #isPlaying = false;
   #observeAnimationKeyFrameTransform?: (keyFrame?: AnimationKeyFrameTransform) => void;
   #animationFrame?: number;
   type: 'group' | 'custom' = 'custom';
@@ -51,6 +53,7 @@ export class AnimationPreviewManager {
 
   public stopAnimation() {
     this.#isStopAnimation = true;
+    this.#isPlaying = false;
     if (this.#animationFrame) {
       window.cancelAnimationFrame(this.#animationFrame);
       this.#animationFrame = undefined;
@@ -66,16 +69,13 @@ export class AnimationPreviewManager {
     let transform: AnimationKeyFrameTransform | undefined;
     let animationKeyFrames: AnimationKeyFrames | undefined;
     const duration = this.duration;
-    const draw = (now: number) => {
+    const draw = async (now: number) => {
       if (now - start! >= duration) {
         stop = true;
         percent = 1;
       } else {
         stop = false;
         percent = (now - start!) / duration;
-      }
-      if (this.#isStopAnimation) {
-        percent = 0;
       }
       if (this.type === 'group') {
         easingPercent = easingFunction[(this.content as AnimationGroupType).function](percent);
@@ -112,14 +112,21 @@ export class AnimationPreviewManager {
         if (this.#animationFrame) {
           window.cancelAnimationFrame(this.#animationFrame);
           this.#animationFrame = undefined;
+          this.#observeAnimationKeyFrameTransform &&
+            this.#observeAnimationKeyFrameTransform(undefined);
         }
       } else if (stop) {
-        if (this.isInfinity) {
-          start = window.performance.now();
-          this.#animationFrame = window.requestAnimationFrame(draw);
-        } else if (this.#animationFrame) {
+        if (this.#animationFrame) {
           window.cancelAnimationFrame(this.#animationFrame);
           this.#animationFrame = undefined;
+        }
+        this.#isPlaying = false;
+        if (this.isInfinity) {
+          await Performance.delay(500);
+          if (!this.#isStopAnimation && !this.#isPlaying) {
+            start = window.performance.now();
+            this.#animationFrame = window.requestAnimationFrame(draw);
+          }
         }
       } else {
         this.#animationFrame = window.requestAnimationFrame(draw);
@@ -130,5 +137,6 @@ export class AnimationPreviewManager {
       draw(timeStamp);
     };
     startAnimation(window.performance.now());
+    this.#isPlaying = true;
   }
 }
