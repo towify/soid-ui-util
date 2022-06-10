@@ -44,7 +44,9 @@ export class AnimationManager {
 
   public execute(complete: () => void) {
     const run = () => {
-      this.#executedTimes += 1;
+      if (!this.#isPause) {
+        this.#executedTimes += 1;
+      }
       if (this.#executedTimes > this.#times) {
         return;
       }
