@@ -53,6 +53,8 @@ export class AnimationManager {
         if (this.#executedTimes === this.#times) {
           complete();
           this.#isPlaying = false;
+          this.#isPause = false;
+          this.#percent = 0;
         }
         return run();
       };
@@ -85,6 +87,7 @@ export class AnimationManager {
   }
 
   public pause() {
+    if (!this.#isPlaying) return;
     this.#isPause = true;
     this.#isPlaying = false;
     if (this.#animationFrame) {
