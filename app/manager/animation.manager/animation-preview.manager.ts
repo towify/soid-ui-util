@@ -3,12 +3,12 @@
  * @Date: 2022/5/31
  */
 
-import { AnimationContentType, AnimationGroupType } from '@towify-types/dsl/dsl.type';
 import { AnimationEnum } from '@towify-types/dsl/animation.enum';
 import { Performance } from 'soid-data';
 import { AnimationKeyFrameTransform, AnimationKeyFrames } from '../../type/animation.type';
 import { easingFunction } from '../../type/animation.function';
 import { AnimationUtils } from '../../utils/animation.utils/animation.utils';
+import type { AnimationContentType, AnimationGroupType } from '@towify-types/dsl';
 
 export class AnimationPreviewManager {
   #isStopAnimation = false;
