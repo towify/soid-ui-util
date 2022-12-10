@@ -3,13 +3,13 @@
  * @Date: 2022/5/29
  */
 
-import { AnimationEnum, AnimationGroupType, DslAnimationType } from '@towify-types/dsl';
-import { AnimationContentType } from '@towify-types/dsl/dsl.type';
+import type { AnimationContentType, AnimationGroupType, DslAnimationType } from '@towify-types/dsl';
 import {
   AnimationGroupInfoList,
   AnimationKeyFrameTransform,
   AnimationKeyFrames
 } from '../../type/animation.type';
+import { AnimationEnum } from '@towify-types/dsl';
 
 export class AnimationUtils {
   public static getAnimationContentKeyFrames(content: AnimationContentType): AnimationKeyFrames {
@@ -183,70 +183,70 @@ export class AnimationUtils {
         !endKeyFrame?.translate && !startKeyFrame?.translate
           ? undefined
           : {
-              x: getTranslateValue(endKeyFrame?.translate?.x, startKeyFrame?.translate?.x),
-              y: getTranslateValue(endKeyFrame?.translate?.y, startKeyFrame?.translate?.y),
-              z: getTranslateValue(endKeyFrame?.translate?.z, startKeyFrame?.translate?.z)
-            },
+            x: getTranslateValue(endKeyFrame?.translate?.x, startKeyFrame?.translate?.x),
+            y: getTranslateValue(endKeyFrame?.translate?.y, startKeyFrame?.translate?.y),
+            z: getTranslateValue(endKeyFrame?.translate?.z, startKeyFrame?.translate?.z)
+          },
       scale:
         !endKeyFrame?.scale && !startKeyFrame?.scale
           ? undefined
           : {
-              x:
-                !endKeyFrame?.scale?.x && !startKeyFrame?.scale?.x
-                  ? undefined
-                  : (startKeyFrame?.scale?.x || 1) +
-                    ((endKeyFrame?.scale?.x || 1) - (startKeyFrame?.scale?.x || 1)) *
-                      transformPercent,
-              y:
-                !endKeyFrame?.scale?.y && !startKeyFrame?.scale?.y
-                  ? undefined
-                  : (startKeyFrame?.scale?.y || 1) +
-                    ((endKeyFrame?.scale?.y || 1) - (startKeyFrame?.scale?.y || 1)) *
-                      transformPercent,
-              z:
-                !endKeyFrame?.scale?.z && !startKeyFrame?.scale?.z
-                  ? undefined
-                  : (startKeyFrame?.scale?.z || 1) +
-                    ((endKeyFrame?.scale?.z || 1) - (startKeyFrame?.scale?.z || 1)) *
-                      transformPercent
-            },
+            x:
+              !endKeyFrame?.scale?.x && !startKeyFrame?.scale?.x
+                ? undefined
+                : (startKeyFrame?.scale?.x || 1) +
+                ((endKeyFrame?.scale?.x || 1) - (startKeyFrame?.scale?.x || 1)) *
+                transformPercent,
+            y:
+              !endKeyFrame?.scale?.y && !startKeyFrame?.scale?.y
+                ? undefined
+                : (startKeyFrame?.scale?.y || 1) +
+                ((endKeyFrame?.scale?.y || 1) - (startKeyFrame?.scale?.y || 1)) *
+                transformPercent,
+            z:
+              !endKeyFrame?.scale?.z && !startKeyFrame?.scale?.z
+                ? undefined
+                : (startKeyFrame?.scale?.z || 1) +
+                ((endKeyFrame?.scale?.z || 1) - (startKeyFrame?.scale?.z || 1)) *
+                transformPercent
+          },
       rotation:
         !endKeyFrame?.rotation && !startKeyFrame?.rotation
           ? undefined
           : {
-              x: endKeyFrame?.rotation?.x || startKeyFrame?.rotation?.x,
-              y: endKeyFrame?.rotation?.y || startKeyFrame?.rotation?.y,
-              z: endKeyFrame?.rotation?.z || startKeyFrame?.rotation?.z,
-              angle:
-                endKeyFrame?.rotation?.x === startKeyFrame?.rotation?.x &&
-                endKeyFrame?.rotation?.y === startKeyFrame?.rotation?.y &&
-                endKeyFrame?.rotation?.z === startKeyFrame?.rotation?.z
-                  ? (startKeyFrame?.rotation?.angle || 0) +
-                    ((endKeyFrame?.rotation?.angle || 0) - (startKeyFrame?.rotation?.angle || 0)) *
-                      transformPercent
-                  : (endKeyFrame?.rotation?.angle || 0) * transformPercent
-            },
+            x: endKeyFrame?.rotation?.x || startKeyFrame?.rotation?.x,
+            y: endKeyFrame?.rotation?.y || startKeyFrame?.rotation?.y,
+            z: endKeyFrame?.rotation?.z || startKeyFrame?.rotation?.z,
+            angle:
+              endKeyFrame?.rotation?.x === startKeyFrame?.rotation?.x &&
+              endKeyFrame?.rotation?.y === startKeyFrame?.rotation?.y &&
+              endKeyFrame?.rotation?.z === startKeyFrame?.rotation?.z
+                ? (startKeyFrame?.rotation?.angle || 0) +
+                ((endKeyFrame?.rotation?.angle || 0) - (startKeyFrame?.rotation?.angle || 0)) *
+                transformPercent
+                : (endKeyFrame?.rotation?.angle || 0) * transformPercent
+          },
       skew:
         !endKeyFrame?.skew && !startKeyFrame?.skew
           ? undefined
           : {
-              x:
-                !endKeyFrame?.skew?.x && !startKeyFrame?.skew?.x
-                  ? undefined
-                  : (startKeyFrame?.skew?.x || 0) +
-                    ((endKeyFrame?.skew?.x || 0) - (startKeyFrame?.skew?.x || 0)) *
-                      transformPercent,
-              y:
-                !endKeyFrame?.skew?.y && !startKeyFrame?.skew?.y
-                  ? undefined
-                  : (startKeyFrame?.skew?.y || 0) +
-                    ((endKeyFrame?.skew?.y || 0) - (startKeyFrame?.skew?.y || 0)) * transformPercent
-            },
+            x:
+              !endKeyFrame?.skew?.x && !startKeyFrame?.skew?.x
+                ? undefined
+                : (startKeyFrame?.skew?.x || 0) +
+                ((endKeyFrame?.skew?.x || 0) - (startKeyFrame?.skew?.x || 0)) *
+                transformPercent,
+            y:
+              !endKeyFrame?.skew?.y && !startKeyFrame?.skew?.y
+                ? undefined
+                : (startKeyFrame?.skew?.y || 0) +
+                ((endKeyFrame?.skew?.y || 0) - (startKeyFrame?.skew?.y || 0)) * transformPercent
+          },
       opacity:
         endKeyFrame?.opacity === undefined || startKeyFrame?.opacity === undefined
           ? undefined
           : startKeyFrame.opacity +
-            (endKeyFrame.opacity - startKeyFrame.opacity) * transformPercent,
+          (endKeyFrame.opacity - startKeyFrame.opacity) * transformPercent,
       blur:
         endKeyFrame?.blur === undefined || startKeyFrame?.blur === undefined
           ? undefined
