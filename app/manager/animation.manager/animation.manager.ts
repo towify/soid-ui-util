@@ -7,7 +7,7 @@ import { Performance } from 'soid-data';
 import { AnimationContentType, AnimationEnum, AnimationGroupType, DslAnimationType } from '@towify-types/dsl';
 import { easingFunction } from '../../type/animation.function';
 import { AnimationUtils } from '../../utils/animation.utils/animation.utils';
-import { AnimationKeyFrameTransform, AnimationKeyFrames } from '../../type/animation.type';
+import { AnimationKeyFrames, AnimationKeyFrameTransform } from '../../type/animation.type';
 
 export class AnimationManager {
   readonly #duration: number;
@@ -35,6 +35,14 @@ export class AnimationManager {
       this.animation.times.type === AnimationEnum.Execution.Custom
         ? this.animation.times.value ?? 1
         : timeValue;
+
+    // 把所有动画的值替换为最终的值
+    if (this.animation.type === 'custom') {
+      (<{ list: AnimationContentType[], effect: AnimationEnum.Effect }>this.animation.content).list.forEach(item => {
+        item.value.start = AnimationUtils.getValue(item.value.start);
+        item.value.end = AnimationUtils.getValue(item.value.end);
+      });
+    }
   }
 
   public observeAnimationKeyFrameTransform(hold: (keyFrame?: AnimationKeyFrameTransform) => void) {
@@ -58,7 +66,7 @@ export class AnimationManager {
         }
         return run();
       };
-      this.run(() => {
+      this.#run(() => {
         callBack();
       }).then();
     };
@@ -96,7 +104,7 @@ export class AnimationManager {
     }
   }
 
-  private async run(callback?: () => void) {
+  async #run(callback?: () => void) {
     let stop = false;
     const duration = this.#duration;
     this.#isPlaying = true;
@@ -107,7 +115,7 @@ export class AnimationManager {
       } else {
         this.#percent = (now - this.#startTime!) / duration;
       }
-      this.runAnimationKeyFrame();
+      this.#runAnimationKeyFrame();
       if (!this.#isPlaying) {
         return;
       }
@@ -142,12 +150,12 @@ export class AnimationManager {
     startAnimation(window.performance.now());
   }
 
-  private runAnimationKeyFrame() {
+  #runAnimationKeyFrame() {
     let easingPercent: number;
     let transform: AnimationKeyFrameTransform | undefined;
     let animationKeyFrames: AnimationKeyFrames | undefined;
     if (this.animation.type === 'group') {
-      easingPercent = easingFunction[(this.animation.content as AnimationGroupType).function](
+      easingPercent = easingFunction[(<AnimationGroupType>this.animation.content).function](
         this.isReverseFill ? (0.5 - Math.abs(0.5 - this.#percent)) * 2 : this.#percent
       );
       animationKeyFrames = AnimationUtils.getAnimationGroupKeyframes(this.animation);
@@ -158,7 +166,7 @@ export class AnimationManager {
       }
       this.#observeAnimationKeyFrameTransform && this.#observeAnimationKeyFrameTransform(transform);
     } else if (this.animation.type === 'custom') {
-      (<{list: AnimationContentType[], effect: AnimationEnum.Effect}>this.animation.content).list.forEach(item => {
+      (<{ list: AnimationContentType[], effect: AnimationEnum.Effect }>this.animation.content).list.forEach(item => {
         easingPercent = easingFunction[this.animation.content.effect](this.isReverseFill ? (0.5 - Math.abs(0.5 - this.#percent)) * 2 : this.#percent);
         animationKeyFrames = AnimationUtils.getAnimationContentKeyFrames(item);
         if (animationKeyFrames) {
@@ -170,7 +178,7 @@ export class AnimationManager {
           transform = undefined;
         }
         this.#observeAnimationKeyFrameTransform &&
-          this.#observeAnimationKeyFrameTransform(transform);
+        this.#observeAnimationKeyFrameTransform(transform);
       });
     }
   }

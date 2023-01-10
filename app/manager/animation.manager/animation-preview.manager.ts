@@ -70,14 +70,6 @@ export class AnimationPreviewManager {
     let transform: AnimationKeyFrameTransform | undefined;
     let animationKeyFrames: AnimationKeyFrames | undefined;
     const duration = this.duration;
-    if ((<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation) {
-      (<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation.value.start = AnimationUtils.getValue(
-        (<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation.value.start
-      );
-      (<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation.value.end = AnimationUtils.getValue(
-        (<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation.value.end
-      );
-    }
     const draw = async (now: number) => {
       if (now - start! >= duration) {
         stop = true;
