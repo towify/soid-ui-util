@@ -19,5 +19,6 @@ export * from './manager/color.manager/color.manager';
 export * from './manager/color.manager/color.model';
 export * from './manager/color.manager/solver.model';
 export * from './manager/animation.manager/animation.manager';
+export * from './manager/animation.manager/animation-preview.manager';
 export * from './type/animation.type';
 export * from './type/animation.function';
