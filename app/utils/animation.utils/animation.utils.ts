@@ -7,6 +7,7 @@ import type { AnimationContentType, AnimationGroupType, DslAnimationType } from 
 import { AnimationEnum } from '@towify-types/dsl';
 import { AnimationGroupInfoList, AnimationKeyFrames, AnimationKeyFrameTransform } from '../../type/animation.type';
 import { SizeUnit } from '@towify/common-values';
+import { NumberUtils } from 'soid-data/util/number.utils';
 
 export class AnimationUtils {
   public static getAnimationContentKeyFrames(content: AnimationContentType): AnimationKeyFrames {
@@ -42,7 +43,7 @@ export class AnimationUtils {
             break;
           }
           case AnimationEnum.AxisMethod.Y: {
-            startKeyFrame.translate.y =  this.getValue(content.value.start);
+            startKeyFrame.translate.y = this.getValue(content.value.start);
             endKeyFrame.translate.y = this.getValue(content.value.end);
             break;
           }
@@ -256,7 +257,7 @@ export class AnimationUtils {
     return undefined;
   }
 
-  static getValue(data: { value: number | string, unit?: SizeUnit.PX | SizeUnit.Percent | 'random'}): {
+  static getValue(data: { value: number | string, unit?: SizeUnit.PX | SizeUnit.Percent | 'random' }): {
     value: number,
     unit: SizeUnit.PX | SizeUnit.Percent
   } {
@@ -264,7 +265,7 @@ export class AnimationUtils {
       const range = (<string>data.value).split('~');
       if (range.length !== 2) {
         return {
-          value: Math.floor(Math.random() * (10) + 1),
+          value: NumberUtils.getRandomIntInRange(0, 10),
           unit: SizeUnit.PX
         };
       }
@@ -275,13 +276,13 @@ export class AnimationUtils {
         range[1] = '10';
       }
       return {
-        value: Math.floor(Math.random() * (parseInt(range[0]) - parseInt(range[1]) + 1)) + parseInt(range[0]),
+        value: NumberUtils.getRandomIntInRange(parseInt(range[0]), parseInt(range[1])),
         unit: SizeUnit.PX
       };
     }
     return {
       value: <number>data.value,
-      unit: data.unit === SizeUnit.Percent ? SizeUnit.Percent  : SizeUnit.PX
+      unit: data.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX
     };
   }
 }
