@@ -49,7 +49,7 @@ export class AnimationPreviewManager {
       this.#animationFrame = undefined;
     }
     this.#isStopAnimation = false;
-    this.run().then();
+    this.#run().then();
   }
 
   public stopAnimation() {
@@ -62,7 +62,7 @@ export class AnimationPreviewManager {
     this.#observeAnimationKeyFrameTransform && this.#observeAnimationKeyFrameTransform(undefined);
   }
 
-  private async run() {
+  async #run() {
     let stop = false;
     let start: number | undefined;
     let percent: number;
@@ -70,6 +70,14 @@ export class AnimationPreviewManager {
     let transform: AnimationKeyFrameTransform | undefined;
     let animationKeyFrames: AnimationKeyFrames | undefined;
     const duration = this.duration;
+    if ((<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation) {
+      (<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation.value.start = AnimationUtils.getValue(
+        (<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation.value.start
+      );
+      (<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation.value.end = AnimationUtils.getValue(
+        (<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation.value.end
+      );
+    }
     const draw = async (now: number) => {
       if (now - start! >= duration) {
         stop = true;
@@ -80,9 +88,7 @@ export class AnimationPreviewManager {
       }
       if (this.type === 'group') {
         easingPercent = easingFunction[(this.content as AnimationGroupType).function](percent);
-        animationKeyFrames = AnimationUtils.getAnimationGroupKeyframesByContent(
-          this.content as AnimationGroupType
-        );
+        animationKeyFrames = AnimationUtils.getAnimationGroupKeyframesByContent(<AnimationGroupType>this.content);
         if (animationKeyFrames) {
           transform = AnimationUtils.getAnimationKeyFrameTransform(
             animationKeyFrames,

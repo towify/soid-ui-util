@@ -38,13 +38,13 @@ export class AnimationUtils {
         endKeyFrame.translate ??= {};
         switch (content.method) {
           case AnimationEnum.AxisMethod.X: {
-            startKeyFrame.translate.x = this.getValue(content.value.start);
-            endKeyFrame.translate.x = this.getValue(content.value.end);
+            startKeyFrame.translate.x = <{ value: number; unit: SizeUnit.PX | SizeUnit.Percent }>content.value.start;
+            endKeyFrame.translate.x = <{ value: number; unit: SizeUnit.PX | SizeUnit.Percent }>content.value.end;
             break;
           }
           case AnimationEnum.AxisMethod.Y: {
-            startKeyFrame.translate.y = this.getValue(content.value.start);
-            endKeyFrame.translate.y = this.getValue(content.value.end);
+            startKeyFrame.translate.y = <{ value: number; unit: SizeUnit.PX | SizeUnit.Percent }>content.value.start;
+            endKeyFrame.translate.y = <{ value: number; unit: SizeUnit.PX | SizeUnit.Percent }>content.value.end;
             break;
           }
           case AnimationEnum.AxisMethod.Z: {
@@ -139,8 +139,8 @@ export class AnimationUtils {
       transformPercent = (percent * 100 - startPercent) / (endPercent - startPercent);
     }
     const getTranslateValue = (
-      endTranslate?: { value: number; unit: 'px' | '%' },
-      startTranslate?: { value: number; unit: 'px' | '%' }
+      endTranslate?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent },
+      startTranslate?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent }
     ) => {
       if (!endTranslate && !startTranslate) {
         return undefined;
@@ -155,7 +155,7 @@ export class AnimationUtils {
         value:
           (startTranslate?.value || 0) +
           ((endTranslate?.value || 0) - (startTranslate?.value || 0)) * transformPercent,
-        unit: endTranslate?.unit || startTranslate?.unit || 'px'
+        unit: endTranslate?.unit || startTranslate?.unit || SizeUnit.PX
       };
     };
     return {
@@ -243,7 +243,7 @@ export class AnimationUtils {
   }
 
   static getAnimationGroupKeyframes(animation: DslAnimationType): AnimationKeyFrames | undefined {
-    if (animation.type === 'custom' || Array.isArray(animation.content)) return undefined;
+    if (animation.type === 'custom') return undefined;
     return AnimationUtils.getAnimationGroupKeyframesByContent(<AnimationGroupType>animation.content);
   }
 

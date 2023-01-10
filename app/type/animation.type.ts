@@ -4,12 +4,13 @@
  */
 
 import { AnimationEnum } from '@towify-types/dsl';
+import { SizeUnit } from '@towify/common-values';
 
 export type AnimationKeyFrameTransform = {
   translate?: {
-    x?: { value: number; unit: 'px' | '%' };
-    y?: { value: number; unit: 'px' | '%' };
-    z?: { value: number; unit: 'px' | '%' };
+    x?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent };
+    y?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent };
+    z?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent };
   };
   scale?: {
     x?: number;
@@ -39,17 +40,17 @@ export type AnimationKeyFrames = {
 
 export const AnimationGroupEffectKeyFrames: { [key: string]: AnimationKeyFrames } = {
   shake: {
-    0: { translate: { x: { value: 0, unit: 'px' } } },
-    10: { translate: { x: { value: -10, unit: 'px' } } },
-    30: { translate: { x: { value: -10, unit: 'px' } } },
-    50: { translate: { x: { value: -10, unit: 'px' } } },
-    70: { translate: { x: { value: -10, unit: 'px' } } },
-    90: { translate: { x: { value: -10, unit: 'px' } } },
-    20: { translate: { x: { value: 10, unit: 'px' } } },
-    40: { translate: { x: { value: 10, unit: 'px' } } },
-    60: { translate: { x: { value: 10, unit: 'px' } } },
-    80: { translate: { x: { value: 10, unit: 'px' } } },
-    100: { translate: { x: { value: 0, unit: 'px' } } }
+    0: { translate: { x: { value: 0, unit: SizeUnit.PX } } },
+    10: { translate: { x: { value: -10, unit: SizeUnit.PX } } },
+    30: { translate: { x: { value: -10, unit: SizeUnit.PX } } },
+    50: { translate: { x: { value: -10, unit: SizeUnit.PX } } },
+    70: { translate: { x: { value: -10, unit: SizeUnit.PX } } },
+    90: { translate: { x: { value: -10, unit: SizeUnit.PX } } },
+    20: { translate: { x: { value: 10, unit: SizeUnit.PX } } },
+    40: { translate: { x: { value: 10, unit: SizeUnit.PX } } },
+    60: { translate: { x: { value: 10, unit: SizeUnit.PX } } },
+    80: { translate: { x: { value: 10, unit: SizeUnit.PX } } },
+    100: { translate: { x: { value: 0, unit: SizeUnit.PX } } }
   },
   swing: {
     0: { rotation: { z: 1, angle: 0 } },
@@ -60,68 +61,68 @@ export const AnimationGroupEffectKeyFrames: { [key: string]: AnimationKeyFrames 
     100: { rotation: { z: 1, angle: 0 } }
   },
   wobble: {
-    0: { translate: { x: { value: 0, unit: '%' } }, rotation: { z: 1, angle: 0 } },
-    15: { translate: { x: { value: -25, unit: '%' } }, rotation: { z: 1, angle: -5 } },
-    30: { translate: { x: { value: 20, unit: '%' } }, rotation: { z: 1, angle: 3 } },
-    45: { translate: { x: { value: -15, unit: '%' } }, rotation: { z: 1, angle: -3 } },
-    60: { translate: { x: { value: 10, unit: '%' } }, rotation: { z: 1, angle: 2 } },
-    75: { translate: { x: { value: -4, unit: '%' } }, rotation: { z: 1, angle: -1 } },
-    100: { translate: { x: { value: 0, unit: '%' } }, rotation: { z: 1, angle: 0 } }
+    0: { translate: { x: { value: 0, unit: SizeUnit.Percent } }, rotation: { z: 1, angle: 0 } },
+    15: { translate: { x: { value: -25, unit: SizeUnit.Percent } }, rotation: { z: 1, angle: -5 } },
+    30: { translate: { x: { value: 20, unit: SizeUnit.Percent } }, rotation: { z: 1, angle: 3 } },
+    45: { translate: { x: { value: -15, unit: SizeUnit.Percent } }, rotation: { z: 1, angle: -3 } },
+    60: { translate: { x: { value: 10, unit: SizeUnit.Percent } }, rotation: { z: 1, angle: 2 } },
+    75: { translate: { x: { value: -4, unit: SizeUnit.Percent } }, rotation: { z: 1, angle: -1 } },
+    100: { translate: { x: { value: 0, unit: SizeUnit.Percent } }, rotation: { z: 1, angle: 0 } }
   },
   drop: {
-    0: { translate: { y: { value: -500, unit: 'px' } }, opacity: 0 },
-    20: { translate: { y: { value: 0, unit: 'px' } }, opacity: 1 },
-    40: { translate: { y: { value: -30, unit: 'px' } } },
-    43: { translate: { y: { value: -30, unit: 'px' } } },
-    58: { translate: { y: { value: 0, unit: 'px' } } },
-    70: { translate: { y: { value: -15, unit: 'px' } } },
-    80: { translate: { y: { value: 0, unit: 'px' } } },
-    90: { translate: { y: { value: -4, unit: 'px' } } },
-    100: { translate: { y: { value: 0, unit: 'px' } } }
+    0: { translate: { y: { value: -500, unit: SizeUnit.PX } }, opacity: 0 },
+    20: { translate: { y: { value: 0, unit: SizeUnit.PX } }, opacity: 1 },
+    40: { translate: { y: { value: -30, unit: SizeUnit.PX } } },
+    43: { translate: { y: { value: -30, unit: SizeUnit.PX } } },
+    58: { translate: { y: { value: 0, unit: SizeUnit.PX } } },
+    70: { translate: { y: { value: -15, unit: SizeUnit.PX } } },
+    80: { translate: { y: { value: 0, unit: SizeUnit.PX } } },
+    90: { translate: { y: { value: -4, unit: SizeUnit.PX } } },
+    100: { translate: { y: { value: 0, unit: SizeUnit.PX } } }
   },
   bounceFromTop: {
-    0: { translate: { y: { value: 0, unit: 'px' } } },
-    20: { translate: { y: { value: 0, unit: 'px' } } },
-    40: { translate: { y: { value: -30, unit: 'px' } } },
-    43: { translate: { y: { value: -30, unit: 'px' } } },
-    53: { translate: { y: { value: 0, unit: 'px' } } },
-    70: { translate: { y: { value: -15, unit: 'px' } } },
-    80: { translate: { y: { value: 0, unit: 'px' } } },
-    90: { translate: { y: { value: -4, unit: 'px' } } },
-    100: { translate: { y: { value: 0, unit: 'px' } } }
+    0: { translate: { y: { value: 0, unit: SizeUnit.PX } } },
+    20: { translate: { y: { value: 0, unit: SizeUnit.PX } } },
+    40: { translate: { y: { value: -30, unit: SizeUnit.PX } } },
+    43: { translate: { y: { value: -30, unit: SizeUnit.PX } } },
+    53: { translate: { y: { value: 0, unit: SizeUnit.PX } } },
+    70: { translate: { y: { value: -15, unit: SizeUnit.PX } } },
+    80: { translate: { y: { value: 0, unit: SizeUnit.PX } } },
+    90: { translate: { y: { value: -4, unit: SizeUnit.PX } } },
+    100: { translate: { y: { value: 0, unit: SizeUnit.PX } } }
   },
   bounceFromLeft: {
-    0: { translate: { x: { value: 0, unit: 'px' } } },
-    20: { translate: { x: { value: 0, unit: 'px' } } },
-    40: { translate: { x: { value: -30, unit: 'px' } } },
-    43: { translate: { x: { value: -30, unit: 'px' } } },
-    53: { translate: { x: { value: 0, unit: 'px' } } },
-    70: { translate: { x: { value: -15, unit: 'px' } } },
-    80: { translate: { x: { value: 0, unit: 'px' } } },
-    90: { translate: { x: { value: -4, unit: 'px' } } },
-    100: { translate: { x: { value: 0, unit: 'px' } } }
+    0: { translate: { x: { value: 0, unit: SizeUnit.PX } } },
+    20: { translate: { x: { value: 0, unit: SizeUnit.PX } } },
+    40: { translate: { x: { value: -30, unit: SizeUnit.PX } } },
+    43: { translate: { x: { value: -30, unit: SizeUnit.PX } } },
+    53: { translate: { x: { value: 0, unit: SizeUnit.PX } } },
+    70: { translate: { x: { value: -15, unit: SizeUnit.PX } } },
+    80: { translate: { x: { value: 0, unit: SizeUnit.PX } } },
+    90: { translate: { x: { value: -4, unit: SizeUnit.PX } } },
+    100: { translate: { x: { value: 0, unit: SizeUnit.PX } } }
   },
   bounceFromBottom: {
-    0: { translate: { y: { value: 0, unit: 'px' } } },
-    20: { translate: { y: { value: 0, unit: 'px' } } },
-    40: { translate: { y: { value: 30, unit: 'px' } } },
-    43: { translate: { y: { value: 30, unit: 'px' } } },
-    53: { translate: { y: { value: 0, unit: 'px' } } },
-    70: { translate: { y: { value: 15, unit: 'px' } } },
-    80: { translate: { y: { value: 0, unit: 'px' } } },
-    90: { translate: { y: { value: 4, unit: 'px' } } },
-    100: { translate: { y: { value: 0, unit: 'px' } } }
+    0: { translate: { y: { value: 0, unit: SizeUnit.PX } } },
+    20: { translate: { y: { value: 0, unit: SizeUnit.PX } } },
+    40: { translate: { y: { value: 30, unit: SizeUnit.PX } } },
+    43: { translate: { y: { value: 30, unit: SizeUnit.PX } } },
+    53: { translate: { y: { value: 0, unit: SizeUnit.PX } } },
+    70: { translate: { y: { value: 15, unit: SizeUnit.PX } } },
+    80: { translate: { y: { value: 0, unit: SizeUnit.PX } } },
+    90: { translate: { y: { value: 4, unit: SizeUnit.PX } } },
+    100: { translate: { y: { value: 0, unit: SizeUnit.PX } } }
   },
   bounceFromRight: {
-    0: { translate: { x: { value: 0, unit: 'px' } } },
-    20: { translate: { x: { value: 0, unit: 'px' } } },
-    40: { translate: { x: { value: 30, unit: 'px' } } },
-    43: { translate: { x: { value: 30, unit: 'px' } } },
-    53: { translate: { x: { value: 0, unit: 'px' } } },
-    70: { translate: { x: { value: 15, unit: 'px' } } },
-    80: { translate: { x: { value: 0, unit: 'px' } } },
-    90: { translate: { x: { value: 4, unit: 'px' } } },
-    100: { translate: { x: { value: 0, unit: 'px' } } }
+    0: { translate: { x: { value: 0, unit: SizeUnit.PX } } },
+    20: { translate: { x: { value: 0, unit: SizeUnit.PX } } },
+    40: { translate: { x: { value: 30, unit: SizeUnit.PX } } },
+    43: { translate: { x: { value: 30, unit: SizeUnit.PX } } },
+    53: { translate: { x: { value: 0, unit: SizeUnit.PX } } },
+    70: { translate: { x: { value: 15, unit: SizeUnit.PX } } },
+    80: { translate: { x: { value: 0, unit: SizeUnit.PX } } },
+    90: { translate: { x: { value: 4, unit: SizeUnit.PX } } },
+    100: { translate: { x: { value: 0, unit: SizeUnit.PX } } }
   },
   zoomIn: {
     0: { opacity: 0, scale: { x: 0.1, y: 0.1 } },
@@ -200,36 +201,48 @@ export const AnimationGroupEffectKeyFrames: { [key: string]: AnimationKeyFrames 
     100: { opacity: 1, scale: { x: 1, y: 1 } }
   },
   fadeAndMoveFromLeft: {
-    0: { opacity: 0, translate: { x: { value: -100, unit: '%' } } },
-    100: { opacity: 1, translate: { x: { value: 0, unit: '%' } } }
+    0: { opacity: 0, translate: { x: { value: -100, unit: SizeUnit.Percent } } },
+    100: { opacity: 1, translate: { x: { value: 0, unit: SizeUnit.Percent } } }
   },
   fadeAndMoveFromRight: {
-    0: { opacity: 0, translate: { x: { value: 100, unit: '%' } } },
-    100: { opacity: 1, translate: { x: { value: 0, unit: '%' } } }
+    0: { opacity: 0, translate: { x: { value: 100, unit: SizeUnit.Percent } } },
+    100: { opacity: 1, translate: { x: { value: 0, unit: SizeUnit.Percent } } }
   },
   fadeAndMoveFromTop: {
-    0: { opacity: 0, translate: { y: { value: -100, unit: '%' } } },
-    100: { opacity: 1, translate: { y: { value: 0, unit: '%' } } }
+    0: { opacity: 0, translate: { y: { value: -100, unit: SizeUnit.Percent } } },
+    100: { opacity: 1, translate: { y: { value: 0, unit: SizeUnit.Percent } } }
   },
   fadeAndMoveFromBottom: {
-    0: { opacity: 0, translate: { y: { value: 100, unit: '%' } } },
-    100: { opacity: 1, translate: { y: { value: 0, unit: '%' } } }
+    0: { opacity: 0, translate: { y: { value: 100, unit: SizeUnit.Percent } } },
+    100: { opacity: 1, translate: { y: { value: 0, unit: SizeUnit.Percent } } }
   },
   fadeAndMoveFromTopLeft: {
-    0: { opacity: 0, translate: { x: { value: -100, unit: '%' }, y: { value: -100, unit: '%' } } },
-    100: { opacity: 1, translate: { x: { value: 0, unit: '%' }, y: { value: 0, unit: '%' } } }
+    0: {
+      opacity: 0,
+      translate: { x: { value: -100, unit: SizeUnit.Percent }, y: { value: -100, unit: SizeUnit.Percent } }
+    },
+    100: { opacity: 1, translate: { x: { value: 0, unit: SizeUnit.Percent }, y: { value: 0, unit: SizeUnit.Percent } } }
   },
   fadeAndMoveFromTopRight: {
-    0: { opacity: 0, translate: { x: { value: 100, unit: '%' }, y: { value: -100, unit: '%' } } },
-    100: { opacity: 1, translate: { x: { value: 0, unit: '%' }, y: { value: 0, unit: '%' } } }
+    0: {
+      opacity: 0,
+      translate: { x: { value: 100, unit: SizeUnit.Percent }, y: { value: -100, unit: SizeUnit.Percent } }
+    },
+    100: { opacity: 1, translate: { x: { value: 0, unit: SizeUnit.Percent }, y: { value: 0, unit: SizeUnit.Percent } } }
   },
   fadeAndMoveFromBottomLeft: {
-    0: { opacity: 0, translate: { x: { value: -100, unit: '%' }, y: { value: 100, unit: '%' } } },
-    100: { opacity: 1, translate: { x: { value: 0, unit: '%' }, y: { value: 0, unit: '%' } } }
+    0: {
+      opacity: 0,
+      translate: { x: { value: -100, unit: SizeUnit.Percent }, y: { value: 100, unit: SizeUnit.Percent } }
+    },
+    100: { opacity: 1, translate: { x: { value: 0, unit: SizeUnit.Percent }, y: { value: 0, unit: SizeUnit.Percent } } }
   },
   fadeAndMoveFromBottomRight: {
-    0: { opacity: 0, translate: { x: { value: 100, unit: '%' }, y: { value: 100, unit: '%' } } },
-    100: { opacity: 1, translate: { x: { value: 0, unit: '%' }, y: { value: 0, unit: '%' } } }
+    0: {
+      opacity: 0,
+      translate: { x: { value: 100, unit: SizeUnit.Percent }, y: { value: 100, unit: SizeUnit.Percent } }
+    },
+    100: { opacity: 1, translate: { x: { value: 0, unit: SizeUnit.Percent }, y: { value: 0, unit: SizeUnit.Percent } } }
   },
   pop: {
     0: { opacity: 0, scale: { x: 0.3, y: 0.3 } },
