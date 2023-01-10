@@ -159,9 +159,7 @@ export class AnimationManager {
       this.#observeAnimationKeyFrameTransform && this.#observeAnimationKeyFrameTransform(transform);
     } else if (Array.isArray(this.animation.content)) {
       this.animation.content.forEach(item => {
-        easingPercent = easingFunction[item.effect](
-          this.isReverseFill ? (0.5 - Math.abs(0.5 - this.#percent)) * 2 : this.#percent
-        );
+        easingPercent = easingFunction[item.effect](this.isReverseFill ? (0.5 - Math.abs(0.5 - this.#percent)) * 2 : this.#percent);
         animationKeyFrames = AnimationUtils.getAnimationContentKeyFrames(item);
         if (animationKeyFrames) {
           transform = AnimationUtils.getAnimationKeyFrameTransform(
