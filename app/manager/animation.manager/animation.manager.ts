@@ -35,6 +35,13 @@ export class AnimationManager {
       this.animation.times.type === AnimationEnum.Execution.Custom
         ? this.animation.times.value ?? 1
         : timeValue;
+  }
+
+  public observeAnimationKeyFrameTransform(hold: (keyFrame?: AnimationKeyFrameTransform) => void) {
+    this.#observeAnimationKeyFrameTransform = hold;
+  }
+
+  public execute(complete: () => void) {
 
     // 把所有动画的值替换为最终的值
     if (this.animation.type === 'custom') {
@@ -43,13 +50,6 @@ export class AnimationManager {
         item.value.end = AnimationUtils.getValue(item.value.end);
       });
     }
-  }
-
-  public observeAnimationKeyFrameTransform(hold: (keyFrame?: AnimationKeyFrameTransform) => void) {
-    this.#observeAnimationKeyFrameTransform = hold;
-  }
-
-  public execute(complete: () => void) {
     const run = () => {
       if (!this.#isPause) {
         this.#executedTimes += 1;
