@@ -264,7 +264,7 @@ export class AnimationUtils {
 
   static getAnimationGroupKeyframes(animation: DslAnimationType): AnimationKeyFrames | undefined {
     if (animation.type === 'custom' || Array.isArray(animation.content)) return undefined;
-    return AnimationUtils.getAnimationGroupKeyframesByContent(animation.content);
+    return AnimationUtils.getAnimationGroupKeyframesByContent(<AnimationGroupType>animation.content);
   }
 
   static getAnimationGroupKeyframesByContent(

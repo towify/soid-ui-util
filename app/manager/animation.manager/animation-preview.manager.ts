@@ -5,7 +5,7 @@
 
 import { AnimationEnum } from '@towify-types/dsl/animation.enum';
 import { Performance } from 'soid-data';
-import { AnimationKeyFrameTransform, AnimationKeyFrames } from '../../type/animation.type';
+import { AnimationKeyFrames, AnimationKeyFrameTransform } from '../../type/animation.type';
 import { easingFunction } from '../../type/animation.function';
 import { AnimationUtils } from '../../utils/animation.utils/animation.utils';
 import type { AnimationContentType, AnimationGroupType } from '@towify-types/dsl';
@@ -16,10 +16,11 @@ export class AnimationPreviewManager {
   #observeAnimationKeyFrameTransform?: (keyFrame?: AnimationKeyFrameTransform) => void;
   #animationFrame?: number;
   type: 'group' | 'custom' = 'custom';
-  content?: AnimationContentType | AnimationGroupType;
+  content?: { animation: AnimationContentType, effect: AnimationEnum.Effect } | AnimationGroupType;
   duration = 0;
 
-  constructor(private readonly isInfinity: boolean) {}
+  constructor(private readonly isInfinity: boolean) {
+  }
 
   setAnimationInfo(params: {
     type: 'group' | 'custom';
@@ -33,7 +34,7 @@ export class AnimationPreviewManager {
     if (this.type === 'group') {
       (this.content as AnimationGroupType).function = params.effect;
     } else {
-      (this.content as AnimationContentType).effect = params.effect;
+      (<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).effect = params.effect;
     }
     return this;
   }
@@ -91,12 +92,10 @@ export class AnimationPreviewManager {
           transform = undefined;
         }
         this.#observeAnimationKeyFrameTransform &&
-          this.#observeAnimationKeyFrameTransform(transform);
+        this.#observeAnimationKeyFrameTransform(transform);
       } else if (this.type === 'custom') {
-        easingPercent = easingFunction[(this.content as AnimationContentType).effect](percent);
-        animationKeyFrames = AnimationUtils.getAnimationContentKeyFrames(
-          this.content as AnimationContentType
-        );
+        easingPercent = easingFunction[(<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).effect](percent);
+        animationKeyFrames = AnimationUtils.getAnimationContentKeyFrames((<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation);
         if (animationKeyFrames) {
           transform = AnimationUtils.getAnimationKeyFrameTransform(
             animationKeyFrames,
@@ -106,14 +105,14 @@ export class AnimationPreviewManager {
           transform = undefined;
         }
         this.#observeAnimationKeyFrameTransform &&
-          this.#observeAnimationKeyFrameTransform(transform);
+        this.#observeAnimationKeyFrameTransform(transform);
       }
       if (this.#isStopAnimation) {
         if (this.#animationFrame) {
           window.cancelAnimationFrame(this.#animationFrame);
           this.#animationFrame = undefined;
           this.#observeAnimationKeyFrameTransform &&
-            this.#observeAnimationKeyFrameTransform(undefined);
+          this.#observeAnimationKeyFrameTransform(undefined);
         }
       } else if (stop) {
         if (this.#animationFrame) {
