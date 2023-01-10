@@ -43,13 +43,6 @@ export class AnimationManager {
 
   public execute(complete: () => void) {
     const run = () => {
-      // 把所有动画的值替换为最终的值
-      if (this.animation.type === 'custom') {
-        (<{ list: AnimationContentType[], effect: AnimationEnum.Effect }>this.animation.content).list.forEach(item => {
-          item.value.start = AnimationUtils.getValue(item.value.start);
-          item.value.end = AnimationUtils.getValue(item.value.end);
-        });
-      }
       if (!this.#isPause) {
         this.#executedTimes += 1;
       }
@@ -104,6 +97,13 @@ export class AnimationManager {
   }
 
   async #run(callback?: () => void) {
+    // 把所有动画的值替换为最终的值
+    if (this.animation.type === 'custom') {
+      (<{ list: AnimationContentType[], effect: AnimationEnum.Effect }>this.animation.content).list.forEach(item => {
+        item.value.start = AnimationUtils.getValue(item.value.start);
+        item.value.end = AnimationUtils.getValue(item.value.end);
+      });
+    }
     let stop = false;
     const duration = this.#duration;
     this.#isPlaying = true;
