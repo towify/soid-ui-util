@@ -24,7 +24,7 @@ export class AnimationPreviewManager {
 
   setAnimationInfo(params: {
     type: 'group' | 'custom';
-    content: AnimationContentType | AnimationGroupType;
+    content: { animation: AnimationContentType, effect: AnimationEnum.Effect } | AnimationGroupType;
     duration: number;
     effect: AnimationEnum.Effect;
   }) {
