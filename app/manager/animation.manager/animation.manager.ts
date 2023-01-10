@@ -4,7 +4,7 @@
  */
 
 import { Performance } from 'soid-data';
-import { AnimationEnum, AnimationGroupType, DslAnimationType } from '@towify-types/dsl';
+import { AnimationContentType, AnimationEnum, AnimationGroupType, DslAnimationType } from '@towify-types/dsl';
 import { easingFunction } from '../../type/animation.function';
 import { AnimationUtils } from '../../utils/animation.utils/animation.utils';
 import { AnimationKeyFrameTransform, AnimationKeyFrames } from '../../type/animation.type';
@@ -157,9 +157,9 @@ export class AnimationManager {
         transform = undefined;
       }
       this.#observeAnimationKeyFrameTransform && this.#observeAnimationKeyFrameTransform(transform);
-    } else if (Array.isArray(this.animation.content)) {
-      this.animation.content.forEach(item => {
-        easingPercent = easingFunction[item.effect](this.isReverseFill ? (0.5 - Math.abs(0.5 - this.#percent)) * 2 : this.#percent);
+    } else if (this.animation.type === 'custom') {
+      (<{list: AnimationContentType[], effect: AnimationEnum.Effect}>this.animation.content).list.forEach(item => {
+        easingPercent = easingFunction[this.animation.content.effect](this.isReverseFill ? (0.5 - Math.abs(0.5 - this.#percent)) * 2 : this.#percent);
         animationKeyFrames = AnimationUtils.getAnimationContentKeyFrames(item);
         if (animationKeyFrames) {
           transform = AnimationUtils.getAnimationKeyFrameTransform(

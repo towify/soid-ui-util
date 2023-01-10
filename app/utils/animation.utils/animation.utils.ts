@@ -4,12 +4,9 @@
  */
 
 import type { AnimationContentType, AnimationGroupType, DslAnimationType } from '@towify-types/dsl';
-import {
-  AnimationGroupInfoList,
-  AnimationKeyFrameTransform,
-  AnimationKeyFrames
-} from '../../type/animation.type';
 import { AnimationEnum } from '@towify-types/dsl';
+import { AnimationGroupInfoList, AnimationKeyFrames, AnimationKeyFrameTransform } from '../../type/animation.type';
+import { SizeUnit } from '@towify/common-values';
 
 export class AnimationUtils {
   public static getAnimationContentKeyFrames(content: AnimationContentType): AnimationKeyFrames {
@@ -21,13 +18,13 @@ export class AnimationUtils {
         endKeyFrame.skew ??= {};
         switch (content.method) {
           case AnimationEnum.AxisMethod.X: {
-            startKeyFrame.skew.x = content.value.start.value;
-            endKeyFrame.skew.x = content.value.end.value;
+            startKeyFrame.skew.x = <number>content.value.start.value;
+            endKeyFrame.skew.x = <number>content.value.end.value;
             break;
           }
           case AnimationEnum.AxisMethod.Y: {
-            startKeyFrame.skew.y = content.value.start.value;
-            endKeyFrame.skew.y = content.value.end.value;
+            startKeyFrame.skew.y = <number>content.value.start.value;
+            endKeyFrame.skew.y = <number>content.value.end.value;
             break;
           }
           default:
@@ -40,36 +37,18 @@ export class AnimationUtils {
         endKeyFrame.translate ??= {};
         switch (content.method) {
           case AnimationEnum.AxisMethod.X: {
-            startKeyFrame.translate.x = {
-              value: content.value.start.value,
-              unit: content.value.start.unit ?? 'px'
-            };
-            endKeyFrame.translate.x = {
-              value: content.value.end.value,
-              unit: content.value.end.unit ?? 'px'
-            };
+            startKeyFrame.translate.x = this.getValue(content.value.start);
+            endKeyFrame.translate.x = this.getValue(content.value.end);
             break;
           }
           case AnimationEnum.AxisMethod.Y: {
-            startKeyFrame.translate.y = {
-              value: content.value.start.value,
-              unit: content.value.start.unit ?? 'px'
-            };
-            endKeyFrame.translate.y = {
-              value: content.value.end.value,
-              unit: content.value.end.unit ?? 'px'
-            };
+            startKeyFrame.translate.y =  this.getValue(content.value.start);
+            endKeyFrame.translate.y = this.getValue(content.value.end);
             break;
           }
           case AnimationEnum.AxisMethod.Z: {
-            startKeyFrame.translate.z = {
-              value: content.value.start.value,
-              unit: content.value.start.unit ?? 'px'
-            };
-            endKeyFrame.translate.z = {
-              value: content.value.end.value,
-              unit: content.value.end.unit ?? 'px'
-            };
+            startKeyFrame.translate.z = this.getValue(content.value.start);
+            endKeyFrame.translate.z = this.getValue(content.value.end);
             break;
           }
           default:
@@ -79,18 +58,18 @@ export class AnimationUtils {
       }
       case AnimationEnum.Action.Scale: {
         startKeyFrame.scale ??= {
-          x: content.value.start.value,
-          y: content.value.start.value
+          x: <number>content.value.start.value,
+          y: <number>content.value.start.value
         };
         endKeyFrame.scale ??= {
-          x: content.value.end.value,
-          y: content.value.end.value
+          x: <number>content.value.end.value,
+          y: <number>content.value.end.value
         };
         break;
       }
       case AnimationEnum.Action.Opacity: {
-        startKeyFrame.opacity = content.value.start.value;
-        endKeyFrame.opacity = content.value.end.value;
+        startKeyFrame.opacity = <number>content.value.start.value;
+        endKeyFrame.opacity = <number>content.value.end.value;
         break;
       }
       case AnimationEnum.Action.Rotate: {
@@ -100,13 +79,13 @@ export class AnimationUtils {
           x: content.rotated3d.x,
           y: content.rotated3d.y,
           z: content.rotated3d.z,
-          angle: content.value.start.value
+          angle: <number>content.value.start.value
         };
         endKeyFrame.rotation = {
           x: content.rotated3d.x,
           y: content.rotated3d.y,
           z: content.rotated3d.z,
-          angle: content.value.end.value
+          angle: <number>content.value.end.value
         };
         if (content.method !== AnimationEnum.AxisMethod.Z) {
           startKeyFrame.perspective = content.perspective;
@@ -275,5 +254,34 @@ export class AnimationUtils {
       return animationInfo.achieveAnimationKeyFrames(content.direction);
     }
     return undefined;
+  }
+
+  static getValue(data: { value: number | string, unit?: SizeUnit.PX | SizeUnit.Percent | 'random'}): {
+    value: number,
+    unit: SizeUnit.PX | SizeUnit.Percent
+  } {
+    if (data.unit === 'random') {
+      const range = (<string>data.value).split('~');
+      if (range.length !== 2) {
+        return {
+          value: Math.floor(Math.random() * (10) + 1),
+          unit: SizeUnit.PX
+        };
+      }
+      if (Number.isNaN(range[0])) {
+        range[0] = '0';
+      }
+      if (Number.isNaN(range[1])) {
+        range[1] = '10';
+      }
+      return {
+        value: Math.floor(Math.random() * (parseInt(range[0]) - parseInt(range[1]) + 1)) + parseInt(range[0]),
+        unit: SizeUnit.PX
+      };
+    }
+    return {
+      value: <number>data.value,
+      unit: data.unit === SizeUnit.Percent ? SizeUnit.Percent  : SizeUnit.PX
+    };
   }
 }
