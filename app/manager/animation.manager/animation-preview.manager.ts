@@ -80,9 +80,9 @@ export class AnimationPreviewManager {
       }
       if (this.type === 'group') {
         easingPercent = easingFunction[(this.content as AnimationGroupType).function](percent);
-        animationKeyFrames = AnimationUtils.getAnimationGroupKeyframesByContent(<AnimationGroupType>this.content);
+        animationKeyFrames = AnimationUtils.getGroupKeyframesByContent(<AnimationGroupType>this.content);
         if (animationKeyFrames) {
-          transform = AnimationUtils.getAnimationKeyFrameTransform(
+          transform = AnimationUtils.getKeyFrameTransform(
             animationKeyFrames,
             easingPercent
           );
@@ -93,9 +93,9 @@ export class AnimationPreviewManager {
         this.#observeAnimationKeyFrameTransform(transform);
       } else if (this.type === 'custom') {
         easingPercent = easingFunction[(<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).effect](percent);
-        animationKeyFrames = AnimationUtils.getAnimationContentKeyFrames((<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation);
+        animationKeyFrames = AnimationUtils.getContentKeyFrames((<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation);
         if (animationKeyFrames) {
-          transform = AnimationUtils.getAnimationKeyFrameTransform(
+          transform = AnimationUtils.getKeyFrameTransform(
             animationKeyFrames,
             easingPercent
           );

@@ -10,7 +10,7 @@ import { SizeUnit } from '@towify/common-values';
 import { NumberUtils } from 'soid-data/util/number.utils';
 
 export class AnimationUtils {
-  public static getAnimationContentKeyFrames(content: AnimationContentType): AnimationKeyFrames {
+  public static getContentKeyFrames(content: AnimationContentType): AnimationKeyFrames {
     const startKeyFrame: AnimationKeyFrameTransform = {};
     const endKeyFrame: AnimationKeyFrameTransform = {};
     switch (content.type) {
@@ -103,7 +103,7 @@ export class AnimationUtils {
     };
   }
 
-  static getAnimationKeyFrameTransform(
+  static getKeyFrameTransform(
     animationKeyFrames: AnimationKeyFrames,
     percent: number
   ): AnimationKeyFrameTransform | undefined {
@@ -142,9 +142,7 @@ export class AnimationUtils {
       endTranslate?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent },
       startTranslate?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent }
     ) => {
-      if (!endTranslate && !startTranslate) {
-        return undefined;
-      }
+      if (!endTranslate && !startTranslate) return undefined;
       if (endTranslate && startTranslate && endTranslate.unit !== startTranslate.unit) {
         return {
           value: endTranslate.value * transformPercent,
@@ -242,14 +240,12 @@ export class AnimationUtils {
     };
   }
 
-  static getAnimationGroupKeyframes(animation: DslAnimationType): AnimationKeyFrames | undefined {
+  static getGroupKeyframes(animation: DslAnimationType): AnimationKeyFrames | undefined {
     if (animation.type === 'custom') return undefined;
-    return AnimationUtils.getAnimationGroupKeyframesByContent(<AnimationGroupType>animation.content);
+    return AnimationUtils.getGroupKeyframesByContent(<AnimationGroupType>animation.content);
   }
 
-  static getAnimationGroupKeyframesByContent(
-    content: AnimationGroupType
-  ): AnimationKeyFrames | undefined {
+  static getGroupKeyframesByContent(content: AnimationGroupType): AnimationKeyFrames | undefined {
     const animationInfo = AnimationGroupInfoList.find(info => info.effect === content.effect);
     if (animationInfo) {
       return animationInfo.achieveAnimationKeyFrames(content.direction);
@@ -257,7 +253,13 @@ export class AnimationUtils {
     return undefined;
   }
 
-  static getValue(data: { value: number | string, unit?: SizeUnit.PX | SizeUnit.Percent | 'random' }): {
+  static getValue(
+    data: {
+      value: number | string,
+      unit?: SizeUnit.PX | SizeUnit.Percent | 'random'
+    },
+    forceRandom?: boolean
+  ): {
     value: number,
     unit: SizeUnit.PX | SizeUnit.Percent
   } {

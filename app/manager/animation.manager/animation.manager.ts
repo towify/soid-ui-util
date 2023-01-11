@@ -8,6 +8,7 @@ import { AnimationContentType, AnimationEnum, AnimationGroupType, DslAnimationTy
 import { easingFunction } from '../../type/animation.function';
 import { AnimationUtils } from '../../utils/animation.utils/animation.utils';
 import { AnimationKeyFrames, AnimationKeyFrameTransform } from '../../type/animation.type';
+import { SizeUnit } from '@towify/common-values';
 
 export class AnimationManager {
   readonly #duration: number;
@@ -22,6 +23,10 @@ export class AnimationManager {
   #isPlaying = false;
   #isPause = false;
   #delayTimes = 0;
+
+  #initialRecords: {
+    [index in `start${ number }` | `end${ number }`]: { value: number | string, unit?: SizeUnit.PX | SizeUnit.Percent | 'random' }
+  } = {};
 
   constructor(
     private readonly animation: DslAnimationType,
@@ -42,6 +47,7 @@ export class AnimationManager {
   }
 
   public execute(complete: () => void) {
+    this.#refreshValue();
     const run = () => {
       if (!this.#isPause) {
         this.#executedTimes += 1;
@@ -59,6 +65,7 @@ export class AnimationManager {
         return run();
       };
       this.#run(() => {
+        this.#refreshValue();
         callBack();
       }).then();
     };
@@ -97,13 +104,6 @@ export class AnimationManager {
   }
 
   async #run(callback?: () => void) {
-    // 把所有动画的值替换为最终的值
-    if (this.animation.type === 'custom') {
-      (<{ list: AnimationContentType[], effect: AnimationEnum.Effect }>this.animation.content).list.forEach(item => {
-        item.value.start = AnimationUtils.getValue(item.value.start);
-        item.value.end = AnimationUtils.getValue(item.value.end);
-      });
-    }
     let stop = false;
     const duration = this.#duration;
     this.#isPlaying = true;
@@ -115,9 +115,7 @@ export class AnimationManager {
         this.#percent = (now - this.#startTime!) / duration;
       }
       this.#runAnimationKeyFrame();
-      if (!this.#isPlaying) {
-        return;
-      }
+      if (!this.#isPlaying) return;
       if (stop) {
         if (this.#animationFrame) {
           window.cancelAnimationFrame(this.#animationFrame);
@@ -149,6 +147,16 @@ export class AnimationManager {
     startAnimation(window.performance.now());
   }
 
+  #refreshValue() {
+    if (this.animation.type !== 'custom') return;
+    (<{ list: AnimationContentType[], effect: AnimationEnum.Effect }>this.animation.content).list.forEach((item, index) => {
+      this.#initialRecords[`start${ index }`] ??= item.value.start;
+      this.#initialRecords[`end${ index }`] ??= item.value.end;
+      item.value.start = AnimationUtils.getValue(this.#initialRecords[`start${ index }`]);
+      item.value.end = AnimationUtils.getValue(this.#initialRecords[`end${ index }`]);
+    });
+  }
+
   #runAnimationKeyFrame() {
     let easingPercent: number;
     let transform: AnimationKeyFrameTransform | undefined;
@@ -157,9 +165,9 @@ export class AnimationManager {
       easingPercent = easingFunction[(<AnimationGroupType>this.animation.content).function](
         this.isReverseFill ? (0.5 - Math.abs(0.5 - this.#percent)) * 2 : this.#percent
       );
-      animationKeyFrames = AnimationUtils.getAnimationGroupKeyframes(this.animation);
+      animationKeyFrames = AnimationUtils.getGroupKeyframes(this.animation);
       if (animationKeyFrames) {
-        transform = AnimationUtils.getAnimationKeyFrameTransform(animationKeyFrames, easingPercent);
+        transform = AnimationUtils.getKeyFrameTransform(animationKeyFrames, easingPercent);
       } else {
         transform = undefined;
       }
@@ -167,9 +175,9 @@ export class AnimationManager {
     } else if (this.animation.type === 'custom') {
       (<{ list: AnimationContentType[], effect: AnimationEnum.Effect }>this.animation.content).list.forEach(item => {
         easingPercent = easingFunction[this.animation.content.effect](this.isReverseFill ? (0.5 - Math.abs(0.5 - this.#percent)) * 2 : this.#percent);
-        animationKeyFrames = AnimationUtils.getAnimationContentKeyFrames(item);
+        animationKeyFrames = AnimationUtils.getContentKeyFrames(item);
         if (animationKeyFrames) {
-          transform = AnimationUtils.getAnimationKeyFrameTransform(
+          transform = AnimationUtils.getKeyFrameTransform(
             animationKeyFrames,
             easingPercent
           );
