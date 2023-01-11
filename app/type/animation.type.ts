@@ -8,9 +8,9 @@ import { SizeUnit } from '@towify/common-values';
 
 export type AnimationKeyFrameTransform = {
   translate?: {
-    x?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent };
-    y?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent };
-    z?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent };
+    x?: { value: number; unit: SizeUnit };
+    y?: { value: number; unit: SizeUnit};
+    z?: { value: number; unit: SizeUnit };
   };
   scale?: {
     x?: number;

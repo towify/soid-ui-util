@@ -65,7 +65,6 @@ export class AnimationManager {
         return run();
       };
       this.#run(() => {
-        this.#refreshValue();
         callBack();
       }).then();
     };

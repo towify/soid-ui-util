@@ -9,6 +9,7 @@ import { AnimationKeyFrames, AnimationKeyFrameTransform } from '../../type/anima
 import { easingFunction } from '../../type/animation.function';
 import { AnimationUtils } from '../../utils/animation.utils/animation.utils';
 import type { AnimationContentType, AnimationGroupType } from '@towify-types/dsl';
+import { SizeUnit } from '@towify/common-values';
 
 export class AnimationPreviewManager {
   #isStopAnimation = false;
@@ -19,8 +20,10 @@ export class AnimationPreviewManager {
   content?: { animation: AnimationContentType, effect: AnimationEnum.Effect } | AnimationGroupType;
   duration = 0;
 
-  constructor(private readonly isInfinity: boolean) {
-  }
+  #initialRecords?: { [key in 'start' | 'end']: { value: number | { min: number, max: number }, unit?: SizeUnit } };
+
+
+  constructor(private readonly isInfinity: boolean) {}
 
   setAnimationInfo(params: {
     type: 'group' | 'custom';
@@ -70,6 +73,7 @@ export class AnimationPreviewManager {
     let transform: AnimationKeyFrameTransform | undefined;
     let animationKeyFrames: AnimationKeyFrames | undefined;
     const duration = this.duration;
+    this.#refreshValue();
     const draw = async (now: number) => {
       if (now - start! >= duration) {
         stop = true;
@@ -135,5 +139,13 @@ export class AnimationPreviewManager {
     };
     startAnimation(window.performance.now());
     this.#isPlaying = true;
+  }
+
+  #refreshValue() {
+    const content = <{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content;
+    if (!content?.animation) return;
+    this.#initialRecords ??= { start: content.animation.value.start, end: content.animation.value.end };
+    content.animation.value.start = AnimationUtils.getValue(this.#initialRecords.start);
+    content.animation.value.end = AnimationUtils.getValue(this.#initialRecords.end);
   }
 }

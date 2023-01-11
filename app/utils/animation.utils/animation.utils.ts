@@ -43,13 +43,13 @@ export class AnimationUtils {
             break;
           }
           case AnimationEnum.AxisMethod.Y: {
-            startKeyFrame.translate.y = <{ value: number; unit: SizeUnit.PX | SizeUnit.Percent }>content.value.start;
-            endKeyFrame.translate.y = <{ value: number; unit: SizeUnit.PX | SizeUnit.Percent }>content.value.end;
+            startKeyFrame.translate.y = <{ value: number; unit: SizeUnit }>content.value.start;
+            endKeyFrame.translate.y = <{ value: number; unit: SizeUnit}>content.value.end;
             break;
           }
           case AnimationEnum.AxisMethod.Z: {
-            startKeyFrame.translate.z = this.getValue(content.value.start);
-            endKeyFrame.translate.z = this.getValue(content.value.end);
+            startKeyFrame.translate.z = <{ value: number; unit: SizeUnit}>this.getValue(content.value.start);
+            endKeyFrame.translate.z = <{ value: number; unit: SizeUnit}>this.getValue(content.value.end);
             break;
           }
           default:
@@ -139,8 +139,8 @@ export class AnimationUtils {
       transformPercent = (percent * 100 - startPercent) / (endPercent - startPercent);
     }
     const getTranslateValue = (
-      endTranslate?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent },
-      startTranslate?: { value: number; unit: SizeUnit.PX | SizeUnit.Percent }
+      endTranslate?: { value: number; unit: SizeUnit},
+      startTranslate?: { value: number; unit: SizeUnit }
     ) => {
       if (!endTranslate && !startTranslate) return undefined;
       if (endTranslate && startTranslate && endTranslate.unit !== startTranslate.unit) {
@@ -258,17 +258,17 @@ export class AnimationUtils {
     unit?: SizeUnit
   }): {
     value: number,
-    unit: SizeUnit.PX | SizeUnit.Percent
+    unit?: SizeUnit
   } {
     if (typeof data.value === 'object') {
       return {
         value: NumberUtils.getRandomIntInRange(data.value.min, data.value.max),
-        unit: SizeUnit.PX
+        unit: data.unit ?? undefined
       };
     }
     return {
       value: data.value,
-      unit: data.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX
+      unit: data.unit
     };
   }
 }
