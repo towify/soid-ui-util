@@ -25,7 +25,7 @@ export class AnimationManager {
   #delayTimes = 0;
 
   #initialRecords: {
-    [index in `start${ number }` | `end${ number }`]: { value: number | string, unit?: SizeUnit.PX | SizeUnit.Percent | 'random' }
+    [index in `start${ number }` | `end${ number }`]: { value: number | { min: number, max: number }, unit?: SizeUnit }
   } = {};
 
   constructor(

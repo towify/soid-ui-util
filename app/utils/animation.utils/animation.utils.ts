@@ -77,20 +77,20 @@ export class AnimationUtils {
         if (!content.rotated3d) break;
         // Rotate 的 Perspective 只在 X Y 动画下生效
         startKeyFrame.rotation = {
-          x: content.rotated3d.x,
-          y: content.rotated3d.y,
-          z: content.rotated3d.z,
+          x: <number>content.rotated3d.x,
+          y: <number>content.rotated3d.y,
+          z: <number>content.rotated3d.z,
           angle: <number>content.value.start.value
         };
         endKeyFrame.rotation = {
-          x: content.rotated3d.x,
-          y: content.rotated3d.y,
-          z: content.rotated3d.z,
+          x: <number>content.rotated3d.x,
+          y: <number>content.rotated3d.y,
+          z: <number>content.rotated3d.z,
           angle: <number>content.value.end.value
         };
         if (content.method !== AnimationEnum.AxisMethod.Z) {
-          startKeyFrame.perspective = content.perspective;
-          endKeyFrame.perspective = content.perspective;
+          startKeyFrame.perspective = <{ value: number; unit: SizeUnit }>content.perspective;
+          endKeyFrame.perspective = <{ value: number; unit: SizeUnit }>content.perspective;
         }
         break;
       }
@@ -253,37 +253,21 @@ export class AnimationUtils {
     return undefined;
   }
 
-  static getValue(
-    data: {
-      value: number | string,
-      unit?: SizeUnit.PX | SizeUnit.Percent | 'random'
-    },
-    forceRandom?: boolean
-  ): {
+  static getValue(data: {
+    value: number | { min: number, max: number },
+    unit?: SizeUnit
+  }): {
     value: number,
     unit: SizeUnit.PX | SizeUnit.Percent
   } {
-    if (data.unit === 'random') {
-      const range = (<string>data.value).split('~');
-      if (range.length !== 2) {
-        return {
-          value: NumberUtils.getRandomIntInRange(0, 10),
-          unit: SizeUnit.PX
-        };
-      }
-      if (Number.isNaN(range[0])) {
-        range[0] = '0';
-      }
-      if (Number.isNaN(range[1])) {
-        range[1] = '10';
-      }
+    if (typeof data.value === 'object') {
       return {
-        value: NumberUtils.getRandomIntInRange(parseInt(range[0]), parseInt(range[1])),
+        value: NumberUtils.getRandomIntInRange(data.value.min, data.value.max),
         unit: SizeUnit.PX
       };
     }
     return {
-      value: <number>data.value,
+      value: data.value,
       unit: data.unit === SizeUnit.Percent ? SizeUnit.Percent : SizeUnit.PX
     };
   }

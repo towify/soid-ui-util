@@ -29,7 +29,7 @@ export type AnimationKeyFrameTransform = {
   };
   blur?: number;
   opacity?: number;
-  perspective?: { value: number; unit: 'px' | '%' };
+  perspective?: { value: number; unit: SizeUnit };
   origin?: string;
 };
 
@@ -163,32 +163,32 @@ export const AnimationGroupEffectKeyFrames: { [key: string]: AnimationKeyFrames 
     100: { opacity: 1, rotation: { z: 1, angle: 0 }, origin: 'right bottom' }
   },
   flipFromTop: {
-    0: { perspective: { value: 400, unit: 'px' }, opacity: 0, rotation: { x: 1, angle: 135 } },
-    60: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { x: 1, angle: -20 } },
-    70: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { x: 1, angle: 10 } },
-    90: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { x: 1, angle: -5 } },
-    100: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { x: 1, angle: 0 } }
+    0: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 0, rotation: { x: 1, angle: 135 } },
+    60: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { x: 1, angle: -20 } },
+    70: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { x: 1, angle: 10 } },
+    90: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { x: 1, angle: -5 } },
+    100: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { x: 1, angle: 0 } }
   },
   flipFromBottom: {
-    0: { perspective: { value: 400, unit: 'px' }, opacity: 0, rotation: { x: 1, angle: -135 } },
-    60: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { x: 1, angle: 20 } },
-    70: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { x: 1, angle: -10 } },
-    90: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { x: 1, angle: 5 } },
-    100: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { x: 1, angle: 0 } }
+    0: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 0, rotation: { x: 1, angle: -135 } },
+    60: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { x: 1, angle: 20 } },
+    70: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { x: 1, angle: -10 } },
+    90: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { x: 1, angle: 5 } },
+    100: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { x: 1, angle: 0 } }
   },
   flipFromLeft: {
-    0: { perspective: { value: 400, unit: 'px' }, opacity: 0, rotation: { y: 1, angle: -135 } },
-    60: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { y: 1, angle: 20 } },
-    70: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { y: 1, angle: -10 } },
-    90: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { y: 1, angle: 5 } },
-    100: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { y: 1, angle: 0 } }
+    0: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 0, rotation: { y: 1, angle: -135 } },
+    60: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { y: 1, angle: 20 } },
+    70: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { y: 1, angle: -10 } },
+    90: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { y: 1, angle: 5 } },
+    100: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { y: 1, angle: 0 } }
   },
   flipFromRight: {
-    0: { perspective: { value: 400, unit: 'px' }, opacity: 0, rotation: { y: 1, angle: 135 } },
-    60: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { y: 1, angle: -20 } },
-    70: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { y: 1, angle: 10 } },
-    90: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { y: 1, angle: -5 } },
-    100: { perspective: { value: 400, unit: 'px' }, opacity: 1, rotation: { y: 1, angle: 0 } }
+    0: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 0, rotation: { y: 1, angle: 135 } },
+    60: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { y: 1, angle: -20 } },
+    70: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { y: 1, angle: 10 } },
+    90: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { y: 1, angle: -5 } },
+    100: { perspective: { value: 400, unit: SizeUnit.PX }, opacity: 1, rotation: { y: 1, angle: 0 } }
   },
   fadeAndScaleIn: {
     0: { opacity: 0, scale: { x: 0.3, y: 0.3 } },
