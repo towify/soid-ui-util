@@ -44,12 +44,12 @@ export class AnimationUtils {
           }
           case AnimationEnum.AxisMethod.Y: {
             startKeyFrame.translate.y = <{ value: number; unit: SizeUnit }>content.value.start;
-            endKeyFrame.translate.y = <{ value: number; unit: SizeUnit}>content.value.end;
+            endKeyFrame.translate.y = <{ value: number; unit: SizeUnit }>content.value.end;
             break;
           }
           case AnimationEnum.AxisMethod.Z: {
-            startKeyFrame.translate.z = <{ value: number; unit: SizeUnit}>this.getValue(content.value.start);
-            endKeyFrame.translate.z = <{ value: number; unit: SizeUnit}>this.getValue(content.value.end);
+            startKeyFrame.translate.z = <{ value: number; unit: SizeUnit }>this.getValue(content.value.start);
+            endKeyFrame.translate.z = <{ value: number; unit: SizeUnit }>this.getValue(content.value.end);
             break;
           }
           default:
@@ -88,14 +88,14 @@ export class AnimationUtils {
           z: <number>content.rotated3d.z,
           angle: <number>content.value.end.value
         };
-        if (content.method !== AnimationEnum.AxisMethod.Z) {
-          startKeyFrame.perspective = <{ value: number; unit: SizeUnit }>content.perspective;
-          endKeyFrame.perspective = <{ value: number; unit: SizeUnit }>content.perspective;
-        }
         break;
       }
       default:
         break;
+    }
+    if (content.method === AnimationEnum.AxisMethod.Z) {
+      startKeyFrame.perspective = <{ value: number; unit: SizeUnit }>content.perspective;
+      endKeyFrame.perspective = <{ value: number; unit: SizeUnit }>content.perspective;
     }
     return {
       0: startKeyFrame,
@@ -139,7 +139,7 @@ export class AnimationUtils {
       transformPercent = (percent * 100 - startPercent) / (endPercent - startPercent);
     }
     const getTranslateValue = (
-      endTranslate?: { value: number; unit: SizeUnit},
+      endTranslate?: { value: number; unit: SizeUnit },
       startTranslate?: { value: number; unit: SizeUnit }
     ) => {
       if (!endTranslate && !startTranslate) return undefined;
