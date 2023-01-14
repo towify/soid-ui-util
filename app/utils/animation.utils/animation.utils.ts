@@ -60,6 +60,10 @@ export class AnimationUtils {
       case AnimationEnum.Action.Scale: {
         startKeyFrame.scale ??= {
           x: <number>content.value.start.value,
+          y: <number>content.value.start.value
+        };
+        endKeyFrame.scale ??= {
+          x: <number>content.value.end.value,
           y: <number>content.value.end.value
         };
         break;
