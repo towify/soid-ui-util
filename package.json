@@ -30,14 +30,14 @@
   },
   "bundleDependencies": false,
   "peerDependencies": {
-    "@towify-types/dsl": ">=1.4.66",
+    "@towify-types/dsl": ">=1.4.72",
     "@towify/common-values": ">=0.2.1",
-    "soid-data": ">=0.3.7"
+    "soid-data": ">=0.3.9"
   },
   "dependencies": {
-    "@towify-types/dsl": "^1.4.66",
+    "@towify-types/dsl": "^1.4.72",
     "@towify/common-values": "0.2.1",
-    "soid-data": "^0.3.7"
+    "soid-data": "^0.3.9"
   },
   "devDependencies": {
     "@babel/core": "~7.20.5",
