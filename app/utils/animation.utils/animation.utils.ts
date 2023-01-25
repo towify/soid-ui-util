@@ -241,16 +241,13 @@ export class AnimationUtils {
   }
 
   static getGroupKeyframes(animation: DslAnimationType): AnimationKeyFrames | undefined {
-    if (animation.type === 'custom') return undefined;
     return AnimationUtils.getGroupKeyframesByContent(<AnimationGroupType>animation.content);
   }
 
   static getGroupKeyframesByContent(content: AnimationGroupType): AnimationKeyFrames | undefined {
     const animationInfo = AnimationGroupInfoList.find(info => info.effect === content.effect);
-    if (animationInfo) {
-      return animationInfo.achieveAnimationKeyFrames(content.direction);
-    }
-    return undefined;
+    if (!animationInfo) return undefined;
+    return animationInfo.achieveAnimationKeyframes(content.direction);
   }
 
   static getValue(data: {

@@ -16,7 +16,7 @@ export class AnimationManager {
   readonly #times: number;
   #hasDelay = false;
   #executedTimes = 0;
-  #observeAnimationKeyFrameTransform?: (keyFrame?: AnimationKeyFrameTransform) => void;
+  #listenTransformKeyframe?: (keyFrame?: AnimationKeyFrameTransform) => void;
   #startTime: number | undefined;
   #percent = 0;
   #animationFrame: number | undefined;
@@ -42,8 +42,8 @@ export class AnimationManager {
         : timeValue;
   }
 
-  public observeAnimationKeyFrameTransform(hold: (keyFrame?: AnimationKeyFrameTransform) => void) {
-    this.#observeAnimationKeyFrameTransform = hold;
+  public listenTransformKeyframe(hold: (keyFrame?: AnimationKeyFrameTransform) => void) {
+    this.#listenTransformKeyframe = hold;
   }
 
   public execute(complete: () => void) {
@@ -88,7 +88,7 @@ export class AnimationManager {
       this.#animationFrame = undefined;
     }
     this.#percent = 0;
-    this.#observeAnimationKeyFrameTransform && this.#observeAnimationKeyFrameTransform(undefined);
+    this.#listenTransformKeyframe && this.#listenTransformKeyframe(undefined);
     this.#startTime = undefined;
   }
 
@@ -113,7 +113,7 @@ export class AnimationManager {
       } else {
         this.#percent = (now - this.#startTime!) / duration;
       }
-      this.#runAnimationKeyFrame();
+      this.#runAnimationKeyframe();
       if (!this.#isPlaying) return;
       if (stop) {
         if (this.#animationFrame) {
@@ -156,7 +156,7 @@ export class AnimationManager {
     });
   }
 
-  #runAnimationKeyFrame() {
+  #runAnimationKeyframe() {
     let easingPercent: number;
     let transform: AnimationKeyFrameTransform | undefined;
     let animationKeyFrames: AnimationKeyFrames | undefined;
@@ -170,7 +170,7 @@ export class AnimationManager {
       } else {
         transform = undefined;
       }
-      this.#observeAnimationKeyFrameTransform && this.#observeAnimationKeyFrameTransform(transform);
+      this.#listenTransformKeyframe && this.#listenTransformKeyframe(transform);
     } else if (this.animation.type === 'custom') {
       (<{ list: AnimationContentType[], effect: AnimationEnum.Effect }>this.animation.content).list.forEach(item => {
         easingPercent = easingFunction[this.animation.content.effect](this.isReverseFill ? (0.5 - Math.abs(0.5 - this.#percent)) * 2 : this.#percent);
@@ -183,8 +183,8 @@ export class AnimationManager {
         } else {
           transform = undefined;
         }
-        this.#observeAnimationKeyFrameTransform &&
-        this.#observeAnimationKeyFrameTransform(transform);
+        this.#listenTransformKeyframe &&
+        this.#listenTransformKeyframe(transform);
       });
     }
   }

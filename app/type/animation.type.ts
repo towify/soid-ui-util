@@ -264,11 +264,11 @@ export const AnimationGroupEffectKeyFrames: { [key: string]: AnimationKeyFrames 
 
 export const AnimationGroupInfoList: {
   effect: AnimationEnum.GroupEffect;
-  achieveAnimationKeyFrames: (direction: AnimationEnum.Direction) => AnimationKeyFrames;
+  achieveAnimationKeyframes: (direction: AnimationEnum.Direction) => AnimationKeyFrames;
 }[] = [
   {
     effect: AnimationEnum.GroupEffect.FadeAndMove,
-    achieveAnimationKeyFrames: direction => {
+    achieveAnimationKeyframes: direction => {
       switch (direction) {
         case AnimationEnum.Direction.LeftToRight:
           return AnimationGroupEffectKeyFrames.fadeAndMoveFromLeft;
@@ -293,7 +293,7 @@ export const AnimationGroupInfoList: {
   },
   {
     effect: AnimationEnum.GroupEffect.Zoom,
-    achieveAnimationKeyFrames: direction => {
+    achieveAnimationKeyframes: direction => {
       if (direction === AnimationEnum.Direction.Forward) {
         return AnimationGroupEffectKeyFrames.zoomIn;
       }
@@ -302,7 +302,7 @@ export const AnimationGroupInfoList: {
   },
   {
     effect: AnimationEnum.GroupEffect.FadeAndScale,
-    achieveAnimationKeyFrames: direction => {
+    achieveAnimationKeyframes: direction => {
       if (direction === AnimationEnum.Direction.Forward) {
         return AnimationGroupEffectKeyFrames.fadeAndScaleIn;
       }
@@ -311,7 +311,7 @@ export const AnimationGroupInfoList: {
   },
   {
     effect: AnimationEnum.GroupEffect.Rotate,
-    achieveAnimationKeyFrames: direction => {
+    achieveAnimationKeyframes: direction => {
       if (direction === AnimationEnum.Direction.Forward) {
         return AnimationGroupEffectKeyFrames.rotationIn;
       }
@@ -320,7 +320,7 @@ export const AnimationGroupInfoList: {
   },
   {
     effect: AnimationEnum.GroupEffect.Pivot,
-    achieveAnimationKeyFrames: direction => {
+    achieveAnimationKeyframes: direction => {
       switch (direction) {
         case AnimationEnum.Direction.TopLeftToBottomRight:
           return AnimationGroupEffectKeyFrames.pivotFromTopLeft;
@@ -337,7 +337,7 @@ export const AnimationGroupInfoList: {
   },
   {
     effect: AnimationEnum.GroupEffect.Flip,
-    achieveAnimationKeyFrames: direction => {
+    achieveAnimationKeyframes: direction => {
       switch (direction) {
         case AnimationEnum.Direction.LeftToRight:
           return AnimationGroupEffectKeyFrames.flipFromLeft;
@@ -354,7 +354,7 @@ export const AnimationGroupInfoList: {
   },
   {
     effect: AnimationEnum.GroupEffect.Bounce,
-    achieveAnimationKeyFrames: direction => {
+    achieveAnimationKeyframes: direction => {
       switch (direction) {
         case AnimationEnum.Direction.LeftToRight:
           return AnimationGroupEffectKeyFrames.bounceFromLeft;
@@ -371,43 +371,43 @@ export const AnimationGroupInfoList: {
   },
   {
     effect: AnimationEnum.GroupEffect.Drop,
-    achieveAnimationKeyFrames: () => {
+    achieveAnimationKeyframes: () => {
       return AnimationGroupEffectKeyFrames.drop;
     }
   },
   {
     effect: AnimationEnum.GroupEffect.Shake,
-    achieveAnimationKeyFrames: () => {
+    achieveAnimationKeyframes: () => {
       return AnimationGroupEffectKeyFrames.shake;
     }
   },
   {
     effect: AnimationEnum.GroupEffect.Swing,
-    achieveAnimationKeyFrames: () => {
+    achieveAnimationKeyframes: () => {
       return AnimationGroupEffectKeyFrames.swing;
     }
   },
   {
     effect: AnimationEnum.GroupEffect.Wobble,
-    achieveAnimationKeyFrames: () => {
+    achieveAnimationKeyframes: () => {
       return AnimationGroupEffectKeyFrames.wobble;
     }
   },
   {
     effect: AnimationEnum.GroupEffect.Pop,
-    achieveAnimationKeyFrames: () => {
+    achieveAnimationKeyframes: () => {
       return AnimationGroupEffectKeyFrames.pop;
     }
   },
   {
     effect: AnimationEnum.GroupEffect.Dissolve,
-    achieveAnimationKeyFrames: () => {
+    achieveAnimationKeyframes: () => {
       return AnimationGroupEffectKeyFrames.dissolve;
     }
   },
   {
     effect: AnimationEnum.GroupEffect.Blur,
-    achieveAnimationKeyFrames: () => {
+    achieveAnimationKeyframes: () => {
       return AnimationGroupEffectKeyFrames.blur;
     }
   }
