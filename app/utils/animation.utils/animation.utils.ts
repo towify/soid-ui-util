@@ -10,22 +10,25 @@ import { SizeUnit } from '@towify/common-values';
 import { NumberUtils } from 'soid-data/util/number.utils';
 
 export class AnimationUtils {
-  public static getContentKeyFrames(content: AnimationContentType): AnimationKeyFrames {
-    const startKeyFrame: AnimationKeyFrameTransform = {};
-    const endKeyFrame: AnimationKeyFrameTransform = {};
+  public static setContentKeyFrames(
+    content: AnimationContentType,
+    keyframes: AnimationKeyFrames
+  ): AnimationKeyFrames {
+    keyframes[0] ??= {};
+    keyframes[100] ??= {};
     switch (content.type) {
       case AnimationEnum.Action.Skew: {
-        startKeyFrame.skew ??= {};
-        endKeyFrame.skew ??= {};
+        keyframes[0].skew ??= {};
+        keyframes[100].skew ??= {};
         switch (content.method) {
           case AnimationEnum.AxisMethod.X: {
-            startKeyFrame.skew.x = <number>content.value.start.value;
-            endKeyFrame.skew.x = <number>content.value.end.value;
+            keyframes[0].skew.x = <number>content.value.start.value;
+            keyframes[100].skew.x = <number>content.value.end.value;
             break;
           }
           case AnimationEnum.AxisMethod.Y: {
-            startKeyFrame.skew.y = <number>content.value.start.value;
-            endKeyFrame.skew.y = <number>content.value.end.value;
+            keyframes[0].skew.y = <number>content.value.start.value;
+            keyframes[100].skew.y = <number>content.value.end.value;
             break;
           }
           default:
@@ -34,22 +37,22 @@ export class AnimationUtils {
         break;
       }
       case AnimationEnum.Action.Translate: {
-        startKeyFrame.translate ??= {};
-        endKeyFrame.translate ??= {};
+        keyframes[0].translate ??= {};
+        keyframes[100].translate ??= {};
         switch (content.method) {
           case AnimationEnum.AxisMethod.X: {
-            startKeyFrame.translate.x = <{ value: number; unit: SizeUnit.PX | SizeUnit.Percent }>content.value.start;
-            endKeyFrame.translate.x = <{ value: number; unit: SizeUnit.PX | SizeUnit.Percent }>content.value.end;
+            keyframes[0].translate.x = <{ value: number; unit: SizeUnit.PX | SizeUnit.Percent }>content.value.start;
+            keyframes[100].translate.x = <{ value: number; unit: SizeUnit.PX | SizeUnit.Percent }>content.value.end;
             break;
           }
           case AnimationEnum.AxisMethod.Y: {
-            startKeyFrame.translate.y = <{ value: number; unit: SizeUnit }>content.value.start;
-            endKeyFrame.translate.y = <{ value: number; unit: SizeUnit }>content.value.end;
+            keyframes[0].translate.y = <{ value: number; unit: SizeUnit }>content.value.start;
+            keyframes[100].translate.y = <{ value: number; unit: SizeUnit }>content.value.end;
             break;
           }
           case AnimationEnum.AxisMethod.Z: {
-            startKeyFrame.translate.z = <{ value: number; unit: SizeUnit }>this.getValue(content.value.start);
-            endKeyFrame.translate.z = <{ value: number; unit: SizeUnit }>this.getValue(content.value.end);
+            keyframes[0].translate.z = <{ value: number; unit: SizeUnit }>this.getValue(content.value.start);
+            keyframes[100].translate.z = <{ value: number; unit: SizeUnit }>this.getValue(content.value.end);
             break;
           }
           default:
@@ -58,31 +61,31 @@ export class AnimationUtils {
         break;
       }
       case AnimationEnum.Action.Scale: {
-        startKeyFrame.scale ??= {
+        keyframes[0].scale ??= {
           x: <number>content.value.start.value,
           y: <number>content.value.start.value
         };
-        endKeyFrame.scale ??= {
+        keyframes[100].scale ??= {
           x: <number>content.value.end.value,
           y: <number>content.value.end.value
         };
         break;
       }
       case AnimationEnum.Action.Opacity: {
-        startKeyFrame.opacity = <number>content.value.start.value;
-        endKeyFrame.opacity = <number>content.value.end.value;
+        keyframes[0].opacity = <number>content.value.start.value;
+        keyframes[100].opacity = <number>content.value.end.value;
         break;
       }
       case AnimationEnum.Action.Rotate: {
         if (!content.rotated3d) break;
         // Rotate 的 Perspective 只在 X Y 动画下生效
-        startKeyFrame.rotation = {
+        keyframes[0].rotation = {
           x: <number>content.rotated3d.x,
           y: <number>content.rotated3d.y,
           z: <number>content.rotated3d.z,
           angle: <number>content.value.start.value
         };
-        endKeyFrame.rotation = {
+        keyframes[100].rotation = {
           x: <number>content.rotated3d.x,
           y: <number>content.rotated3d.y,
           z: <number>content.rotated3d.z,
@@ -94,13 +97,10 @@ export class AnimationUtils {
         break;
     }
     if (content.method === AnimationEnum.AxisMethod.Z || content.type === AnimationEnum.Action.Rotate) {
-      startKeyFrame.perspective = <{ value: number; unit: SizeUnit }>content.perspective;
-      endKeyFrame.perspective = <{ value: number; unit: SizeUnit }>content.perspective;
+      keyframes[0].perspective = <{ value: number; unit: SizeUnit }>content.perspective;
+      keyframes[100].perspective = <{ value: number; unit: SizeUnit }>content.perspective;
     }
-    return {
-      0: startKeyFrame,
-      100: endKeyFrame
-    };
+    return keyframes;
   }
 
   static getKeyFrameTransform(

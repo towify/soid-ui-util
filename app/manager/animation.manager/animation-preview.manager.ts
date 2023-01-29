@@ -23,7 +23,8 @@ export class AnimationPreviewManager {
   #initialRecords?: { [key in 'start' | 'end']: { value: number | { min: number, max: number }, unit?: SizeUnit } };
 
 
-  constructor(private readonly isInfinity: boolean) {}
+  constructor(private readonly isInfinity: boolean) {
+  }
 
   setAnimationInfo(params: {
     type: 'group' | 'custom';
@@ -71,7 +72,7 @@ export class AnimationPreviewManager {
     let percent: number;
     let easingPercent: number;
     let transform: AnimationKeyFrameTransform | undefined;
-    let animationKeyFrames: AnimationKeyFrames | undefined;
+    let animationKeyFrames: AnimationKeyFrames = {};
     const duration = this.duration;
     this.#refreshValue();
     const draw = async (now: number) => {
@@ -84,7 +85,7 @@ export class AnimationPreviewManager {
       }
       if (this.type === 'group') {
         easingPercent = easingFunction[(this.content as AnimationGroupType).function](percent);
-        animationKeyFrames = AnimationUtils.getGroupKeyframesByContent(<AnimationGroupType>this.content);
+        animationKeyFrames = AnimationUtils.getGroupKeyframesByContent(<AnimationGroupType>this.content) ?? {};
         if (animationKeyFrames) {
           transform = AnimationUtils.getKeyFrameTransform(
             animationKeyFrames,
@@ -97,8 +98,11 @@ export class AnimationPreviewManager {
         this.#observeAnimationKeyFrameTransform(transform);
       } else if (this.type === 'custom') {
         easingPercent = easingFunction[(<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).effect](percent);
-        animationKeyFrames = AnimationUtils.getContentKeyFrames((<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation);
-        if (animationKeyFrames) {
+        AnimationUtils.setContentKeyFrames(
+          (<{ animation: AnimationContentType, effect: AnimationEnum.Effect }>this.content).animation,
+          animationKeyFrames
+        );
+        if (Object.keys(animationKeyFrames).length) {
           transform = AnimationUtils.getKeyFrameTransform(
             animationKeyFrames,
             easingPercent

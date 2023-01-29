@@ -159,12 +159,12 @@ export class AnimationManager {
   #runAnimationKeyframe() {
     let easingPercent: number;
     let transform: AnimationKeyFrameTransform | undefined;
-    let animationKeyFrames: AnimationKeyFrames | undefined;
+    let animationKeyFrames: AnimationKeyFrames = {};
     if (this.animation.type === 'group') {
       easingPercent = easingFunction[(<AnimationGroupType>this.animation.content).function](
         this.isReverseFill ? (0.5 - Math.abs(0.5 - this.#percent)) * 2 : this.#percent
       );
-      animationKeyFrames = AnimationUtils.getGroupKeyframes(this.animation);
+      animationKeyFrames = AnimationUtils.getGroupKeyframes(this.animation) ?? {};
       if (animationKeyFrames) {
         transform = AnimationUtils.getKeyFrameTransform(animationKeyFrames, easingPercent);
       } else {
@@ -174,8 +174,8 @@ export class AnimationManager {
     } else if (this.animation.type === 'custom') {
       (<{ list: AnimationContentType[], effect: AnimationEnum.Effect }>this.animation.content).list.forEach(item => {
         easingPercent = easingFunction[this.animation.content.effect](this.isReverseFill ? (0.5 - Math.abs(0.5 - this.#percent)) * 2 : this.#percent);
-        animationKeyFrames = AnimationUtils.getContentKeyFrames(item);
-        if (animationKeyFrames) {
+        AnimationUtils.setContentKeyFrames(item, animationKeyFrames);
+        if (Object.keys(animationKeyFrames).length) {
           transform = AnimationUtils.getKeyFrameTransform(
             animationKeyFrames,
             easingPercent
