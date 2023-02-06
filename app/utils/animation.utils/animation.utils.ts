@@ -7,7 +7,7 @@ import type { AnimationContentType, AnimationGroupType, DslAnimationType } from 
 import { AnimationEnum } from '@towify-types/dsl';
 import { AnimationGroupInfoList, AnimationKeyFrames, AnimationKeyFrameTransform } from '../../type/animation.type';
 import { SizeUnit } from '@towify/common-values';
-import { NumberUtils } from 'soid-data/util/number.utils';
+import { NumberUtils } from 'soid-data';
 
 export class AnimationUtils {
   public static setContentKeyFrames(
