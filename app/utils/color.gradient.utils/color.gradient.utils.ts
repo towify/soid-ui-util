@@ -2,7 +2,7 @@
  * @author allen
  * @data 2021/3/30 15:49
  */
-import { ColorGradientType } from '../../type/common.type';
+import { ColorGradientType, ColorType } from '../../type/common.type';
 import { ColorUtils } from '../color.utils/color.utils';
 
 export class ColorGradientUtils {
@@ -43,6 +43,60 @@ export class ColorGradientUtils {
       }
     });
     return colorGradientCss;
+  }
+
+  // todo: just support linear color gradient, by allen
+  static getColorGradientByCss(css: string): ColorGradientType {
+    let linear: {
+      angle: number;
+    } | undefined = undefined;
+    let radial = undefined;
+    const colors: ColorType[] = []
+    const lineGradientTag = 'linear-gradient(';
+    if (css.includes(lineGradientTag)) {
+      radial = undefined;
+      linear = {
+        angle: 0
+      }
+      const lineContentArray = css.substring(lineGradientTag.length, css.length - 1).split(',');
+      let maxLength = lineContentArray.length - 1;
+      let indexOffset = 0;
+      lineContentArray.forEach((content, index) => {
+        if (index === 0 && (content.includes('to') || content.includes('deg'))) {
+          if (content.includes('to')) {
+            linear!.angle = 0;
+            if (content.toLowerCase().includes('bottom')) {
+              linear!.angle = 180;
+            } else if (content.toLowerCase().includes('left')) {
+              linear!.angle = 270;
+            } else if (content.toLowerCase().includes('right')) {
+              linear!.angle = 90
+            }
+          } else {
+            linear!.angle = parseFloat(content.replace(/deg/g, ''));
+          }
+          indexOffset = 1;
+          maxLength -= 1;
+          return;
+        }
+        if (!maxLength) return;
+        colors.push({
+          hex: content.replace(/ /g, ''),
+          opacity: 100,
+          percent: parseFloat((((index - indexOffset) / maxLength) * 100).toFixed(2))
+        })
+      })
+    } else if (css.includes('radial-gradient(circle')) {
+      linear = undefined
+    }
+    return {
+      linear,
+      radial,
+      shared: {
+        repeat: false,
+        colors: colors
+      }
+    }
   }
 
   static getAngleByPointInfo(params: {
